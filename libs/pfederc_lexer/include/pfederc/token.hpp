@@ -20,7 +20,11 @@ namespace pfederc {
     Position operator +(const Position &pos) const noexcept;
   };
 
-  enum TokenType {
+  enum TokenType : uint16_t {
+    TOK_ERR,       //!< error
+    TOK_EOL,       //!< end-of-line
+    TOK_EOF,       //!< end-of-file
+
     TOK_ID,
     TOK_INT8,
     TOK_INT16,
@@ -52,7 +56,8 @@ namespace pfederc {
     TOK_KW_CTN,    //!< continue
     TOK_KW_BRK,    //!< break
     TOK_KW_INC,    //!< include
-    TOK_KW_IMP,    //!< import
+    TOK_KW_IMPORT, //!< import
+    TOK_KW_SAFE,   //!< safe
     TOK_KW_TRUE,   //!< True
     TOK_KW_FALSE,  //!< False
 
@@ -70,8 +75,8 @@ namespace pfederc {
     TOK_OP_ASG_ADD, //!< +=
     TOK_OP_ASG,     //!< =
     TOK_OP_NULL,    //!< null a
-    TOK_OP_LAND,    //!< &&
     TOK_OP_LOR,     //!< ||
+    TOK_OP_LAND,    //!< &&
     TOK_OP_ARG,     //!< \<\>
     TOK_OP_BOR,     //!< |
     TOK_OP_BXOR,    //!< ^
@@ -96,30 +101,101 @@ namespace pfederc {
     TOK_OP_NEG,     //!< -a
     TOK_OP_LN,      //!< !
     TOK_OP_BN,      //!< ~
-    TOK_OP_SF,      //!< safe a
     TOK_OP_DEREF,   //!< \*a
+    TOK_OP_MEM,     //!< '.'
+    TOK_OP_DMEM,    //!< -\>
 
     TOK_ANY,        //!< \_
   };
 
-  std::string tokenTypeToString(TokenType type) noexcept;
+  constexpr TokenType TOK_KW_START = TOK_KW_FN;
+  constexpr TokenType TOK_KW_END = TOK_KW_FALSE;
+  /*!\return Returns true if type is a keyword, otherwise false.
+   */
+  bool isTokenTypeKeyword(TokenType type) noexcept;
+
+  constexpr TokenType TOK_OP_START = TOK_OP_COMMA;
+  constexpr TokenType TOK_OP_END = TOK_OP_DMEM;
+  /*!\return Returns true if type is an operator, otherwise false.
+   */
+  bool isTokenTypeOperator(TokenType type) noexcept;
+
+  constexpr size_t KEYWORDS_MIN_STRING_LENGTH = 2;
+  constexpr size_t KEYWORDS_LENGTH = 7;
+  typedef std::tuple<TokenType, std::string> KeywordTuple;
+  /*!\brief Keywords with corresponding string (Feder code)
+   *
+   * KEYWORDS[0] are operators with length KEYWORDS_MIN_STRING_LENGTH.
+   * KEYWORDS[n] are operators with length KEYWORDS_MIN_STRING_LENGTH + n;
+   */
+  extern const std::vector<KeywordTuple> KEYWORDS[KEYWORDS_LENGTH];
+
+  constexpr size_t OPERATORS_MIN_STRING_LENGTH = 1;
+  constexpr size_t OPERATORS_LENGTH = 3;
+  typedef std::tuple<TokenType, std::string> OperatorTuple;
+  /*!\brief Operators with corresponding string (Feder code)
+   *
+   * OPERATORS[0] are operators with length OPERATORS_MIN_STRING_LENGTH.
+   * OPERATORS[n] are operators with length OPERATORS_MIN_STRING_LENGTH + n;
+   */
+  extern const std::vector<OperatorTuple> OPERATORS[OPERATORS_LENGTH];
+
+  /*!\brief String of TokenType (exactly the same as TokenType)
+   */
+  extern const std::map<TokenType, std::string> TOKEN_TYPE_STRINGS;
+
+  /*!\brief Operator associativity
+   */
+  enum Associativity {
+    LEFT,
+    RIGHT,
+  };
+
+  enum OperatorType {
+    UNARY,
+    BINARY
+  };
+
+  /*!\brief Operator precedence
+   */
+  typedef uint8_t Precedence;
+
+  typedef std::tuple<Precedence, OperatorType, Associativity> OperatorInfoTuple;
+  /*!\brief Information about operators
+   */
+  extern const std::map<TokenType, OperatorInfoTuple> OPERATOR_INFOS;
 
   class Token {
+    Token *last;
     TokenType type;
     Position pos;
   public:
-    Token(TokenType type, const Position &pos) noexcept;
+    /*!\brief Initializes Token
+     * \param last If first token in file nullptr, otherwise not
+     * \param type
+     * \param pos
+     */
+    Token(Token *last, TokenType type, const Position &pos) noexcept;
     virtual ~Token();
 
+    /*!\return Returns previous read token. If there isn't any previous token
+     * (0th token in file), then *nullptr* is returned.
+     */
+    Token *getLast() const noexcept;
     TokenType getType() const noexcept;
     const Position &getPosition() const noexcept;
+
+    bool operator !=(TokenType type) const noexcept;
+    bool operator ==(TokenType type) const noexcept;
   };
 
-  class NumberToken : Token {
+  class NumberToken : public Token {
     uint64_t num;
   public:
-    NumberToken(TokenType type, const Position &pos, uint64_t num) noexcept;
-    NumberToken(TokenType type, const Position &pos, int64_t num) noexcept;
+    NumberToken(Token *last, TokenType type, const Position &pos, uint64_t num) noexcept;
+    NumberToken(Token *last, TokenType type, const Position &pos, int64_t num) noexcept;
+    NumberToken(Token *last, TokenType type, const Position &pos, float num) noexcept;
+    NumberToken(Token *last, TokenType type, const Position &pos, double num) noexcept;
     virtual ~NumberToken();
 
     int8_t  i8() const noexcept;
@@ -131,6 +207,9 @@ namespace pfederc {
     uint16_t u16() const noexcept;
     uint32_t u32() const noexcept;
     uint64_t u64() const noexcept;
+
+    float f32() const noexcept;
+    double f64() const noexcept;
   };
 }
 

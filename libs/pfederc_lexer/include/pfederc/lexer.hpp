@@ -7,24 +7,41 @@
 
 namespace pfederc {
   class Lexer;
+  class LexerError;
+
+  enum LexerErrorCode {
+    LEX_ERR_GENERAL_INVALID_CHARACTER,
+    LEX_ERR_ID_NO_DIGIT_AFTER_ANYS,
+    LEX_ERR_ID_NOT_JUST_ANYS,
+    LEX_ERR_STR_INVALID_ESCAPE_CODE,
+    LEX_ERR_CHAR_INVALID_END,
+    LEX_ERR_STR_INVALID_END,
+    LEX_ERR_NUM_UNEXPECTED_CHAR_DIGIT,
+    LEX_ERR_NUM_UNEXPECTED_CHAR,
+  };
 
   class Lexer {
     LanguageConfiguration cfg;
-    std::string fileContent;
-    std::string filePath;
     std::istream &input;
+    std::string filePath;
+    std::string fileContent;
     std::vector<Token*> tokens; //!< All tokens read by next
     std::vector<size_t> lineIndices; //!< Indices of line beginnings
+    std::vector<LexerError*> errors; //!< Generated errors
     // tmps for lexical analysis
     size_t currentStartIndex, currentEndIndex;
-    char currentChar; //!< Current character invalid if currentToken == nullptr
+    int currentChar; //!< Current character invalid if currentToken == nullptr
     Token *currentToken; //!< Current token. nullptr before first next call.
     std::string lastComment; //!< Important for generating some documentation
     // METHODS for next()
     //! Reads nextChar. Sets currentChar to read character.
-    char nextChar() noexcept;
+    int nextChar() noexcept;
+    Token *nextToken() noexcept;
+    void skipSpace() noexcept;
     //! Reads ids, keywords and any
     Token *nextTokenId() noexcept;
+    Token *nextTokenLine() noexcept;
+    Token *nextTokenEOF() noexcept;
     //! Reads next number
     Token *nextTokenNum() noexcept;
     Token *nextTokenBinNum() noexcept;
@@ -37,8 +54,12 @@ namespace pfederc {
     Token *nextTokenFltNum(size_t num) noexcept;
     Token *nextTokenChar() noexcept;
     Token *nextTokenString() noexcept;
+    //! Returns nullptr if successfull otherwise error token
+    Token *nextTokenStringEscapeCode() noexcept;
     //! Can return nullptr
     Token *nextTokenOperator() noexcept;
+
+    Token *generateError(LexerError *err) noexcept;
   public:
     Lexer(const LanguageConfiguration &cfg,
         std::istream &input, const std::string &filePath) noexcept;
@@ -49,12 +70,44 @@ namespace pfederc {
     const std::string &getFilePath() const noexcept;
     const std::vector<Token*> &getTokens() const noexcept;
     const std::vector<size_t> &getLineIndices() const noexcept;
+    const std::vector<LexerError*> &getErrors() const noexcept;
+
+    /*!\return Returns current token position (last next call)
+     */
+    Position getCurrentCursor() const noexcept;
+
+    /*!\return Returns line at position index
+     *
+     * If index is out-of-bounds a fatal occurs 
+     */
+    std::string getLine(size_t index) const noexcept;
 
     /*!\brief Aquire next token from input stream
      *
      * \return Never returns nullptr (except out-of-memory)
      */
     Token *next() noexcept;
+  };
+
+  class LexerError {
+    Level logLevel;
+    LexerErrorCode err;
+    Position pos;
+  public:
+    /*!\brief Initializes LexerError
+     * \param logLevel
+     * \param err
+     * \param pos Error position
+     */
+    LexerError(Level logLevel, LexerErrorCode err, const Position &pos) noexcept;
+    virtual ~LexerError();
+
+    Level getLogLevel() const noexcept;
+    LexerErrorCode getErrorCode() const noexcept;
+
+    /*!\return Returns where the error occured
+     */
+    const Position &getPosition() const noexcept;
   };
 }
 

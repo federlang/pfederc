@@ -2,12 +2,15 @@
 #define PFEDERC_CORE_CORE_HPP
 
 #include <algorithm>
+#include <cctype>
 #include <cstdint>
 #include <functional>
 #include <iostream>
 #include <istream>
+#include <map>
 #include <ostream>
 #include <string>
+#include <tuple>
 #include <vector>
 
 namespace pfederc {

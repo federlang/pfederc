@@ -73,14 +73,14 @@ Logger::~Logger() {
 }
 
 bool Logger::accept(Level logLevel) const noexcept {
-  return logLevel & allowedLevels == logLevel;
+  return (logLevel & allowedLevels) == logLevel;
 }
 
 bool Logger::log(Level logLevel, const std::string &msg) noexcept {
   if (!accept(logLevel))
     return false;
 
-  if (logLevel & (LVL_WARNING | LVL_NOTE | LVL_HELP) != 0)
+  if ((logLevel & (LVL_WARNING | LVL_NOTE | LVL_HELP)) != 0)
     baseLog.info(msg);
   else
     baseLog.error(msg);
