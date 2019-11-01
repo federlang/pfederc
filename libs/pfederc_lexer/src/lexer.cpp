@@ -117,7 +117,7 @@ inline static std::string _logLexerErrorMark(const Lexer &lexer, const LexerErro
       result += ' ';
   }
   // print marks till end
-  for (size_t i = err.getPosition().startIndex; i <= err.getPosition().endIndex; ++i)  {
+  for (size_t i = err.getPosition().startIndex; i <= err.getPosition().endIndex && i < lexer.getFileContent().size(); ++i)  {
     const char c = lexer.getFileContent()[i];
     const char d = c & 0xF0;
     if ((~c & 0x80) == 0x80 // ascii

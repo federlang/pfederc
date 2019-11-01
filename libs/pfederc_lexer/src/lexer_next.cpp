@@ -4,7 +4,7 @@ using namespace pfederc;
 // static methods
 
 inline static bool _isNewLineCharacter(char ch) noexcept {
-  return ch == '\r' || ch == '\n';
+  return std::strchr("\n\r", ch);
 }
 
 // global

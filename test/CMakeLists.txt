@@ -177,6 +177,19 @@ match_test(tokenid_str00 tokenid "\"hello, world!\"" "^TOK_STR\n$")
 # bad
 match_test(tokenid_str50 tokenid "\"" "^TOK_ERR\n")
 match_test(tokenid_str51 tokenid "\"abcd" "^TOK_ERR\n")
+# EOL
+match_test(tokenid_eol tokenid "\n" "^TOK_EOL\n$")
+# EOF
+match_test(tokenid_eof tokenid "" "^TOK_EOF\n$")
+# Brackets
+match_test(tokeid_b00 tokenid "(" "^TOK_BRACKET_OPEN\n$")
+match_test(tokeid_b01 tokenid ")" "^TOK_BRACKET_CLOSE\n$")
+match_test(tokeid_b02 tokenid "[" "^TOK_ARR_BRACKET_OPEN\n$")
+match_test(tokeid_b03 tokenid "]" "^TOK_ARR_BRACKET_CLOSE\n$")
+match_test(tokeid_b04 tokenid "{" "^TOK_TEMPL_BRACKET_OPEN\n$")
+match_test(tokeid_b05 tokenid "}" "^TOK_TEMPL_BRACKET_CLOSE\n$")
+# Any
+match_test(tokeid_any tokenid "_" "^TOK_ANY\n$")
 
 # memory tests
 build_test(tokenidmem)
