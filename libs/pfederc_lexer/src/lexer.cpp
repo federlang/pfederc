@@ -107,7 +107,7 @@ inline static std::string _logLexerErrorBase(const Lexer &lexer, const LexerErro
 inline static std::string _logLexerErrorMark(const Lexer &lexer, const LexerError &err) noexcept {
   std::string result = lexer.getLine(err.getPosition().startIndex) + '\n';
   // print space till start
-  for (size_t i = 0; i < err.getPosition().startIndex; ++i)  {
+  for (size_t i = 0; i < err.getPosition().startIndex && i < lexer.getFileContent().size(); ++i)  {
     const char c = lexer.getFileContent()[i];
     const char d = c & 0xF0;
     if (c == '\t')
