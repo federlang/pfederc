@@ -13,5 +13,5 @@ int main(int argsc, char * argsv[]) {
   std::cout << TOKEN_TYPE_STRINGS.at(tok->getType()) << std::endl;
   Logger log;
   logLexerErrors(log, lex);
-  return *tok != TOK_ERR ? 0 : 1;
+  return 0;
 }

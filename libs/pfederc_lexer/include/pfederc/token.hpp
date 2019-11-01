@@ -39,6 +39,13 @@ namespace pfederc {
     TOK_CHAR,
     TOK_STR,
 
+    TOK_BRACKET_OPEN,        //!< (
+    TOK_BRACKET_CLOSE,       //!< )
+    TOK_ARR_BRACKET_OPEN,    //!< [
+    TOK_ARR_BRACKET_CLOSE,   //!< ]
+    TOK_TEMPL_BRACKET_OPEN,  //!< {
+    TOK_TEMPL_BRACKET_CLOSE, //!< }
+
     TOK_KW_FN,     //!< func
     TOK_KW_MOD,    //!< mod
     TOK_KW_CLASS,  //!< class

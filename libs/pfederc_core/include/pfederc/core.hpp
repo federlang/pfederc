@@ -4,6 +4,7 @@
 #include <algorithm>
 #include <cctype>
 #include <cstdint>
+#include <cstring>
 #include <functional>
 #include <iostream>
 #include <istream>

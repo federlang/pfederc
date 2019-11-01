@@ -16,6 +16,8 @@ namespace pfederc {
     LEX_ERR_STR_INVALID_ESCAPE_CODE,
     LEX_ERR_CHAR_INVALID_END,
     LEX_ERR_STR_INVALID_END,
+    LEX_ERR_STR_HEXADECIMAL_CHAR,
+    LEX_ERR_NUM_LEADING_ZERO,
     LEX_ERR_NUM_UNEXPECTED_CHAR_DIGIT,
     LEX_ERR_NUM_UNEXPECTED_CHAR,
   };
@@ -58,6 +60,7 @@ namespace pfederc {
     Token *nextTokenStringEscapeCode() noexcept;
     //! Can return nullptr
     Token *nextTokenOperator() noexcept;
+    Token *nextTokenBracket() noexcept;
 
     Token *generateError(LexerError *err) noexcept;
   public:
@@ -109,6 +112,11 @@ namespace pfederc {
      */
     const Position &getPosition() const noexcept;
   };
+
+  LogMessage logLexerError(const Lexer &lexer, const LexerError &err) noexcept;
+  /*!\return Returns true if an error occured
+   */
+  bool logLexerErrors(Logger &log, const Lexer &lex) noexcept;
 }
 
 #endif /* PFEDERC_LEXER_LEXER_HPP */

@@ -82,7 +82,7 @@ namespace pfederc {
     std::vector<LogMessage> msgs;
   public:
     LogMessage(Level logLevel, const std::string &msg,
-               const std::vector<LogMessage> &msgs) noexcept;
+               const std::vector<LogMessage> &msgs = {}) noexcept;
     LogMessage(const LogMessage &msg) noexcept;
     virtual ~LogMessage();
 

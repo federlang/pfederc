@@ -42,8 +42,10 @@ Token *Lexer::generateError(LexerError *err) noexcept {
 
 int Lexer::nextChar() noexcept {
   currentChar = input.get();
-  if (currentChar != -1)
+  if (currentChar != std::char_traits<char>::eof())
     fileContent += static_cast<char>(currentChar);
+  else
+    fileContent += '\0';
   ++currentEndIndex;
   return currentChar;
 }
@@ -54,6 +56,9 @@ Token *Lexer::nextToken() noexcept {
 
   if (_isNewLineCharacter(currentChar))
     return nextTokenLine();
+
+  if (std::strchr("()[]{}", currentChar))
+    return nextTokenBracket();
 
   if (currentChar == '"')
     return nextTokenString();
@@ -172,17 +177,31 @@ Token *Lexer::nextTokenStringEscapeCode() noexcept {
   case '\'':
   case '\"':
   case '\\':
-  case '\a':
-  case '\b':
-  case '\f':
-  case '\n':
-  case '\r':
-  case '\t':
-  case '\v':
+  case 'a':
+  case 'b':
+  case 'f':
+  case 'n':
+  case 'r':
+  case 't':
+  case 'v':
+    return nullptr;
+  case 'x':
+    nextChar(); // eat x
+    if (!std::isxdigit(currentChar)) {
+      return generateError(new LexerError(LVL_ERROR,
+        LEX_ERR_STR_HEXADECIMAL_CHAR, Position{getCurrentCursor().line,
+          currentEndIndex, currentEndIndex}));
+    }
+    nextChar(); // eat hex
+    if (!std::isxdigit(currentChar)) {
+      return generateError(new LexerError(LVL_ERROR,
+        LEX_ERR_STR_HEXADECIMAL_CHAR, Position{getCurrentCursor().line,
+          currentEndIndex, currentEndIndex}));
+    }
     return nullptr;
   default:
     return generateError(new LexerError(LVL_ERROR,
-    LEX_ERR_STR_INVALID_ESCAPE_CODE, getCurrentCursor()));
+      LEX_ERR_STR_INVALID_ESCAPE_CODE, getCurrentCursor()));
   }
 }
 
@@ -202,7 +221,8 @@ Token *Lexer::nextTokenString() noexcept {
 
   if (currentChar != '\"')
     return generateError(new LexerError(LVL_ERROR,
-      LEX_ERR_STR_INVALID_END, getCurrentCursor()));
+      LEX_ERR_STR_INVALID_END, Position{getCurrentCursor().line,
+        currentEndIndex, currentEndIndex}));
 
   nextChar(); // eat "
 
@@ -221,7 +241,8 @@ Token *Lexer::nextTokenChar() noexcept {
   nextChar();
   if (currentChar != '\'')
     return generateError(new LexerError(LVL_ERROR,
-      LEX_ERR_STR_INVALID_ESCAPE_CODE, getCurrentCursor()));
+      LEX_ERR_CHAR_INVALID_END, Position{getCurrentCursor().line,
+        currentEndIndex, currentEndIndex}));
 
   nextChar(); // eat '
 
@@ -239,6 +260,14 @@ Token *Lexer::nextTokenNum() noexcept {
     case 'x':
       return nextTokenHexNum();
     default:
+      if (isdigit(currentChar)) {
+        return generateError(new LexerError(LVL_ERROR,
+          LEX_ERR_NUM_LEADING_ZERO, Position{getCurrentCursor().line,
+            currentStartIndex, currentStartIndex}));
+      } else if (currentChar == '.') {
+        return nextTokenFltNum(0);
+      }
+
       return nextTokenNumType(0);
     }
   }
@@ -398,7 +427,7 @@ Token *Lexer::nextTokenFltNum(size_t num) noexcept {
   switch (currentChar) {
   case 'f':
     nextChar(); // eat f
-    tok = new NumberToken(currentToken, TOK_FLT64, getCurrentCursor(), f64);
+    tok = new NumberToken(currentToken, TOK_FLT32, getCurrentCursor(), f32);
     break;
   case 'F':
     nextChar(); // eat F
@@ -416,4 +445,26 @@ Token *Lexer::nextTokenFltNum(size_t num) noexcept {
     return tok;
 
   return new NumberToken(currentToken, TOK_FLT64, getCurrentCursor(), f64);
+}
+
+Token *Lexer::nextTokenBracket() noexcept {
+  const char c = currentChar;
+  nextChar(); // eat bracket
+  switch (c) {
+  case '(':
+    return new Token(currentToken, TOK_BRACKET_OPEN, getCurrentCursor());
+  case ')':
+    return new Token(currentToken, TOK_BRACKET_CLOSE, getCurrentCursor());
+  case '[':
+    return new Token(currentToken, TOK_ARR_BRACKET_OPEN, getCurrentCursor());
+  case ']':
+    return new Token(currentToken, TOK_ARR_BRACKET_CLOSE, getCurrentCursor());
+  case '{':
+    return new Token(currentToken, TOK_TEMPL_BRACKET_OPEN, getCurrentCursor());
+  case '}':
+    return new Token(currentToken, TOK_TEMPL_BRACKET_CLOSE, getCurrentCursor());
+  default:
+    fatal(__FILE__, __LINE__, "Unexpected branch reached");
+    return nullptr;
+  }
 }
