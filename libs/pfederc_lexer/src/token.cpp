@@ -35,7 +35,8 @@ namespace pfederc {
 
   const std::vector<OperatorTuple> OPERATORS[OPERATORS_LENGTH] = {
     // 1
-    {OperatorTuple(TOK_OP_COMMA, ","),
+    {OperatorTuple(TOK_OP_STMT, ";"),
+     OperatorTuple(TOK_OP_COMMA, ","),
      OperatorTuple(TOK_OP_ASG, "="),
      OperatorTuple(TOK_OP_BOR, "|"),
      OperatorTuple(TOK_OP_BXOR, "^"),
@@ -50,7 +51,10 @@ namespace pfederc {
      OperatorTuple(TOK_OP_DCL, ":"),
      OperatorTuple(TOK_OP_LN, "!"),
      OperatorTuple(TOK_OP_BN, "~"),
-     OperatorTuple(TOK_OP_MEM, ".")},
+     OperatorTuple(TOK_OP_MEM, "."),
+     OperatorTuple(TOK_OP_BRACKET_OPEN, "("),
+     OperatorTuple(TOK_OP_ARR_BRACKET_OPEN, "["),
+     OperatorTuple(TOK_OP_TEMPL_BRACKET_OPEN, "{")},
     // 2
     {OperatorTuple(TOK_OP_ASG_DCL, ":="),
      OperatorTuple(TOK_OP_ASG_AND, "&="),
@@ -96,11 +100,11 @@ namespace pfederc {
     { TOK_CHAR, "TOK_CHAR" },
     { TOK_STR, "TOK_STR" },
 
-    { TOK_BRACKET_OPEN, "TOK_BRACKET_OPEN" },
+    { TOK_OP_BRACKET_OPEN, "TOK_OP_BRACKET_OPEN" },
     { TOK_BRACKET_CLOSE, "TOK_BRACKET_CLOSE" },
-    { TOK_ARR_BRACKET_OPEN, "TOK_ARR_BRACKET_OPEN" },
+    { TOK_OP_ARR_BRACKET_OPEN, "TOK_OP_ARR_BRACKET_OPEN" },
     { TOK_ARR_BRACKET_CLOSE, "TOK_ARR_BRACKET_CLOSE" },
-    { TOK_TEMPL_BRACKET_OPEN, "TOK_TEMPL_BRACKET_OPEN" },
+    { TOK_OP_TEMPL_BRACKET_OPEN, "TOK_OP_TEMPL_BRACKET_OPEN" },
     { TOK_TEMPL_BRACKET_CLOSE, "TOK_TEMPL_BRACKET_CLOSE" },
 
     { TOK_KW_FN, "TOK_KW_FN" },
@@ -125,6 +129,7 @@ namespace pfederc {
     { TOK_KW_FALSE, "TOK_KW_FALSE" },
 
     { TOK_OP_COMMA, "TOK_OP_COMMA" },
+    { TOK_OP_STMT, "TOK_OP_STMT" },
     { TOK_OP_ASG_DCL, "TOK_OP_ASG_DCL" },
     { TOK_OP_ASG_AND, "TOK_OP_ASG_AND" },
     { TOK_OP_ASG_XOR, "TOK_OP_ASG_XOR" },
@@ -172,6 +177,7 @@ namespace pfederc {
   };
 
   const std::map<TokenType, OperatorInfoTuple> OPERATOR_INFOS = {
+    { TOK_OP_STMT,    OperatorInfoTuple( 0, BINARY, LEFT) },
     { TOK_OP_COMMA,   OperatorInfoTuple( 1, BINARY, LEFT) },
     { TOK_OP_ASG_DCL, OperatorInfoTuple( 2, BINARY, RIGHT) },
     { TOK_OP_ASG_AND, OperatorInfoTuple( 3, BINARY, RIGHT) },
@@ -213,6 +219,9 @@ namespace pfederc {
     { TOK_OP_LN,      OperatorInfoTuple(17, UNARY, RIGHT) },
     { TOK_OP_BN,      OperatorInfoTuple(17, UNARY, RIGHT) },
     { TOK_OP_DEREF,   OperatorInfoTuple(17, UNARY, RIGHT) },
+    { TOK_OP_BRACKET_OPEN, OperatorInfoTuple(18, BINARY, LEFT) },
+    { TOK_OP_ARR_BRACKET_OPEN, OperatorInfoTuple(18, BINARY, LEFT) },
+    { TOK_OP_TEMPL_BRACKET_OPEN, OperatorInfoTuple(18, BINARY, LEFT) },
     { TOK_OP_MEM,     OperatorInfoTuple(18, BINARY, LEFT) },
     { TOK_OP_DMEM,    OperatorInfoTuple(18, BINARY, LEFT) },
   };

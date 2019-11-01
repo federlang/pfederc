@@ -35,7 +35,8 @@ void Lexer::skipSpace() noexcept {
 
 Token *Lexer::generateError(LexerError *err) noexcept {
   errors.push_back(err);
-  while (currentChar != EOF && currentChar != '\n' && currentChar != '\r')
+  while (currentChar != EOF
+      && currentChar != '\n' && currentChar != '\r')
     nextChar();
   return new Token(currentToken, TOK_ERR, getCurrentCursor());
 }
@@ -57,7 +58,7 @@ Token *Lexer::nextToken() noexcept {
   if (_isNewLineCharacter(currentChar))
     return nextTokenLine();
 
-  if (std::strchr("()[]{}", currentChar))
+  if (std::strchr(")]}", currentChar))
     return nextTokenBracket();
 
   if (currentChar == '"')
@@ -451,16 +452,10 @@ Token *Lexer::nextTokenBracket() noexcept {
   const char c = currentChar;
   nextChar(); // eat bracket
   switch (c) {
-  case '(':
-    return new Token(currentToken, TOK_BRACKET_OPEN, getCurrentCursor());
   case ')':
     return new Token(currentToken, TOK_BRACKET_CLOSE, getCurrentCursor());
-  case '[':
-    return new Token(currentToken, TOK_ARR_BRACKET_OPEN, getCurrentCursor());
   case ']':
     return new Token(currentToken, TOK_ARR_BRACKET_CLOSE, getCurrentCursor());
-  case '{':
-    return new Token(currentToken, TOK_TEMPL_BRACKET_OPEN, getCurrentCursor());
   case '}':
     return new Token(currentToken, TOK_TEMPL_BRACKET_CLOSE, getCurrentCursor());
   default:

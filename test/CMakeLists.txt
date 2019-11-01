@@ -114,12 +114,13 @@ match_test(tokenid_op36 tokenid "!" "^TOK_OP_LN\n$")
 match_test(tokenid_op37 tokenid "~" "^TOK_OP_BN\n$")
 match_test(tokenid_op38 tokenid "." "^TOK_OP_MEM\n$")
 match_test(tokenid_op39 tokenid "->" "^TOK_OP_DMEM\n$")
+match_test(tokenid_op40 tokenid "\;" "^TOK_OP_STMT\n$")
 # Brackets
-match_test(tokenid_br00 tokenid "(" "^TOK_BRACKET_OPEN\n$")
+match_test(tokenid_br00 tokenid "(" "^TOK_OP_BRACKET_OPEN\n$")
 match_test(tokenid_br01 tokenid ")" "^TOK_BRACKET_CLOSE\n$")
-match_test(tokenid_br02 tokenid "[" "^TOK_ARR_BRACKET_OPEN\n$")
+match_test(tokenid_br02 tokenid "[" "^TOK_OP_ARR_BRACKET_OPEN\n$")
 match_test(tokenid_br03 tokenid "]" "^TOK_ARR_BRACKET_CLOSE\n$")
-match_test(tokenid_br04 tokenid "{" "^TOK_TEMPL_BRACKET_OPEN\n$")
+match_test(tokenid_br04 tokenid "{" "^TOK_OP_TEMPL_BRACKET_OPEN\n$")
 match_test(tokenid_br05 tokenid "}" "^TOK_TEMPL_BRACKET_CLOSE\n$")
 # Integers
 # good
@@ -187,21 +188,14 @@ match_test(tokenid_str51 tokenid "\"abcd" "^TOK_ERR\n")
 match_test(tokenid_eol tokenid "\n" "^TOK_EOL\n$")
 # EOF
 match_test(tokenid_eof tokenid " " "^TOK_EOF\n$")
-# Brackets
-match_test(tokeid_b00 tokenid "(" "^TOK_BRACKET_OPEN\n$")
-match_test(tokeid_b01 tokenid ")" "^TOK_BRACKET_CLOSE\n$")
-match_test(tokeid_b02 tokenid "[" "^TOK_ARR_BRACKET_OPEN\n$")
-match_test(tokeid_b03 tokenid "]" "^TOK_ARR_BRACKET_CLOSE\n$")
-match_test(tokeid_b04 tokenid "{" "^TOK_TEMPL_BRACKET_OPEN\n$")
-match_test(tokeid_b05 tokenid "}" "^TOK_TEMPL_BRACKET_CLOSE\n$")
 # Any
 match_test(tokeid_any tokenid "_" "^TOK_ANY\n$")
 # kill tests
-status_test_arg(tokenid_kill00 tokenidmem "ka;jsdlkfa;h")
+status_test_arg(tokenid_kill00 tokenidmem "ka\;jsdlkfa\;h")
 status_test_arg(tokenid_kill01 tokenidmem "[as]123786!@#~")
 status_test_arg(tokenid_kill02 tokenidmem "\\\\")
 status_test_arg(tokenid_kill03 tokenidmem "\n")
-status_test_arg(tokenid_kill04 tokenidmem "         akl;sdjfa123")
+status_test_arg(tokenid_kill04 tokenidmem "         akl\;sdjfa123")
 
 # memory tests
 valgrind_test(tokenid_memstr00 $<TARGET_FILE:tokenidmem> "\"hello, world!\"")
@@ -215,3 +209,5 @@ valgrind_test(tokenid_memstr07 $<TARGET_FILE:tokenidmem> "0x0")
 valgrind_test(tokenid_memstr08 $<TARGET_FILE:tokenidmem> "0o0")
 valgrind_test(tokenid_memstr09 $<TARGET_FILE:tokenidmem> "0b0")
 valgrind_test(tokenid_memstr10 $<TARGET_FILE:tokenidmem> "(")
+
+# syntax
