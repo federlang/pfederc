@@ -20,6 +20,7 @@ namespace pfederc {
     LEX_ERR_NUM_LEADING_ZERO,
     LEX_ERR_NUM_UNEXPECTED_CHAR_DIGIT,
     LEX_ERR_NUM_UNEXPECTED_CHAR,
+    LEX_ERR_REGION_COMMENT_END,
   };
 
   class Lexer {
@@ -61,6 +62,11 @@ namespace pfederc {
     //! Can return nullptr
     Token *nextTokenOperator() noexcept;
     Token *nextTokenBracket() noexcept;
+    // comments
+    Token *nextRegionComment() noexcept;
+    Token *nextLineComment() noexcept;
+    Token *nextRegionCommentDoc() noexcept;
+    Token *nextLineCommentDoc() noexcept;
 
     Token *generateError(LexerError *err) noexcept;
   public:

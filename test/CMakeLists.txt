@@ -190,6 +190,14 @@ match_test(tokenid_eol tokenid "\n" "^TOK_EOL\n$")
 match_test(tokenid_eof tokenid " " "^TOK_EOF\n$")
 # Any
 match_test(tokeid_any tokenid "_" "^TOK_ANY\n$")
+
+# comments and spaces
+match_test(tokenid_sp00 tokenid "// comment\n123" "^TOK_EOL\n$")
+match_test(tokenid_sp01 tokenid "/* comment */ 123" "^TOK_INT32\n$")
+match_test(tokenid_sp02 tokenid "    123" "^TOK_INT32\n$")
+match_test(tokenid_sp03 tokenid "/* comment\nanother comment*/ 123"
+  "^TOK_INT32\n$")
+
 # kill tests
 status_test_arg(tokenid_kill00 tokenidmem "ka\;jsdlkfa\;h")
 status_test_arg(tokenid_kill01 tokenidmem "[as]123786!@#~")
@@ -209,5 +217,6 @@ valgrind_test(tokenid_memstr07 $<TARGET_FILE:tokenidmem> "0x0")
 valgrind_test(tokenid_memstr08 $<TARGET_FILE:tokenidmem> "0o0")
 valgrind_test(tokenid_memstr09 $<TARGET_FILE:tokenidmem> "0b0")
 valgrind_test(tokenid_memstr10 $<TARGET_FILE:tokenidmem> "(")
+
 
 # syntax

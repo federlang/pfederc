@@ -17,10 +17,6 @@ Token *Lexer::next() noexcept {
   } else if (*currentToken == TOK_EOF)
     return currentToken;
 
-  // Ignore spaces
-  skipSpace();
-  // set token starting point
-  currentStartIndex = currentEndIndex;
 
   Token *result = nextToken();
   currentToken = result;
@@ -52,6 +48,11 @@ int Lexer::nextChar() noexcept {
 }
 
 Token *Lexer::nextToken() noexcept {
+  // Ignore spaces
+  skipSpace();
+  // set token starting point
+  currentStartIndex = currentEndIndex;
+
   if (std::isalpha(currentChar) || currentChar == '_')
     return nextTokenId();
 
@@ -151,6 +152,7 @@ inline static bool _hasOperatorStr(const std::string &op, TokenType &type) noexc
   for (const auto &tpl : operators) {
     if (std::get<1>(tpl) == op) {
       type = std::get<0>(tpl);
+
       return true;
     }
   }
@@ -169,7 +171,87 @@ Token *Lexer::nextTokenOperator() noexcept {
   if (op.empty())
     return nullptr;
 
+  // if match check if comment (starting with '/')
+  if (operatorType == TOK_OP_DIV) {
+    if (currentChar == '*') // region comment
+      return nextRegionComment();
+    else if (currentChar == '/') // one line comment
+      return nextLineComment();
+  }
+
   return new Token(currentToken, operatorType, getCurrentCursor());
+}
+
+Token *Lexer::nextRegionCommentDoc() noexcept {
+  nextChar();
+  lastComment.clear();
+
+  while (currentChar != EOF) {
+    if (currentChar == '*') {
+      nextChar(); // eat *
+      if (currentChar == '/') {
+        nextChar(); // eat /
+        return nextToken();
+      }
+
+      lastComment += '*';
+      continue;
+    }
+
+    lastComment += (char) currentChar;
+
+    nextChar();
+  }
+
+  return generateError(new LexerError(LVL_ERROR, LEX_ERR_REGION_COMMENT_END,
+    getCurrentCursor()));
+}
+
+Token *Lexer::nextRegionComment() noexcept {
+  nextChar(); // eat *
+  if (currentChar == '*' || currentChar == '!')
+    return nextRegionCommentDoc();
+
+  while (currentChar != EOF) {
+    if (currentChar == '*') {
+      nextChar(); // eat *
+      if (currentChar == '/') {
+        nextChar(); // eat /
+        return nextToken();
+      }
+
+      continue;
+    }
+
+    nextChar();
+  }
+
+  return generateError(new LexerError(LVL_ERROR, LEX_ERR_REGION_COMMENT_END,
+    getCurrentCursor()));
+}
+
+Token *Lexer::nextLineCommentDoc() noexcept {
+  nextChar();
+  if (!lastComment.empty())
+    lastComment += '\n';
+
+  while (currentChar != EOF && currentChar != '\n' && currentChar != '\r') {
+    lastComment += (char) currentChar;
+    nextChar();
+  }
+
+  return nextToken();
+}
+
+Token *Lexer::nextLineComment() noexcept {
+  nextChar(); // eat /
+  if (currentChar == '*' || currentChar == '!')
+    return nextLineCommentDoc();
+
+  while (currentChar != EOF && currentChar != '\n' && currentChar != '\r')
+    nextChar();
+
+  return nextToken();
 }
 
 Token *Lexer::nextTokenStringEscapeCode() noexcept {
