@@ -3,7 +3,7 @@
 using namespace pfederc;
 
 int main(int argsc, char * argsv[]) {
-  if (argsc == 0)
+  if (argsc != 2 || strlen(argsv[1]) == 0)
     return 1;
 
   std::istringstream input(argsv[1]);
