@@ -192,11 +192,14 @@ match_test(tokenid_eof tokenid " " "^TOK_EOF\n$")
 match_test(tokeid_any tokenid "_" "^TOK_ANY\n$")
 
 # comments and spaces
+# good
 match_test(tokenid_sp00 tokenid "// comment\n123" "^TOK_EOL\n$")
 match_test(tokenid_sp01 tokenid "/* comment */ 123" "^TOK_INT32\n$")
 match_test(tokenid_sp02 tokenid "    123" "^TOK_INT32\n$")
 match_test(tokenid_sp03 tokenid "/* comment\nanother comment*/ 123"
   "^TOK_INT32\n$")
+# bad
+match_test(tokenid_sp50 tokenid "/* comment" "^TOK_ERR\n")
 
 # kill tests
 status_test_arg(tokenid_kill00 tokenidmem "ka\;jsdlkfa\;h")

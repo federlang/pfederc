@@ -184,6 +184,8 @@ LogMessage pfederc::logLexerError(const Lexer &lexer, const LexerError &err) noe
       _logLexerErrorMsg(lexer, err, "Unexpected digit"));  
   case LEX_ERR_NUM_UNEXPECTED_CHAR:
     return LogMessage(err.getLogLevel(), _logLexerErrorMsg(lexer, err, "Unexpected character"));  
+  case LEX_ERR_REGION_COMMENT_END:
+    return LogMessage(err.getLogLevel(), _logLexerErrorMsg(lexer, err, "Expected '*/'"));
   default:
     return LogMessage(err.getLogLevel(), _logLexerErrorMsg(lexer, err, "Unknown error"));
   }
