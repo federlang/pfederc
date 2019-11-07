@@ -89,7 +89,21 @@ namespace pfederc {
      *
      * If index is out-of-bounds a fatal occurs 
      */
-    std::string getLine(size_t index) const noexcept;
+    std::string getLineFromIndex(size_t index) const noexcept;
+
+
+    /*!\return Returns 'index' line
+     *
+     * If index is out-of-bounds a fatal occurs
+     */
+    std::string getLineAt(size_t lineIndex) const noexcept;
+
+    /*!\return Returns line's number starting from 0 which contains the
+     * character at position 'index'
+     *
+     * If index is out-of-bounds a fatal occurs
+     */
+    size_t getLineNumber(size_t index) const noexcept;
 
     /*!\brief Aquire next token from input stream
      *

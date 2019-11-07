@@ -47,17 +47,17 @@ const std::vector<LexerError*> &Lexer::getErrors() const noexcept {
 }
 
 Position Lexer::getCurrentCursor() const noexcept {
-  return Position{lineIndices.size() - 1, currentStartIndex, currentEndIndex - 1};
+  return Position{lineIndices.size() - 1, currentStartIndex,
+    currentEndIndex > 0 ? currentEndIndex - 1 : 0};
 }
 
-std::string Lexer::getLine(size_t index) const noexcept {
+std::string Lexer::getLineFromIndex(size_t index) const noexcept {
   if (index > currentEndIndex) {
-    fatal(__FILE__, __LINE__, "Out of bounds");
+    fatal("lexer.cpp", __LINE__, "Out of bounds: " + std::to_string(index));
     return "";
   }
 
-  size_t lineIndex = lineIndices.size() - 1;
-  for (; index < lineIndices[lineIndex]; --lineIndex);
+  size_t lineIndex = getLineNumber(index);
 
   size_t lineStartIndex = lineIndices[lineIndex];
   size_t lineEndIndex = lineIndex == lineIndices.size() - 1
@@ -71,6 +71,38 @@ std::string Lexer::getLine(size_t index) const noexcept {
   std::string result(fileContent.substr(lineStartIndex,
     lineEndIndex - lineStartIndex));
   return result;
+}
+
+std::string Lexer::getLineAt(size_t lineIndex) const noexcept {
+  if (lineIndex >= getLineIndices().size()) {
+    fatal("lexer.cpp", __LINE__, "Out of bounds: " + std::to_string(lineIndex));
+    return "";
+  }
+
+  size_t lineStartIndex = lineIndices[lineIndex];
+  size_t lineEndIndex = lineIndex == lineIndices.size() - 1
+    ? currentEndIndex : lineIndices[lineIndex + 1] - 1;
+  if (lineEndIndex > lineStartIndex
+        && (fileContent[lineEndIndex] == '\r'
+          || fileContent[lineEndIndex] == '\n')) {
+    --lineEndIndex;
+  }
+
+  std::string result(fileContent.substr(lineStartIndex,
+    lineEndIndex - lineStartIndex));
+  return result;
+}
+
+size_t Lexer::getLineNumber(size_t index) const noexcept {
+  if (index > currentEndIndex) {
+    fatal("lexer.cpp", __LINE__, "Out of bounds: " + std::to_string(index));
+    return 0;
+  }
+
+  size_t lineIndex = lineIndices.size() - 1;
+  for (; index < lineIndices[lineIndex]; --lineIndex);
+
+  return lineIndex;
 }
 
 // LexerError
@@ -105,7 +137,14 @@ inline static std::string _logLexerErrorBase(const Lexer &lexer, const LexerErro
 }
 
 inline static std::string _logLexerErrorMark(const Lexer &lexer, const LexerError &err) noexcept {
-  std::string result = lexer.getLine(err.getPosition().startIndex) + '\n';
+  std::string result = lexer.getLineAt(err.getPosition().line) + '\n';
+  // if end position not in same line
+  const size_t lastLine = lexer.getLineNumber(err.getPosition().endIndex);
+  if (lastLine > err.getPosition().line) {
+    for (size_t i = err.getPosition().line; i <= lastLine; ++i) {
+      result += lexer.getLineAt(i) + '\n';
+    }
+  }
   // print space till start
   for (size_t i = 0; i < err.getPosition().startIndex && i < lexer.getFileContent().size(); ++i)  {
     const char c = lexer.getFileContent()[i];
@@ -133,19 +172,19 @@ inline static std::string _logLexerErrorMsg(const Lexer &lexer, const LexerError
 
 inline static LogMessage _logLexerErrorLeadingZero(const Lexer &lexer, const LexerError &err) noexcept {
   return LogMessage(LVL_NOTE, "Fix: Remove zero\n"
-        + lexer.getLine(err.getPosition().startIndex)
+        + lexer.getLineFromIndex(err.getPosition().startIndex)
           .erase(err.getPosition().startIndex - lexer.getLineIndices()[err.getPosition().line], 1));
 }
 
 inline static LogMessage _logLexerErrorCharInvalidEnd(const Lexer &lexer, const LexerError &err) noexcept {
   return LogMessage(LVL_NOTE, "Fix: Insert '\n"
-    + lexer.getLine(err.getPosition().startIndex)
+    + lexer.getLineFromIndex(err.getPosition().startIndex)
       .insert(err.getPosition().startIndex - lexer.getLineIndices()[err.getPosition().line], "'"));
 }
 
 inline static LogMessage _logLexerErrorStrInvalidEnd(const Lexer &lexer, const LexerError &err) noexcept {
   return LogMessage(LVL_NOTE, "Fix: Insert \"\n"
-    + lexer.getLine(err.getPosition().startIndex)
+    + lexer.getLineFromIndex(err.getPosition().startIndex)
       .insert(err.getPosition().startIndex - lexer.getLineIndices()[err.getPosition().line], "\""));
 }
 
