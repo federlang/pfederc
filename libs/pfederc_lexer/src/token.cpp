@@ -25,6 +25,7 @@ namespace pfederc {
      KeywordTuple(TOK_KW_FALSE, "False")},
     // 6
     {KeywordTuple(TOK_KW_RET,    "return"),
+     KeywordTuple(TOK_KW_LAMBDA, "lambda"),
      KeywordTuple(TOK_KW_SWITCH, "switch"),
      KeywordTuple(TOK_KW_IMPORT, "import")},
     // 7
@@ -108,6 +109,7 @@ namespace pfederc {
     { TOK_TEMPL_BRACKET_CLOSE, "TOK_TEMPL_BRACKET_CLOSE" },
 
     { TOK_KW_FN, "TOK_KW_FN" },
+    { TOK_KW_LAMBDA, "TOK_KW_LAMBDA" },
     { TOK_KW_MOD, "TOK_KW_MOD" },
     { TOK_KW_CLASS, "TOK_KW_CLASS" },
     { TOK_KW_ENUM, "TOK_KW_ENUM" },

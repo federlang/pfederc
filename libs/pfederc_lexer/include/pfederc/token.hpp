@@ -44,6 +44,7 @@ namespace pfederc {
     TOK_TEMPL_BRACKET_CLOSE, //!< }
 
     TOK_KW_FN,     //!< func
+    TOK_KW_LAMBDA, //!< lambda
     TOK_KW_MOD,    //!< mod
     TOK_KW_CLASS,  //!< class
     TOK_KW_ENUM,   //!< enum
