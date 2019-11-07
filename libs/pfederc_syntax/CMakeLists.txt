@@ -5,4 +5,5 @@ add_library(pfederc_syntax
 	"${pfederc_syntax_SOURCE_DIR}/src/syntax.cpp")
 target_include_directories(pfederc_syntax PUBLIC
 	"${pfederc_syntax_SOURCE_DIR}/include")
-target_link_libraries(pfederc_syntax PUBLIC pfederc_core)
+target_link_libraries(pfederc_syntax PUBLIC pfederc_core pfederc_errors
+  pfederc_lexer)
