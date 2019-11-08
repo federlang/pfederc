@@ -36,7 +36,8 @@ namespace pfederc {
 
   const std::vector<OperatorTuple> OPERATORS[OPERATORS_LENGTH] = {
     // 1
-    {OperatorTuple(TOK_OP_STMT, ";"),
+    {OperatorTuple(TOK_STMT, ";"),
+
      OperatorTuple(TOK_OP_COMMA, ","),
      OperatorTuple(TOK_OP_ASG, "="),
      OperatorTuple(TOK_OP_BOR, "|"),
@@ -130,8 +131,9 @@ namespace pfederc {
     { TOK_KW_TRUE, "TOK_KW_TRUE" },
     { TOK_KW_FALSE, "TOK_KW_FALSE" },
 
+    { TOK_STMT, "TOK_STMT" },
+
     { TOK_OP_COMMA, "TOK_OP_COMMA" },
-    { TOK_OP_STMT, "TOK_OP_STMT" },
     { TOK_OP_ASG_DCL, "TOK_OP_ASG_DCL" },
     { TOK_OP_ASG_AND, "TOK_OP_ASG_AND" },
     { TOK_OP_ASG_XOR, "TOK_OP_ASG_XOR" },
@@ -179,7 +181,6 @@ namespace pfederc {
   };
 
   const std::map<TokenType, OperatorInfoTuple> OPERATOR_INFOS = {
-    { TOK_OP_STMT,    OperatorInfoTuple( 0, BINARY, LEFT) },
     { TOK_OP_COMMA,   OperatorInfoTuple( 1, BINARY, LEFT) },
     { TOK_OP_ASG_DCL, OperatorInfoTuple( 2, BINARY, RIGHT) },
     { TOK_OP_ASG_AND, OperatorInfoTuple( 3, BINARY, RIGHT) },

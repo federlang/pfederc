@@ -66,8 +66,9 @@ namespace pfederc {
     TOK_KW_TRUE,   //!< True
     TOK_KW_FALSE,  //!< False
 
+    TOK_STMT,    //!< ;
+
     TOK_OP_COMMA,   //!< ,
-    TOK_OP_STMT,    //!< ;
     TOK_OP_BRACKET_OPEN,        //!< (
     TOK_OP_ARR_BRACKET_OPEN,    //!< [
     TOK_OP_TEMPL_BRACKET_OPEN,  //!< {
