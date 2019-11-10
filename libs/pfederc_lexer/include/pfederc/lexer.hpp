@@ -28,9 +28,9 @@ namespace pfederc {
     std::istream &input;
     std::string filePath;
     std::string fileContent;
-    std::vector<Token*> tokens; //!< All tokens read by next
+    std::vector<std::unique_ptr<Token>> tokens; //!< All tokens read by next
     std::vector<size_t> lineIndices; //!< Indices of line beginnings
-    std::vector<LexerError*> errors; //!< Generated errors
+    std::vector<std::unique_ptr<LexerError>> errors; //!< Generated errors
     // tmps for lexical analysis
     size_t currentStartIndex, currentEndIndex;
     int currentChar; //!< Current character invalid if currentToken == nullptr
@@ -39,47 +39,72 @@ namespace pfederc {
     // METHODS for next()
     //! Reads nextChar. Sets currentChar to read character.
     int nextChar() noexcept;
-    Token *nextToken() noexcept;
+    std::unique_ptr<Token> nextToken() noexcept;
     void skipSpace() noexcept;
     //! Reads ids, keywords and any
-    Token *nextTokenId() noexcept;
-    Token *nextTokenLine() noexcept;
-    Token *nextTokenEOF() noexcept;
+    std::unique_ptr<Token> nextTokenId() noexcept;
+    std::unique_ptr<Token> nextTokenLine() noexcept;
+    std::unique_ptr<Token> nextTokenEOF() noexcept;
     //! Reads next number
-    Token *nextTokenNum() noexcept;
-    Token *nextTokenBinNum() noexcept;
-    Token *nextTokenOctNum() noexcept;
-    Token *nextTokenHexNum() noexcept;
-    Token *nextTokenDecNum() noexcept;
+    std::unique_ptr<Token> nextTokenNum() noexcept;
+    std::unique_ptr<Token> nextTokenBinNum() noexcept;
+    std::unique_ptr<Token> nextTokenOctNum() noexcept;
+    std::unique_ptr<Token> nextTokenHexNum() noexcept;
+    std::unique_ptr<Token> nextTokenDecNum() noexcept;
     //! Reads number type (non, or s,S,l,L with optional u). *num* is number.
-    Token *nextTokenNumType(size_t num) noexcept;
+    std::unique_ptr<Token> nextTokenNumType(size_t num) noexcept;
     //! Next floating point number. *num* is left to '.'
-    Token *nextTokenFltNum(size_t num) noexcept;
-    Token *nextTokenChar() noexcept;
-    Token *nextTokenString() noexcept;
+    std::unique_ptr<Token> nextTokenFltNum(size_t num) noexcept;
+    std::unique_ptr<Token> nextTokenChar() noexcept;
+    std::unique_ptr<Token> nextTokenString() noexcept;
     //! Returns nullptr if successfull otherwise error token
-    Token *nextTokenStringEscapeCode() noexcept;
+    std::unique_ptr<Token> nextTokenStringEscapeCode() noexcept;
     //! Can return nullptr
-    Token *nextTokenOperator() noexcept;
-    Token *nextTokenBracket() noexcept;
+    std::unique_ptr<Token> nextTokenOperator() noexcept;
+    std::unique_ptr<Token> nextTokenBracket() noexcept;
     // comments
-    Token *nextRegionComment() noexcept;
-    Token *nextLineComment() noexcept;
-    Token *nextRegionCommentDoc() noexcept;
-    Token *nextLineCommentDoc() noexcept;
+    std::unique_ptr<Token> nextRegionComment() noexcept;
+    std::unique_ptr<Token> nextLineComment() noexcept;
+    std::unique_ptr<Token> nextRegionCommentDoc() noexcept;
+    std::unique_ptr<Token> nextLineCommentDoc() noexcept;
 
-    Token *generateError(LexerError *err) noexcept;
+    std::unique_ptr<Token> generateError(std::unique_ptr<LexerError> &&err) noexcept;
   public:
     Lexer(const LanguageConfiguration &cfg,
         std::istream &input, const std::string &filePath) noexcept;
     virtual ~Lexer();
 
-    const LanguageConfiguration &getLanguageConfiguration() const noexcept;
-    const std::string &getFileContent() const noexcept;
-    const std::string &getFilePath() const noexcept;
-    const std::vector<Token*> &getTokens() const noexcept;
-    const std::vector<size_t> &getLineIndices() const noexcept;
-    const std::vector<LexerError*> &getErrors() const noexcept;
+    //const LanguageConfiguration &getLanguageConfiguration() const noexcept;
+    //const std::string &getFileContent() const noexcept;
+    //const std::string &getFilePath() const noexcept;
+    //const std::vector<Token*> &getTokens() const noexcept;
+    //const std::vector<size_t> &getLineIndices() const noexcept;
+    //const std::vector<LexerError*> &getErrors() const noexcept;
+
+    inline const auto &getLanguageConfiguration() const noexcept {
+      return cfg;
+    }
+    
+    inline const auto &getFileContent() const noexcept {
+      return fileContent;
+    }
+    
+    inline const auto &getFilePath() const noexcept {
+      return filePath;
+    }
+    
+    inline const auto &getTokens() const noexcept {
+      return tokens;
+    }
+    
+    inline const auto &getLineIndices() const noexcept {
+      return lineIndices;
+    }
+    
+    inline const auto &getErrors() const noexcept {
+      return errors;
+    }
+
 
     /*!\return Returns current token position (last next call)
      */
@@ -109,7 +134,7 @@ namespace pfederc {
      *
      * \return Never returns nullptr (except out-of-memory)
      */
-    Token *next() noexcept;
+    Token &next() noexcept;
   };
 
   class LexerError {
@@ -134,6 +159,7 @@ namespace pfederc {
   };
 
   LogMessage logLexerError(const Lexer &lexer, const LexerError &err) noexcept;
+
   /*!\return Returns true if an error occured
    */
   bool logLexerErrors(Logger &log, const Lexer &lex) noexcept;

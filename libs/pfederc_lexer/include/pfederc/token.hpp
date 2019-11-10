@@ -186,6 +186,7 @@ namespace pfederc {
      * \param pos
      */
     Token(Token *last, TokenType type, const Position &pos) noexcept;
+    Token(const Token &) = delete;
     virtual ~Token();
 
     /*!\return Returns previous read token. If there isn't any previous token

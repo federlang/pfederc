@@ -16,34 +16,6 @@ Lexer::Lexer(const LanguageConfiguration &cfg,
 }
 
 Lexer::~Lexer() {
-  for (Token *tok : tokens)
-    delete tok;
-  for (LexerError *err : errors)
-    delete err;
-}
-
-const LanguageConfiguration &Lexer::getLanguageConfiguration() const noexcept {
-  return cfg;
-}
-
-const std::string &Lexer::getFileContent() const noexcept {
-  return fileContent;
-}
-
-const std::string &Lexer::getFilePath() const noexcept {
-  return filePath;
-}
-
-const std::vector<Token*> &Lexer::getTokens() const noexcept {
-  return tokens;
-}
-
-const std::vector<size_t> &Lexer::getLineIndices() const noexcept {
-  return lineIndices;
-}
-
-const std::vector<LexerError*> &Lexer::getErrors() const noexcept {
-  return errors;
 }
 
 Position Lexer::getCurrentCursor() const noexcept {
@@ -232,7 +204,7 @@ LogMessage pfederc::logLexerError(const Lexer &lexer, const LexerError &err) noe
 
 bool pfederc::logLexerErrors(Logger &log, const Lexer &lex) noexcept {
   bool result = false;
-  for (const auto lexErr : lex.getErrors()) {
+  for (const auto &lexErr : lex.getErrors()) {
     LogMessage msg = logLexerError(lex, *lexErr);
     if (msg.getLogLevel() == LVL_ERROR)
       result = true;
