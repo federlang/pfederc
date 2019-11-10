@@ -2,6 +2,7 @@ cmake_minimum_required(VERSION 3.10)
 project(pfederc_syntax)
 
 add_library(pfederc_syntax
+	"${pfederc_syntax_SOURCE_DIR}/src/expr.cpp"
 	"${pfederc_syntax_SOURCE_DIR}/src/syntax.cpp")
 target_include_directories(pfederc_syntax PUBLIC
 	"${pfederc_syntax_SOURCE_DIR}/include")
