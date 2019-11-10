@@ -77,28 +77,6 @@ size_t Lexer::getLineNumber(size_t index) const noexcept {
   return lineIndex;
 }
 
-// LexerError
-
-LexerError::LexerError(Level logLevel, LexerErrorCode err,
-    const Position &pos) noexcept
-    : logLevel{logLevel}, err{err}, pos(pos) {
-}
-
-LexerError::~LexerError() {
-}
-
-Level LexerError::getLogLevel() const noexcept {
-  return logLevel;
-}
-
-LexerErrorCode LexerError::getErrorCode() const noexcept {
-  return err;
-}
-
-const Position &LexerError::getPosition() const noexcept {
-  return pos;
-}
-
 // error reporting
 
 inline static std::string _logLexerErrorBase(const Lexer &lexer, const LexerError &err) noexcept {

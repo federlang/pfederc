@@ -74,13 +74,6 @@ namespace pfederc {
         std::istream &input, const std::string &filePath) noexcept;
     virtual ~Lexer();
 
-    //const LanguageConfiguration &getLanguageConfiguration() const noexcept;
-    //const std::string &getFileContent() const noexcept;
-    //const std::string &getFilePath() const noexcept;
-    //const std::vector<Token*> &getTokens() const noexcept;
-    //const std::vector<size_t> &getLineIndices() const noexcept;
-    //const std::vector<LexerError*> &getErrors() const noexcept;
-
     inline const auto &getLanguageConfiguration() const noexcept {
       return cfg;
     }
@@ -104,7 +97,6 @@ namespace pfederc {
     inline const auto &getErrors() const noexcept {
       return errors;
     }
-
 
     /*!\return Returns current token position (last next call)
      */
@@ -147,15 +139,25 @@ namespace pfederc {
      * \param err
      * \param pos Error position
      */
-    LexerError(Level logLevel, LexerErrorCode err, const Position &pos) noexcept;
-    virtual ~LexerError();
+    constexpr LexerError(Level logLevel, LexerErrorCode err,
+        const Position &pos) noexcept
+        : logLevel{logLevel}, err{err}, pos(pos) {
+    }
+    inline virtual ~LexerError() {}
 
-    Level getLogLevel() const noexcept;
-    LexerErrorCode getErrorCode() const noexcept;
+    inline Level getLogLevel() const noexcept {
+      return logLevel;
+    }
+    
+    inline LexerErrorCode getErrorCode() const noexcept {
+      return err;
+    }
 
     /*!\return Returns where the error occured
      */
-    const Position &getPosition() const noexcept;
+    inline const Position &getPosition() const noexcept {
+      return pos;
+    }
   };
 
   LogMessage logLexerError(const Lexer &lexer, const LexerError &err) noexcept;
