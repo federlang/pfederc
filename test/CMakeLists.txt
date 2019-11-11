@@ -117,6 +117,8 @@ match_test(tokenid_op38 tokenid "." "^TOK_OP_MEM\n$")
 match_test(tokenid_op39 tokenid "->" "^TOK_OP_DMEM\n$")
 # STMT
 match_test(tokenid_stmt00 tokenid "\;" "^TOK_STMT\n$")
+# IMPL
+match_test(Tokenid_impl00 tokenid "=>" "^TOK_IMPL\n$")
 # Brackets
 match_test(tokenid_br00 tokenid "(" "^TOK_OP_BRACKET_OPEN\n$")
 match_test(tokenid_br01 tokenid ")" "^TOK_BRACKET_CLOSE\n$")

@@ -58,7 +58,9 @@ namespace pfederc {
      OperatorTuple(TOK_OP_ARR_BRACKET_OPEN, "["),
      OperatorTuple(TOK_OP_TEMPL_BRACKET_OPEN, "{")},
     // 2
-    {OperatorTuple(TOK_OP_ASG_DCL, ":="),
+    {OperatorTuple(TOK_IMPL, "=>"),
+
+     OperatorTuple(TOK_OP_ASG_DCL, ":="),
      OperatorTuple(TOK_OP_ASG_AND, "&="),
      OperatorTuple(TOK_OP_ASG_XOR, "^="),
      OperatorTuple(TOK_OP_ASG_OR, "|="),
@@ -132,6 +134,7 @@ namespace pfederc {
     { TOK_KW_FALSE, "TOK_KW_FALSE" },
 
     { TOK_STMT, "TOK_STMT" },
+    { TOK_IMPL, "TOK_IMPL" },
 
     { TOK_OP_COMMA, "TOK_OP_COMMA" },
     { TOK_OP_ASG_DCL, "TOK_OP_ASG_DCL" },
