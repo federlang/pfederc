@@ -9,7 +9,7 @@ int main(int argsc, char * argsv[]) {
   std::istringstream input(argsv[1]);
   LanguageConfiguration cfg = createDefaultLanguageConfiguration();
   Lexer lex(cfg, input, "<args[1]>");
-  Token &tok = lex.next();
+  const Token &tok = lex.next();
   std::cout << TOKEN_TYPE_STRINGS.at(tok.getType()) << std::endl;
   Logger log;
   logLexerErrors(log, lex);

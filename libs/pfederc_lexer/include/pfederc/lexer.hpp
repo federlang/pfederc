@@ -126,7 +126,15 @@ namespace pfederc {
      *
      * \return Never returns nullptr (except out-of-memory)
      */
-    Token &next() noexcept;
+    const Token &next() noexcept;
+
+    /*!\return Returns last token read with next
+     *
+     * Undefined behaviour if next wasn't called before
+     */
+    inline const Token &getCurrentToken() noexcept {
+      return *currentToken;
+    }
   };
 
   class LexerError final {

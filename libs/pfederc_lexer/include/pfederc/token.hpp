@@ -165,12 +165,12 @@ namespace pfederc {
 
   /*!\brief Operator associativity
    */
-  enum Associativity {
+  enum class Associativity {
     LEFT,
     RIGHT,
   };
 
-  enum OperatorType {
+  enum class OperatorType {
     UNARY,
     BINARY
   };
@@ -182,7 +182,7 @@ namespace pfederc {
   typedef std::tuple<Precedence, OperatorType, Associativity> OperatorInfoTuple;
   /*!\brief Information about operators
    */
-  extern const std::map<TokenType, OperatorInfoTuple> OPERATOR_INFOS;
+  extern const std::map<TokenType, OperatorInfoTuple> OPERATORS_INFO;
 
   class Token {
     Token *last;
