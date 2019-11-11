@@ -2,7 +2,7 @@
 using namespace pfederc;
 
 namespace pfederc {
-  const std::vector<std::tuple<TokenType, std::string>> KEYWORDS[KEYWORDS_LENGTH] = {
+  const std::vector<std::tuple<TokenType, std::string>> KEYWORDS[KEYWORDS_LENGTH] {
     // 2
     {KeywordTuple(TOK_KW_IF, "if"),
      KeywordTuple(TOK_KW_DO, "do")},
@@ -34,7 +34,7 @@ namespace pfederc {
     {KeywordTuple(TOK_KW_CTN,      "continue")},
   };
 
-  const std::vector<OperatorTuple> OPERATORS[OPERATORS_LENGTH] = {
+  const std::vector<OperatorTuple> OPERATORS[OPERATORS_LENGTH] {
     // 1
     {OperatorTuple(TOK_STMT, ";"),
 
@@ -86,7 +86,7 @@ namespace pfederc {
      OperatorTuple(TOK_OP_ASG_RSH, ">>=")},
   };
 
-  const std::map<TokenType, std::string> TOKEN_TYPE_STRINGS = {
+  const std::map<TokenType, std::string> TOKEN_TYPE_STRINGS {
     { TOK_ERR, "TOK_ERR" },
     { TOK_EOL, "TOK_EOL" },
     { TOK_EOF, "TOK_EOF" },
@@ -183,7 +183,7 @@ namespace pfederc {
     { TOK_ANY, "TOK_ANY" },
   };
 
-  const std::map<TokenType, OperatorInfoTuple> OPERATOR_INFOS = {
+  const std::map<TokenType, OperatorInfoTuple> OPERATOR_INFOS {
     { TOK_OP_COMMA,   OperatorInfoTuple( 1, BINARY, LEFT) },
     { TOK_OP_ASG_DCL, OperatorInfoTuple( 2, BINARY, RIGHT) },
     { TOK_OP_ASG_AND, OperatorInfoTuple( 3, BINARY, RIGHT) },
@@ -230,6 +230,12 @@ namespace pfederc {
     { TOK_OP_TEMPL_BRACKET_OPEN, OperatorInfoTuple(18, BINARY, LEFT) },
     { TOK_OP_MEM,     OperatorInfoTuple(18, BINARY, LEFT) },
     { TOK_OP_DMEM,    OperatorInfoTuple(18, BINARY, LEFT) },
+  };
+
+  const std::map<TokenType, TokenType> TOKEN_BIOP_TO_UNOP {
+    { TOK_OP_ADD, TOK_OP_POS },
+    { TOK_OP_SUB, TOK_OP_NEG },
+    { TOK_OP_MUL, TOK_OP_DEREF },
   };
 }
 

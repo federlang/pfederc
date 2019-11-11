@@ -155,6 +155,12 @@ namespace pfederc {
    */
   extern const std::map<TokenType, std::string> TOKEN_TYPE_STRINGS;
 
+  /*!\brief Contains all binary operator to unary operator convertions
+   * (operators which can double has binary- and unary operators)
+   */
+  extern const std::map<TokenType /* biop */,
+      TokenType /* unop */> TOKEN_BIOP_TO_UNOP;
+
   /*!\brief Operator associativity
    */
   enum Associativity {
