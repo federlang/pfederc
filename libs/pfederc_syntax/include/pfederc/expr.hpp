@@ -79,7 +79,7 @@ namespace pfederc {
 
   typedef std::vector<std::unique_ptr<Expr>> Exprs;
 
-  class ProgramExpr : public Expr {
+  class ProgramExpr final : public Expr {
     const Token * progName;
     Exprs imports;
     Exprs defs;
@@ -108,7 +108,7 @@ namespace pfederc {
     inline const auto &getDefinitions() const noexcept { return defs; }
   };
 
-  class TokenExpr : public Expr {
+  class TokenExpr final : public Expr {
     const Token &tok;
   public:
     TokenExpr(const Lexer &lexer, const Token &tok) noexcept;
@@ -117,7 +117,7 @@ namespace pfederc {
     inline const Token &getToken() const noexcept { return tok; }
   };
 
-  class UseExpr : public Expr {
+  class UseExpr final : public Expr {
     std::unique_ptr<Expr> expr;
   public:
     UseExpr(const Lexer &lexer, const Position &pos,
@@ -131,7 +131,7 @@ namespace pfederc {
       std::unique_ptr<Expr> /* type */,
       std::unique_ptr<Expr> /* opt guard */> FuncParameter;
 
-  class FuncExpr : public Expr {
+  class FuncExpr final : public Expr {
     const Token &tokId; //!< function identifier
     Exprs templs;
     std::vector<FuncParameter> params;
@@ -160,7 +160,7 @@ namespace pfederc {
     inline const BodyExpr *getBody() const noexcept { return body.get(); }
   };
 
-  class LambdaExpr : public Expr {
+  class LambdaExpr final : public Expr {
     Exprs params;
     std::unique_ptr<BodyExpr> body;
   public:
@@ -175,7 +175,7 @@ namespace pfederc {
     { return *body; }
   };
 
-  class TraitExpr : public Expr {
+  class TraitExpr final : public Expr {
     const Token &tokId; //!< trait identifier
     Exprs templs;
     std::vector<std::unique_ptr<FuncExpr>> functions;
@@ -192,7 +192,7 @@ namespace pfederc {
     { return functions; }
   };
 
-  class ClassExpr : public Expr {
+  class ClassExpr final : public Expr {
     const Token &tokId;
     Exprs templs;
     std::vector<std::unique_ptr<BiOpExpr>> constructAttributes;
@@ -220,7 +220,7 @@ namespace pfederc {
     { return functions; }
   };
 
-  class TraitImplExpr : public Expr {
+  class TraitImplExpr final : public Expr {
     const Token &classTokId;
     Exprs templs;
     std::unique_ptr<Expr> implTrait;
@@ -243,7 +243,7 @@ namespace pfederc {
 
   typedef std::tuple<const Token&, std::vector<std::unique_ptr<Expr>>> EnumConstructor;
 
-  class EnumExpr : public Expr {
+  class EnumExpr final : public Expr {
     const Token &tokId;
     Exprs templs;
     std::vector<EnumConstructor> constructors;
@@ -260,7 +260,7 @@ namespace pfederc {
     { return constructors; }
   };
 
-  class ModExpr : public Expr {
+  class ModExpr final : public Expr {
     const Token &tokId;
     Exprs exprs;
   public:
@@ -272,7 +272,7 @@ namespace pfederc {
     inline const auto &getExpressions() const noexcept { return exprs; }
   };
 
-  class SafeExpr : public Expr {
+  class SafeExpr final : public Expr {
     std::unique_ptr<Expr> expr;
   public:
     SafeExpr(const Lexer &lexer, const Position &pos,
@@ -288,7 +288,7 @@ namespace pfederc {
   typedef std::tuple<std::unique_ptr<Expr> /* cond */,
       std::unique_ptr<BodyExpr>> IfCase;
 
-  class IfExpr : public Expr {
+  class IfExpr final : public Expr {
     std::vector<IfCase> ifCases;
     std::unique_ptr<BodyExpr> elseExpr;
     bool isensure;
@@ -314,7 +314,7 @@ namespace pfederc {
     inline const BodyExpr *getElse() const noexcept { return elseExpr.get(); }
   };
 
-  class LoopExpr : public Expr {
+  class LoopExpr final : public Expr {
     std::unique_ptr<Expr> initExpr, condExpr, itExpr;
   public:
     /*!\brief Initializes LoopExpr
@@ -351,7 +351,7 @@ namespace pfederc {
       const std::vector<const Token * /* variables */>,
       std::unique_ptr<BodyExpr>> MatchPattern;
 
-  class MatchExpr : public Expr {
+  class MatchExpr final : public Expr {
     std::vector<MatchPattern> cases;
     std::unique_ptr<BodyExpr> anyCase;
   public:
@@ -375,7 +375,7 @@ namespace pfederc {
     { return anyCase.get(); }
   };
 
-  class BiOpExpr : public Expr {
+  class BiOpExpr final : public Expr {
     const Token &tokOp;
     std::unique_ptr<Expr> lhs, rhs;
   public:
@@ -391,7 +391,7 @@ namespace pfederc {
     inline const Expr &getLeft() const noexcept { return *lhs; }
   };
 
-  class UnOpExpr : public Expr {
+  class UnOpExpr final : public Expr {
     const Token &tokOp;
     std::unique_ptr<Expr> expr;
   public:
@@ -404,7 +404,7 @@ namespace pfederc {
     inline const Expr &getExpression() const noexcept { return *expr; }
   };
 
-  class BodyExpr : public Expr {
+  class BodyExpr final : public Expr {
     Exprs exprs;
     std::unique_ptr<Expr> retExpr;
   public:
@@ -419,7 +419,7 @@ namespace pfederc {
     inline const Expr *getReturn() const noexcept { return retExpr.get(); }
   };
 
-  class ArrayCpyExpr : public Expr {
+  class ArrayCpyExpr final : public Expr {
     std::unique_ptr<Expr> valueExpr, lengthExpr;
   public:
     ArrayCpyExpr(const Lexer &lexer, const Position &pos,
@@ -431,7 +431,7 @@ namespace pfederc {
     inline const Expr &getLength() const noexcept { return *lengthExpr; }
   };
 
-  class ArrayLitExpr : public Expr {
+  class ArrayLitExpr final : public Expr {
     Exprs exprs;
   public:
     /*!\brief Initializes ArrayLitExpr
@@ -452,7 +452,7 @@ namespace pfederc {
     inline const auto &getValues() const noexcept { return exprs; }
   };
 
-  class ArrayEmptyExpr : public Expr {
+  class ArrayEmptyExpr final : public Expr {
     std::unique_ptr<Expr> typeExpr;
   public:
     ArrayEmptyExpr(const Lexer &lexer, const Position &pos,
