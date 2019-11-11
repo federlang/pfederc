@@ -113,6 +113,8 @@ namespace pfederc {
     TOK_OP_LN,      //!< !
     TOK_OP_BN,      //!< ~
     TOK_OP_DEREF,   //!< \*a
+    TOK_OP_MUT,     //!< &
+
     TOK_OP_MEM,     //!< '.'
     TOK_OP_DMEM,    //!< -\>
 

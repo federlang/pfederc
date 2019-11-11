@@ -178,6 +178,7 @@ namespace pfederc {
     { TOK_OP_BN, "TOK_OP_BN" },
     { TOK_KW_SAFE, "TOK_KW_SAFE" },
     { TOK_OP_DEREF, "TOK_OP_DEREF" },
+    { TOK_OP_MUT, "TOK_OP_MUT" },
     { TOK_OP_MEM, "TOK_OP_MEM" },
     { TOK_OP_DMEM, "TOK_OP_DMEM" },
     { TOK_ANY, "TOK_ANY" },
@@ -225,6 +226,7 @@ namespace pfederc {
     { TOK_OP_LN,      OperatorInfoTuple(17, UNARY, RIGHT) },
     { TOK_OP_BN,      OperatorInfoTuple(17, UNARY, RIGHT) },
     { TOK_OP_DEREF,   OperatorInfoTuple(17, UNARY, RIGHT) },
+    { TOK_OP_MUT,     OperatorInfoTuple(17, UNARY, RIGHT) },
     { TOK_OP_BRACKET_OPEN, OperatorInfoTuple(18, BINARY, LEFT) },
     { TOK_OP_ARR_BRACKET_OPEN, OperatorInfoTuple(18, BINARY, LEFT) },
     { TOK_OP_TEMPL_BRACKET_OPEN, OperatorInfoTuple(18, BINARY, LEFT) },
@@ -236,6 +238,7 @@ namespace pfederc {
     { TOK_OP_ADD, TOK_OP_POS },
     { TOK_OP_SUB, TOK_OP_NEG },
     { TOK_OP_MUL, TOK_OP_DEREF },
+    { TOK_OP_BAND, TOK_OP_MUT },
   };
 }
 
