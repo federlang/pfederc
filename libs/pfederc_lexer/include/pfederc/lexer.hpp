@@ -129,7 +129,7 @@ namespace pfederc {
     Token &next() noexcept;
   };
 
-  class LexerError {
+  class LexerError final {
     Level logLevel;
     LexerErrorCode err;
     Position pos;
@@ -143,7 +143,7 @@ namespace pfederc {
         const Position &pos) noexcept
         : logLevel{logLevel}, err{err}, pos(pos) {
     }
-    inline virtual ~LexerError() {}
+    inline ~LexerError() {}
 
     inline Level getLogLevel() const noexcept {
       return logLevel;
