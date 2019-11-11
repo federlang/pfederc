@@ -9,7 +9,7 @@ inline static bool _isNewLineCharacter(char ch) noexcept {
 
 // global
 
-const Token& Lexer::next() noexcept {
+Token& Lexer::next() noexcept {
   if  (!currentToken) {
     lineIndices.push_back(0);
     nextChar();

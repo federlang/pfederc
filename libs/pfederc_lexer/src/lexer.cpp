@@ -79,24 +79,24 @@ size_t Lexer::getLineNumber(size_t index) const noexcept {
 
 // error reporting
 
-inline static std::string _logLexerErrorBase(const Lexer &lexer, const LexerError &err) noexcept {
+inline static std::string _logLexerErrorBase(const Lexer &lexer, const Position &pos) noexcept {
   return lexer.getFilePath() + ":"
-    + std::to_string((err.getPosition().line + 1)) + ":" 
-    + std::to_string(err.getPosition().startIndex - lexer.getLineIndices()[err.getPosition().line] + 1)
+    + std::to_string((pos.line + 1)) + ":" 
+    + std::to_string(pos.startIndex - lexer.getLineIndices()[pos.line] + 1)
     + ": error: ";
 }
 
-inline static std::string _logLexerErrorMark(const Lexer &lexer, const LexerError &err) noexcept {
-  std::string result = lexer.getLineAt(err.getPosition().line) + '\n';
+inline static std::string _logLexerErrorMark(const Lexer &lexer, const Position &pos) noexcept {
+  std::string result = lexer.getLineAt(pos.line) + '\n';
   // if end position not in same line
-  const size_t lastLine = lexer.getLineNumber(err.getPosition().endIndex);
-  if (lastLine > err.getPosition().line) {
-    for (size_t i = err.getPosition().line; i <= lastLine; ++i) {
+  const size_t lastLine = lexer.getLineNumber(pos.endIndex);
+  if (lastLine > pos.line) {
+    for (size_t i = pos.line; i <= lastLine; ++i) {
       result += lexer.getLineAt(i) + '\n';
     }
   }
   // print space till start
-  for (size_t i = 0; i < err.getPosition().startIndex && i < lexer.getFileContent().size(); ++i)  {
+  for (size_t i = 0; i < pos.startIndex && i < lexer.getFileContent().size(); ++i)  {
     const char c = lexer.getFileContent()[i];
     const char d = c & 0xF0;
     if (c == '\t')
@@ -106,7 +106,7 @@ inline static std::string _logLexerErrorMark(const Lexer &lexer, const LexerErro
       result += ' ';
   }
   // print marks till end
-  for (size_t i = err.getPosition().startIndex; i <= err.getPosition().endIndex && i < lexer.getFileContent().size(); ++i)  {
+  for (size_t i = pos.startIndex; i <= pos.endIndex && i < lexer.getFileContent().size(); ++i)  {
     const char c = lexer.getFileContent()[i];
     const char d = c & 0xF0;
     if ((~c & 0x80) == 0x80 // ascii
@@ -116,8 +116,8 @@ inline static std::string _logLexerErrorMark(const Lexer &lexer, const LexerErro
   return result;
 }
 
-inline static std::string _logLexerErrorMsg(const Lexer &lexer, const LexerError &err, const std::string &msg) noexcept {
-  return _logLexerErrorBase(lexer, err) + msg + "\n" + _logLexerErrorMark(lexer, err);
+std::string pfederc::logCreateErrorMessage(const Lexer &lexer, const Position &pos, const std::string &msg) noexcept {
+  return _logLexerErrorBase(lexer, pos) + msg + "\n" + _logLexerErrorMark(lexer, pos);
 }
 
 inline static LogMessage _logLexerErrorLeadingZero(const Lexer &lexer, const LexerError &err) noexcept {
@@ -140,43 +140,44 @@ inline static LogMessage _logLexerErrorStrInvalidEnd(const Lexer &lexer, const L
 
 // global
 LogMessage pfederc::logLexerError(const Lexer &lexer, const LexerError &err) noexcept {
+  const Position &pos = err.getPosition();
   switch (err.getErrorCode()) {
   case LEX_ERR_GENERAL_INVALID_CHARACTER:
     return LogMessage(err.getLogLevel(),
-      _logLexerErrorMsg(lexer, err, "Invalid character"));  
+      logCreateErrorMessage(lexer, pos, "Invalid character"));  
   case LEX_ERR_ID_NO_DIGIT_AFTER_ANYS:
     return LogMessage(err.getLogLevel(),
-      _logLexerErrorMsg(lexer, err, "Leading _ must not be followed by digit"));  
+      logCreateErrorMessage(lexer, pos, "Leading _ must not be followed by digit"));  
   case LEX_ERR_ID_NOT_JUST_ANYS:
     return LogMessage(err.getLogLevel(),
-      _logLexerErrorMsg(lexer, err, "Identifier must not consist of just _"));  
+      logCreateErrorMessage(lexer, pos, "Identifier must not consist of just _"));  
   case LEX_ERR_STR_INVALID_ESCAPE_CODE:
     return LogMessage(err.getLogLevel(),
-      _logLexerErrorMsg(lexer, err, "Invalid escape sequence"));  
+      logCreateErrorMessage(lexer, pos, "Invalid escape sequence"));  
   case LEX_ERR_CHAR_INVALID_END:
     return LogMessage(err.getLogLevel(),
-      _logLexerErrorMsg(lexer, err, "Expected '"),
+      logCreateErrorMessage(lexer, pos, "Expected '"),
       { _logLexerErrorCharInvalidEnd(lexer, err) });  
   case LEX_ERR_STR_INVALID_END:
     return LogMessage(err.getLogLevel(),
-      _logLexerErrorMsg(lexer, err, "Expected \""),
+      logCreateErrorMessage(lexer, pos, "Expected \""),
       { _logLexerErrorStrInvalidEnd(lexer, err) });  
   case LEX_ERR_STR_HEXADECIMAL_CHAR:
     return LogMessage(err.getLogLevel(),
-      _logLexerErrorMsg(lexer, err, "Expected hexadecimal character"));
+      logCreateErrorMessage(lexer, pos, "Expected hexadecimal character"));
   case LEX_ERR_NUM_LEADING_ZERO:
     return LogMessage(err.getLogLevel(),
-      _logLexerErrorMsg(lexer, err, "Zero must not be the first character of decimal number"),
+      logCreateErrorMessage(lexer, pos, "Zero must not be the first character of decimal number"),
       { _logLexerErrorLeadingZero(lexer, err) });  
   case LEX_ERR_NUM_UNEXPECTED_CHAR_DIGIT:
     return LogMessage(err.getLogLevel(),
-      _logLexerErrorMsg(lexer, err, "Unexpected digit"));  
+      logCreateErrorMessage(lexer, pos, "Unexpected digit"));  
   case LEX_ERR_NUM_UNEXPECTED_CHAR:
-    return LogMessage(err.getLogLevel(), _logLexerErrorMsg(lexer, err, "Unexpected character"));  
+    return LogMessage(err.getLogLevel(), logCreateErrorMessage(lexer, pos, "Unexpected character"));  
   case LEX_ERR_REGION_COMMENT_END:
-    return LogMessage(err.getLogLevel(), _logLexerErrorMsg(lexer, err, "Expected '*/'"));
+    return LogMessage(err.getLogLevel(), logCreateErrorMessage(lexer, pos, "Expected '*/'"));
   default:
-    return LogMessage(err.getLogLevel(), _logLexerErrorMsg(lexer, err, "Unknown error"));
+    return LogMessage(err.getLogLevel(), logCreateErrorMessage(lexer, pos, "Unknown error"));
   }
 }
 

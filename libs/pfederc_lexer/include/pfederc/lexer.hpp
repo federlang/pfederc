@@ -126,13 +126,13 @@ namespace pfederc {
      *
      * \return Never returns nullptr (except out-of-memory)
      */
-    const Token &next() noexcept;
+    Token &next() noexcept;
 
     /*!\return Returns last token read with next
      *
      * Undefined behaviour if next wasn't called before
      */
-    inline const Token &getCurrentToken() noexcept {
+    inline Token &getCurrentToken() noexcept {
       return *currentToken;
     }
   };
@@ -169,6 +169,9 @@ namespace pfederc {
   };
 
   LogMessage logLexerError(const Lexer &lexer, const LexerError &err) noexcept;
+
+  std::string logCreateErrorMessage(const Lexer &lexer,
+    const Position &pos, const std::string &msg) noexcept;
 
   /*!\return Returns true if an error occured
    */
