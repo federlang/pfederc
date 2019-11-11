@@ -53,6 +53,7 @@ namespace pfederc {
     TOK_KW_RET,    //!< return
     TOK_KW_USE,    //!< use
     TOK_KW_IF,     //!< if
+    TOK_KW_ENSURE, //!< ensure
     TOK_KW_ELSE,   //!< else
     TOK_KW_MATCH,  //!< match
     TOK_KW_SWITCH, //!< switch

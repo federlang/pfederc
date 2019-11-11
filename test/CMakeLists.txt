@@ -74,6 +74,7 @@ match_test(tokenid_kw18 tokenid "safe" "^TOK_KW_SAFE\n$")
 match_test(tokenid_kw19 tokenid "True" "^TOK_KW_TRUE\n$")
 match_test(tokenid_kw20 tokenid "False" "^TOK_KW_FALSE\n$")
 match_test(tokenid_kw21 tokenid "lambda" "^TOK_KW_LAMBDA\n$")
+match_test(tokenid_kw22 tokenid "ensure" "^TOK_KW_ENSURE\n$")
 # Operators
 match_test(tokenid_op00 tokenid "," "^TOK_OP_COMMA\n$")
 match_test(tokenid_op01 tokenid ":=" "^TOK_OP_ASG_DCL\n$")

@@ -26,6 +26,7 @@ namespace pfederc {
     // 6
     {KeywordTuple(TOK_KW_RET,    "return"),
      KeywordTuple(TOK_KW_LAMBDA, "lambda"),
+     KeywordTuple(TOK_KW_ENSURE, "ensure"),
      KeywordTuple(TOK_KW_SWITCH, "switch"),
      KeywordTuple(TOK_KW_IMPORT, "import")},
     // 7
@@ -121,6 +122,7 @@ namespace pfederc {
     { TOK_KW_RET, "TOK_KW_RET" },
     { TOK_KW_USE, "TOK_KW_USE" },
     { TOK_KW_IF, "TOK_KW_IF" },
+    { TOK_KW_ENSURE, "TOK_KW_ENSURE" },
     { TOK_KW_ELSE, "TOK_KW_ELSE" },
     { TOK_KW_MATCH, "TOK_KW_MATCH" },
     { TOK_KW_SWITCH, "TOK_KW_SWITCH" },
