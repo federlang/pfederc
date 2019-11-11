@@ -184,7 +184,7 @@ namespace pfederc {
     { TOK_ANY, "TOK_ANY" },
   };
 
-  const std::map<TokenType, OperatorInfoTuple> OPERATORS_INFO {
+  const std::map<TokenType, const OperatorInfoTuple> OPERATORS_INFO {
     { TOK_OP_COMMA,   OperatorInfoTuple( 1, OperatorType::BINARY, Associativity::LEFT) },
     { TOK_OP_ASG_DCL, OperatorInfoTuple( 2, OperatorType::BINARY, Associativity::RIGHT) },
     { TOK_OP_ASG_AND, OperatorInfoTuple( 3, OperatorType::BINARY, Associativity::RIGHT) },

@@ -182,7 +182,7 @@ namespace pfederc {
   typedef std::tuple<Precedence, OperatorType, Associativity> OperatorInfoTuple;
   /*!\brief Information about operators
    */
-  extern const std::map<TokenType, OperatorInfoTuple> OPERATORS_INFO;
+  extern const std::map<TokenType, const OperatorInfoTuple> OPERATORS_INFO;
 
   class Token {
     Token *last;
