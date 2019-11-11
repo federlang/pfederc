@@ -34,6 +34,8 @@ namespace pfederc {
     EXPR_ARRLIT,
     EXPR_ARRCPY,
     EXPR_ARREMPTY,
+
+    EXPR_ERR,
   };
 
   class Expr;
@@ -462,6 +464,13 @@ namespace pfederc {
     /*!\return Returns type of every element in the array
      */
     inline const Expr &getType() const noexcept { return *typeExpr; }
+  };
+
+  class ErrorExpr final : public Expr {
+  public:
+    inline ErrorExpr(const Lexer &lexer, const Position &pos) noexcept
+        : Expr(lexer, EXPR_ERR, pos) {}
+    inline virtual ~ErrorExpr() {}
   };
 }
 
