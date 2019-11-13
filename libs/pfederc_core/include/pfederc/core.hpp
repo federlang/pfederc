@@ -25,7 +25,9 @@ namespace pfederc {
          multiLineStringLeftTrim;
   };
 
-  LanguageConfiguration createDefaultLanguageConfiguration() noexcept;
+  constexpr LanguageConfiguration createDefaultLanguageConfiguration() noexcept {
+    return LanguageConfiguration{false, true};
+  }
 }
 
 #endif /* PFEDERC_CORE_CORE_HPP */
