@@ -283,6 +283,28 @@ match_test(ast_fncall05 ast "a - b.c(d, e)" "^\\\\(- a \\\\(\\\\(\\\\. b c\\\\) 
 match_test(ast_fncall50 ast "a(" "^ERR\n")
 match_test(ast_fncall51 ast "a(b" "^ERR\n")
 match_test(ast_fncall52 ast "a(b, c" "^ERR\n")
+match_test(ast_fncall53 ast "a(b]" "^ERR\n")
+match_test(ast_fncall54 ast "a(b}" "^ERR\n")
+# arr
+# good
+match_test(ast_arrcall00 ast "a[0]" "^\\\\[a 0\\\\]\n$")
+match_test(ast_arrcall01 ast "a[0, 1]" "^\\\\[a 0 1\\\\]\n$")
+# bad
+match_test(ast_arrcall50 ast "a[" "^ERR\n")
+match_test(ast_arrcall51 ast "a[0" "^ERR\n")
+match_test(ast_arrcall52 ast "a[0)" "^ERR\n")
+match_test(ast_arrcall53 ast "a[]" "^ERR\n")
+match_test(ast_arrcall54 ast "a[0}" "^ERR\n")
+# templ
+# good
+match_test(ast_templcall00 ast "a{b}" "^{a b}\n$")
+match_test(ast_templcall01 ast "a{b, c}" "^{a b c}\n$")
+# bad
+match_test(ast_templcall50 ast "a{" "^ERR\n")
+match_test(ast_templcall51 ast "a{b" "^ERR\n")
+match_test(ast_templcall52 ast "a{}" "^ERR\n")
+match_test(ast_templcall53 ast "a{b)" "^ERR\n")
+match_test(ast_templcall54 ast "a{b]" "^ERR\n")
 
 # memory tests
 valgrind_test(ast_mem00 $<TARGET_FILE:astmem> "a + b")
