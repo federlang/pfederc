@@ -133,6 +133,10 @@ std::unique_ptr<Expr> Parser::parseBinary(std::unique_ptr<Expr> lhs,
   while (_binary_continue_condition(*lookahead, minPrecedence, prec)) {
     const Token *op = lexer.getCurrentToken();
     lexer.next(); // advance to next unprocessed token
+    
+    // ignore newline tekons
+    while (*lexer.getCurrentToken() == TOK_EOL)
+      lexer.next();
 
     std::unique_ptr<Expr> rhs;
     if (TOKEN_BRACKETS.find(op->getType()) != TOKEN_BRACKETS.end()) {

@@ -227,6 +227,7 @@ valgrind_test(tokenid_memint01 $<TARGET_FILE:tokenidmem> "0x0")
 valgrind_test(tokenid_memint02 $<TARGET_FILE:tokenidmem> "0o0")
 valgrind_test(tokenid_memint03 $<TARGET_FILE:tokenidmem> "0b0")
 valgrind_test(tokenid_memint14 $<TARGET_FILE:tokenidmem> "(")
+valgrind_test(tokenid_memeof00 $<TARGET_FILE:tokenidmem> "              ")
 
 # -------------------------------- syntax ------------------------------------
 # binary operators
@@ -306,6 +307,10 @@ match_test(ast_templcall52 ast "a{}" "^ERR\n")
 match_test(ast_templcall53 ast "a{b)" "^ERR\n")
 match_test(ast_templcall54 ast "a{b]" "^ERR\n")
 
+# newline tests
+match_test(ast_eol00 ast "a +\nb" "^\\\\(\\\\+ a b\\\\)\n$")
+match_test(ast_eol01 ast "a +\n\n\nb" "^\\\\(\\\\+ a b\\\\)\n$")
+
 # memory tests
 valgrind_test(ast_mem00 $<TARGET_FILE:astmem> "a + b")
 valgrind_test(ast_mem01 $<TARGET_FILE:astmem> "a + b + c * d * e / hello")
@@ -313,3 +318,5 @@ valgrind_test(ast_mem02 $<TARGET_FILE:astmem> "\"Hello\" + \"World\"")
 valgrind_test(ast_mem03 $<TARGET_FILE:astmem> "\"Hello\" + ")
 valgrind_test(ast_mem04 $<TARGET_FILE:astmem> "abcde + ")
 valgrind_test(ast_mem05 $<TARGET_FILE:astmem> "++ ")
+valgrind_test(ast_mem06 $<TARGET_FILE:astmem> "a(b, c, d, e)")
+valgrind_test(ast_mem07 $<TARGET_FILE:astmem> "a.f.g(b, c, d, e)")
