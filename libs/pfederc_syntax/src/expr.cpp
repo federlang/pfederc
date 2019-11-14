@@ -74,10 +74,12 @@ FuncExpr::FuncExpr(const Lexer &lexer, const Position &pos,
     std::unique_ptr<TemplateDecls> &&templs,
     std::vector<std::unique_ptr<FuncParameter>> &&params,
     std::unique_ptr<Expr> &&returnExpr,
-    std::unique_ptr<BodyExpr> &&body) noexcept
+    std::unique_ptr<BodyExpr> &&body,
+    bool autoDetectReturnType) noexcept
     : Expr(lexer, EXPR_FUNC, pos), tokId{tokId},
       templs(std::move(templs)), params(std::move(params)),
-      returnExpr(std::move(returnExpr)), body(std::move(body)) {
+      returnExpr(std::move(returnExpr)), body(std::move(body)),
+      autoDetectReturnType{autoDetectReturnType} {
 }
 
 FuncExpr::~FuncExpr() {
@@ -116,6 +118,8 @@ std::string FuncExpr::toString() const noexcept {
   if (returnExpr) {
     result += ": ";
     result += returnExpr->toString();
+  } else if (autoDetectReturnType) {
+    result += ":";
   }
 
   if (!body) {

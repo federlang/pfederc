@@ -186,13 +186,15 @@ namespace pfederc {
     std::vector<std::unique_ptr<FuncParameter>> params;
     std::unique_ptr<Expr> returnExpr; // optional
     std::unique_ptr<BodyExpr> body; // optional
+    bool autoDetectReturnType;
   public:
     FuncExpr(const Lexer &lexer, const Position &pos,
       const Token *tokId,
       std::unique_ptr<TemplateDecls> &&templs,
       std::vector<std::unique_ptr<FuncParameter>> &&params,
       std::unique_ptr<Expr> &&returnExpr,
-      std::unique_ptr<BodyExpr> &&body) noexcept;
+      std::unique_ptr<BodyExpr> &&body,
+      bool autoDetectReturnType = false) noexcept;
     FuncExpr(const FuncExpr &) = delete;
     virtual ~FuncExpr();
 
@@ -208,6 +210,9 @@ namespace pfederc {
     /*!\return Returns optional function body.
      */
     inline const BodyExpr *getBody() const noexcept { return body.get(); }
+
+    inline bool isAutoReturnType() const noexcept
+    { return autoDetectReturnType; }
 
     virtual std::string toString() const noexcept;
   };

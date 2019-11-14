@@ -65,6 +65,9 @@ inline static LogMessage _logParserError(const Parser &parser, const SyntaxError
   case STX_ERR_EXPECTED_STMT:
     return LogMessage(lvl, logCreateErrorMessage(lexer, pos,
       "Expected ';'"));
+  case STX_ERR_EXPECTED_EOL:
+    return LogMessage(lvl, logCreateErrorMessage(lexer, pos,
+      "Expected end-of-line"));
   default:
     return LogMessage(lvl, logCreateErrorMessage(lexer, pos, "Unknown error"));
   }

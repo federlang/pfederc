@@ -336,8 +336,6 @@ std::unique_ptr<Expr> Parser::parseFuncType() noexcept {
 }
 
 std::unique_ptr<Expr> Parser::parseFuncReturnType() noexcept {
-  sanityExpect(TOK_OP_DCL);
-
   std::unique_ptr<Expr> returnExpr = parseExpression();
   if (!returnExpr)
     return nullptr;
@@ -391,16 +389,48 @@ std::unique_ptr<Expr> Parser::parseFunction() noexcept {
     if (parameters.empty())
       err = true;
   }
+  // assign to expression
+  if (*lexer.getCurrentToken() == TOK_OP_ASG) {
+    lexer.next(); // eat =
 
-  std::unique_ptr<Expr> returnExpr;
-  if (*lexer.getCurrentToken() == TOK_OP_DCL) {
-    // return type
-    returnExpr = parseFuncReturnType();
-    if (!returnExpr)
+    std::unique_ptr<Expr> returnExprPos(parseExpression());
+    if (!returnExprPos)
       err = true;
+
+    if (*lexer.getCurrentToken() != TOK_EOF
+        && *lexer.getCurrentToken() != TOK_EOL) {
+      generateError(std::make_unique<SyntaxError>(LVL_ERROR,
+        STX_ERR_EXPECTED_EOL, lexer.getCurrentToken()->getPosition()));
+      err = true;
+    }
+
+    lexer.next();
+
+    if (err)
+      return nullptr;
+
+    return std::make_unique<FuncExpr>(lexer, tok->getPosition(),
+      tok, std::move(templ), std::move(parameters),
+      nullptr,
+      std::make_unique<BodyExpr>(lexer, returnExprPos->getPosition(),
+      Exprs(), std::move(returnExprPos)), true);
   }
 
-  if (*lexer.getCurrentToken() == TOK_STMT) {
+  std::unique_ptr<Expr> returnExpr;
+  bool autoDetect = false;
+  if (*lexer.getCurrentToken() == TOK_OP_DCL) {
+    lexer.next();
+    if (*lexer.getCurrentToken() == TOK_EOL) {
+      autoDetect = true;
+    } else {
+      // return type
+      returnExpr = parseFuncReturnType();
+      if (!returnExpr)
+        err = true;
+    }
+  }
+  // declaration
+  if (!autoDetect && *lexer.getCurrentToken() == TOK_STMT) {
     lexer.next(); // eat ;
     if (err)
       return nullptr;
@@ -408,9 +438,10 @@ std::unique_ptr<Expr> Parser::parseFunction() noexcept {
     // function declaration
     return std::make_unique<FuncExpr>(lexer, tok->getPosition(),
       tok, std::move(templ), std::move(parameters),
-      std::move(returnExpr), nullptr);
+      std::move(returnExpr), nullptr, false);
   }
- 
+
+  // body
   if (!expect(TOK_EOL)) {
     generateError(std::make_unique<SyntaxError>(LVL_ERROR,
       STX_ERR_EXPECTED_FN_DCL_DEF, lexer.getCurrentToken()->getPosition()));
@@ -439,7 +470,7 @@ std::unique_ptr<Expr> Parser::parseFunction() noexcept {
 
   return std::make_unique<FuncExpr>(lexer, tok->getPosition(),
     tok, std::move(templ), std::move(parameters),
-    std::move(returnExpr), std::move(body));
+    std::move(returnExpr), std::move(body), autoDetect);
 }
 
 std::unique_ptr<BodyExpr> Parser::parseFunctionBody() noexcept {

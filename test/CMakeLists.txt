@@ -322,7 +322,10 @@ match_test(ast_fn02 ast "func helloworld(x: i32): i32\;"
 	"^func helloworld\\\\(x: i32\\\\): i32\\\\\;\n$")
 match_test(ast_fn03 ast "func helloworld(x: i32): i32\nreturn x\n\;"
 	"^func helloworld\\\\(x: i32\\\\): i32\nreturn x\n\\\\\;\n$")
-
+match_test(ast_fn04 ast "func helloworld(x: i32) = x\n"
+	"^func helloworld\\\\(x: i32\\\\):\nreturn x\n\\\\\;\n$")
+match_test(ast_fn05 ast "func helloworld(x: i32):\nreturn x\n\;"
+	"^func helloworld\\\\(x: i32\\\\):\nreturn x\n\\\\\;\n$")
 # lambda tests
 match_test(ast_lambda00 ast "lambda\nreturn x\n\;"
 	"^lambda \nreturn x\n\\\\\;\n$")
