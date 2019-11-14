@@ -443,7 +443,47 @@ std::unique_ptr<Expr> Parser::parseFunction() noexcept {
 }
 
 std::unique_ptr<BodyExpr> Parser::parseFunctionBody() noexcept {
-   // TODO
+  Position pos(lexer.getCurrentToken()->getPosition());
+  bool err = false;
+  Exprs exprs;
+  while (*lexer.getCurrentToken() != TOK_KW_RET
+      && *lexer.getCurrentToken() != TOK_STMT
+      && *lexer.getCurrentToken() != TOK_EOF) {
+    if (*lexer.getCurrentToken() == TOK_EOL) {
+      lexer.next();
+      continue;
+    }
+
+    std::unique_ptr<Expr> expr(parseExpression());
+    if (!expect(TOK_EOL)) {
+      generateError(std::make_unique<SyntaxError>(LVL_ERROR,
+        STX_ERR_EXPECTED_EOL, lexer.getCurrentToken()->getPosition()));
+      err = true;
+    }
+
+    if (!expr)
+      err = true;
+    else {
+      pos = pos + expr->getPosition();
+      exprs.push_back(std::move(expr));
+    }
+  }
+  std::unique_ptr<Expr> returnExpr;
+  // TODO
+  if (*lexer.getCurrentToken() == TOK_KW_RET) {
+    pos = pos + lexer.getCurrentToken()->getPosition();
+    lexer.next(); // eat return
+    returnExpr = parseExpression();
+    if (!returnExpr)
+      return nullptr;
+    pos = pos + returnExpr->getPosition();
+  }
+
+  if (err)
+    return nullptr;
+
+  return std::make_unique<BodyExpr>(lexer,
+    pos, std::move(exprs), std::move(returnExpr));
 }
 
 std::unique_ptr<Expr> Parser::parseLambda() noexcept {

@@ -26,6 +26,7 @@ endmacro()
 
 macro(match_test testname name args match)
 	add_test(NAME "${testname}" COMMAND "${name}" ${args})
+	set_property(TEST "${testname}" PROPERTY TIMEOUT 10)
 	set_property(TEST "${testname}" PROPERTY PASS_REGULAR_EXPRESSION "${match}")
 endmacro()
 
@@ -312,6 +313,13 @@ match_test(ast_eol00 ast "a +\nb" "^\\\\(\\\\+ a b\\\\)\n$")
 match_test(ast_eol01 ast "a +\n\n\nb" "^\\\\(\\\\+ a b\\\\)\n$")
 match_test(ast_eol02 ast "++ \na" "^\\\\(\\\\+\\\\+ a\\\\)\n$")
 match_test(ast_eol03 ast "+ \na" "^\\\\(\\\\+ a\\\\)\n$")
+
+# function tests
+match_test(ast_fn00 ast "func helloworld\;" "^func helloworld\\\\\;\n$")
+match_test(ast_fn01 ast "func helloworld: i32\;"
+	"^func helloworld: i32\\\\\;\n$")
+match_test(ast_fn02 ast "func helloworld(x: i32): i32\;"
+	"^func helloworld\\\\(x: i32\\\\): i32\\\\\;\n$")
 
 # memory tests
 valgrind_test(ast_mem00 $<TARGET_FILE:astmem> "a + b")

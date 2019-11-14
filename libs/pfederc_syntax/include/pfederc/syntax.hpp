@@ -23,6 +23,7 @@ namespace pfederc {
     STX_ERR_EXPECTED_FN_DCL_DEF,
     STX_ERR_EXPECTED_STMT,
     STX_ERR_FUNC_VAR_NO_TEMPL,
+    STX_ERR_EXPECTED_EOL,
   };
 
   class Parser final {
