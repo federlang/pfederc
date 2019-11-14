@@ -436,8 +436,19 @@ BodyExpr::~BodyExpr() {
 }
 
 std::string BodyExpr::toString() const noexcept {
-  // TODO
-  return "";
+  std::string result;
+  for (auto &expr : exprs) {
+    result += expr->toString();
+    result += '\n';
+  }
+
+  if (retExpr) {
+    result += "return ";
+    result += retExpr->toString();
+    result += '\n';
+  }
+
+  return result;
 }
 
 // ArrayCpyExpr

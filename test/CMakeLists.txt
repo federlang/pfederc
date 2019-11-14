@@ -320,6 +320,8 @@ match_test(ast_fn01 ast "func helloworld: i32\;"
 	"^func helloworld: i32\\\\\;\n$")
 match_test(ast_fn02 ast "func helloworld(x: i32): i32\;"
 	"^func helloworld\\\\(x: i32\\\\): i32\\\\\;\n$")
+match_test(ast_fn03 ast "func helloworld(x: i32): i32\nreturn x\n\;"
+	"^func helloworld\\\\(x: i32\\\\): i32\nreturn x\n\\\\\;\n$")
 
 # memory tests
 valgrind_test(ast_mem00 $<TARGET_FILE:astmem> "a + b")
