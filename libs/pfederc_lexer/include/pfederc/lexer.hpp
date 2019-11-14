@@ -132,8 +132,8 @@ namespace pfederc {
      *
      * Undefined behaviour if next wasn't called before
      */
-    inline Token &getCurrentToken() noexcept {
-      return *currentToken;
+    inline Token *getCurrentToken() noexcept {
+      return currentToken;
     }
   };
 

@@ -6,11 +6,18 @@
 
 namespace pfederc {
   class Token;
+  class Lexer;
 
   struct Position {
     size_t line;
     size_t startIndex;
     size_t endIndex;
+
+    constexpr Position(size_t line, size_t startIndex, size_t endIndex) noexcept
+        : line{line}, startIndex{startIndex}, endIndex{endIndex} {}
+
+    constexpr Position(const Position &pos) noexcept
+        : line{pos.line}, startIndex{pos.startIndex} , endIndex{pos.endIndex} {}
 
     /*!\brief Merge this and pos
      * \param pos
@@ -164,6 +171,9 @@ namespace pfederc {
   extern const std::map<TokenType /* biop */,
       TokenType /* unop */> TOKEN_BIOP_TO_UNOP;
 
+  extern const std::map<TokenType /* open bracket */,
+    TokenType /* closing bracket */> TOKEN_BRACKETS;
+
   /*!\brief Operator associativity
    */
   enum class Associativity {
@@ -196,18 +206,29 @@ namespace pfederc {
      * \param pos
      */
     Token(Token *last, TokenType type, const Position &pos) noexcept;
+    Token() = delete;
     Token(const Token &) = delete;
     virtual ~Token();
 
     /*!\return Returns previous read token. If there isn't any previous token
      * (0th token in file), then *nullptr* is returned.
      */
-    Token *getLast() const noexcept;
-    TokenType getType() const noexcept;
-    const Position &getPosition() const noexcept;
+    inline Token *getLast() const noexcept {
+      return last;
+    }
+    
+    inline TokenType getType() const noexcept {
+      return type;
+    }
+    
+    inline const Position &getPosition() const noexcept {
+      return pos;
+    }
 
     bool operator !=(TokenType type) const noexcept;
     bool operator ==(TokenType type) const noexcept;
+
+    std::string toString(const Lexer &lexer) const noexcept;
   };
 
   class NumberToken : public Token {

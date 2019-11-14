@@ -19,9 +19,10 @@ Token& Lexer::next() noexcept {
 
 
   std::unique_ptr<Token> result(nextToken());
+  Token &tok = *result;
   currentToken = result.get();
   tokens.push_back(std::move(result));
-  return *currentToken;
+  return tok;
 }
 
 void Lexer::skipSpace() noexcept {
@@ -39,10 +40,10 @@ std::unique_ptr<Token> Lexer::generateError(std::unique_ptr<LexerError> &&err) n
 
 int Lexer::nextChar() noexcept {
   currentChar = input.get();
-  if (currentChar != std::char_traits<char>::eof())
+  if (currentChar != std::char_traits<char>::eof()) {
     fileContent += static_cast<char>(currentChar);
-  else
-    fileContent += '\0';
+  } else
+    fileContent += ' ';
   ++currentEndIndex;
   return currentChar;
 }
@@ -96,7 +97,9 @@ std::unique_ptr<Token> Lexer::nextTokenLine() noexcept {
 }
 
 std::unique_ptr<Token> Lexer::nextTokenEOF() noexcept {
-  return std::make_unique<Token>(currentToken, TOK_EOF, getCurrentCursor());
+  return std::make_unique<Token>(currentToken, TOK_EOF, 
+    Position{getCurrentCursor().line, getFileContent().length() - 1,
+      getFileContent().length() - 1});
 }
 
 std::unique_ptr<Token> Lexer::nextTokenId() noexcept {
@@ -296,7 +299,7 @@ std::unique_ptr<Token> Lexer::nextTokenString() noexcept {
     if (currentChar == '\\') {
       std::unique_ptr<Token> tok(nextTokenStringEscapeCode());
       if (tok)
-        return std::move(tok); // error forwarding
+        return tok; // error forwarding
     }
 
     nextChar();
@@ -318,7 +321,7 @@ std::unique_ptr<Token> Lexer::nextTokenChar() noexcept {
   if (currentChar == '\\') {
     std::unique_ptr<Token> tok = nextTokenStringEscapeCode();
     if (tok)
-      return std::move(tok); // error forwarding
+      return tok; // error forwarding
   }
 
   nextChar();
@@ -482,7 +485,7 @@ std::unique_ptr<Token> Lexer::nextTokenNumType(size_t num) noexcept {
     return std::make_unique<NumberToken>(currentToken, TOK_INT32,
       getCurrentCursor(), num);
 
-  return std::move(tok);
+  return tok;
 }
 
 std::unique_ptr<Token> Lexer::nextTokenFltNum(size_t num) noexcept {
@@ -525,7 +528,7 @@ std::unique_ptr<Token> Lexer::nextTokenFltNum(size_t num) noexcept {
         currentEndIndex, currentEndIndex}));
 
   if (tok)
-    return std::move(tok);
+    return tok;
 
   return std::make_unique<NumberToken>(currentToken, TOK_FLT64, getCurrentCursor(), f64);
 }

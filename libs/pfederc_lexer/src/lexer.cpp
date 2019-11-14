@@ -19,8 +19,8 @@ Lexer::~Lexer() {
 }
 
 Position Lexer::getCurrentCursor() const noexcept {
-  return Position{lineIndices.size() - 1, currentStartIndex,
-    currentEndIndex > 0 ? currentEndIndex - 1 : 0};
+  return Position(lineIndices.size() - 1, currentStartIndex,
+    currentEndIndex > 0 ? currentEndIndex - 1 : 0);
 }
 
 std::string Lexer::getLineFromIndex(size_t index) const noexcept {
@@ -53,7 +53,7 @@ std::string Lexer::getLineAt(size_t lineIndex) const noexcept {
 
   size_t lineStartIndex = lineIndices[lineIndex];
   size_t lineEndIndex = lineIndex == lineIndices.size() - 1
-    ? currentEndIndex : lineIndices[lineIndex + 1] - 1;
+    ? getFileContent().length() - 1 : lineIndices[lineIndex + 1] - 1;
   if (lineEndIndex > lineStartIndex
         && (fileContent[lineEndIndex] == '\r'
           || fileContent[lineEndIndex] == '\n')) {
@@ -61,7 +61,7 @@ std::string Lexer::getLineAt(size_t lineIndex) const noexcept {
   }
 
   std::string result(fileContent.substr(lineStartIndex,
-    lineEndIndex - lineStartIndex));
+    lineEndIndex - lineStartIndex + 1));
   return result;
 }
 
@@ -97,19 +97,21 @@ inline static std::string _logLexerErrorMark(const Lexer &lexer, const Position 
   }
   // print space till start
   for (size_t i = 0; i < pos.startIndex && i < lexer.getFileContent().size(); ++i)  {
-    const char c = lexer.getFileContent()[i];
-    const char d = c & 0xF0;
+    const uint8_t c = lexer.getFileContent()[i];
+    const uint8_t d = c & 0xF0;
     if (c == '\t')
-      result += '\t';
+      result += "  ";
     else if ((~c & 0x80) == 0x80 // ascii
         || d == 0xC0 || d == 0xE0 || d == 0xF0) // utf-8 compatible
       result += ' ';
   }
   // print marks till end
   for (size_t i = pos.startIndex; i <= pos.endIndex && i < lexer.getFileContent().size(); ++i)  {
-    const char c = lexer.getFileContent()[i];
-    const char d = c & 0xF0;
-    if ((~c & 0x80) == 0x80 // ascii
+    const uint8_t c = lexer.getFileContent()[i];
+    const uint8_t d = c & 0xF0;
+    if (c == '\t')
+      result += "^^";
+    else if ((~c & 0x80) == 0x80 // ascii
         || d == 0xC0 || d == 0xE0 || d == 0xF0) // utf-8 compatible
       result += '^';
   }
@@ -191,4 +193,10 @@ bool pfederc::logLexerErrors(Logger &log, const Lexer &lex) noexcept {
   }
 
   return result;
+}
+
+// Token
+std::string Token::toString(const Lexer &lexer) const noexcept {
+  return lexer.getFileContent().substr(getPosition().startIndex,
+    getPosition().endIndex - getPosition().startIndex + 1);
 }

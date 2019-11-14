@@ -242,6 +242,14 @@ namespace pfederc {
     { TOK_OP_MUL, TOK_OP_DEREF },
     { TOK_OP_BAND, TOK_OP_MUT },
   };
+
+
+  const std::map<TokenType /* open bracket */,
+    TokenType /* closing bracket */> TOKEN_BRACKETS = {
+      { TOK_OP_BRACKET_OPEN, TOK_BRACKET_CLOSE },
+      { TOK_OP_ARR_BRACKET_OPEN, TOK_ARR_BRACKET_CLOSE },
+      { TOK_OP_TEMPL_BRACKET_OPEN, TOK_TEMPL_BRACKET_CLOSE },
+  };
 }
 
 bool pfederc::isTokenTypeKeyword(TokenType type) noexcept {
@@ -266,18 +274,6 @@ Token::Token(Token *last, TokenType type, const Position &pos) noexcept
 }
 
 Token::~Token() {
-}
-
-Token *Token::getLast() const noexcept {
-  return last;
-}
-
-TokenType Token::getType() const noexcept {
-  return type;
-}
-
-const Position &Token::getPosition() const noexcept {
-  return pos;
 }
 
 bool Token::operator !=(TokenType type) const noexcept {
