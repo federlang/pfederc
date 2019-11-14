@@ -39,6 +39,8 @@ status_test(tokenidtostr)
 
 build_test(tokenid)
 build_test(tokenidmem)
+build_test(ast)
+build_test(astmem)
 
 # Identifiers
 # good
@@ -226,5 +228,66 @@ valgrind_test(tokenid_memint02 $<TARGET_FILE:tokenidmem> "0o0")
 valgrind_test(tokenid_memint03 $<TARGET_FILE:tokenidmem> "0b0")
 valgrind_test(tokenid_memint14 $<TARGET_FILE:tokenidmem> "(")
 
+# -------------------------------- syntax ------------------------------------
+# binary operators
+# good
+match_test(ast_biop00 ast "a == b" "^\\\\(== a b\\\\)\n$")
+match_test(ast_biop01 ast "a != b" "^\\\\(!= a b\\\\)\n$")
+match_test(ast_biop02 ast "a + b" "^\\\\(\\\\+ a b\\\\)\n$")
+match_test(ast_biop03 ast "a - b" "^\\\\(- a b\\\\)\n$")
+# bad
+match_test(ast_biop50 ast "a -" "^ERR\n")
+match_test(ast_biop51 ast "/ a" "^ERR\n")
+match_test(ast_biop52 ast "a *" "^ERR\n")
+match_test(ast_biop53 ast "a %" "^ERR\n")
+match_test(ast_biop54 ast "a ==" "^ERR\n")
+# precedence/associativity
+match_test(ast_prec00 ast "a + b * c"
+  "^\\\\(\\\\+ a \\\\(\\\\* b c\\\\)\\\\)\n$")
+match_test(ast_prec01 ast "a + b + c"
+  "^\\\\(\\\\+ \\\\(\\\\+ a b\\\\) c\\\\)\n$")
+match_test(ast_prec02 ast "a * b * c"
+  "^\\\\(\\\\* \\\\(\\\\* a b\\\\) c\\\\)\n$")
+match_test(ast_prec03 ast "a : b : c"
+  "^\\\\(: a \\\\(: b c\\\\)\\\\)\n$")
+match_test(ast_prec04 ast "a = b = c"
+  "^\\\\(= a \\\\(= b c\\\\)\\\\)\n$")
+match_test(ast_prec05 ast "a + b - c"
+  "^\\\\(- \\\\(\\\\+ a b\\\\) c\\\\)\n$")
+# unary operators
+match_test(ast_unop00 ast "++a" "^\\\\(\\\\+\\\\+ a\\\\)\n$")
+match_test(ast_unop01 ast "+a" "^\\\\(\\\\+ a\\\\)\n$")
+match_test(ast_unop02 ast "-a" "^\\\\(- a\\\\)\n$")
+match_test(ast_unop03 ast "&a" "^\\\\(& a\\\\)\n$")
+match_test(ast_unop04 ast "*a" "^\\\\(\\\\* a\\\\)\n")
+# unayr/binary operator precedence
+match_test(ast_biunop00 ast "+a.b"
+  "^\\\\(\\\\+ \\\\(\\\\. a b\\\\)\\\\)\n$")
+match_test(ast_biunop01 ast "+a-b"
+  "^\\\\(- \\\\(\\\\+ a\\\\) b\\\\)\n$")
+match_test(ast_biunop02 ast "+a+b"
+  "^\\\\(\\\\+ \\\\(\\\\+ a\\\\) b\\\\)\n$")
+match_test(ast_biunop03 ast "+a.b-c.d.e/f"
+  "^\\\\(- \\\\(\\\\+ \\\\(\\\\. a b\\\\)\\\\) \\\\(/ \\\\(\\\\. \\\\(\\\\. c d\\\\) e\\\\) f\\\\)\\\\)")
 
-# syntax
+# fn, arr, templ calls
+# fn
+# good
+match_test(ast_fncall00 ast "a()" "^\\\\(a\\\\)\n$")
+match_test(ast_fncall01 ast "a(b)" "^\\\\(a b\\\\)\n$")
+match_test(ast_fncall02 ast "a(b, c)" "^\\\\(a b c\\\\)\n$")
+match_test(ast_fncall03 ast "a.b(c, d)" "^\\\\(\\\\(\\\\. a b\\\\) c d\\\\)\n$")
+match_test(ast_fncall04 ast "a + b(c, d)" "^\\\\(\\\\+ a \\\\(b c d\\\\)\\\\)\n$")
+match_test(ast_fncall05 ast "a - b.c(d, e)" "^\\\\(- a \\\\(\\\\(\\\\. b c\\\\) d e\\\\)\\\\)\n$")
+# bad
+match_test(ast_fncall50 ast "a(" "^ERR\n")
+match_test(ast_fncall51 ast "a(b" "^ERR\n")
+match_test(ast_fncall52 ast "a(b, c" "^ERR\n")
+
+# memory tests
+valgrind_test(ast_mem00 $<TARGET_FILE:astmem> "a + b")
+valgrind_test(ast_mem01 $<TARGET_FILE:astmem> "a + b + c * d * e / hello")
+valgrind_test(ast_mem02 $<TARGET_FILE:astmem> "\"Hello\" + \"World\"")
+valgrind_test(ast_mem03 $<TARGET_FILE:astmem> "\"Hello\" + ")
+valgrind_test(ast_mem04 $<TARGET_FILE:astmem> "abcde + ")
+valgrind_test(ast_mem05 $<TARGET_FILE:astmem> "++ ")
