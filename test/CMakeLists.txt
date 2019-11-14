@@ -323,6 +323,12 @@ match_test(ast_fn02 ast "func helloworld(x: i32): i32\;"
 match_test(ast_fn03 ast "func helloworld(x: i32): i32\nreturn x\n\;"
 	"^func helloworld\\\\(x: i32\\\\): i32\nreturn x\n\\\\\;\n$")
 
+# lambda tests
+match_test(ast_lambda00 ast "lambda\nreturn x\n\;"
+	"^lambda \nreturn x\n\\\\\;\n$")
+match_test(ast_lambda01 ast "lambda (x: i32)\nreturn x\n\;"
+	"^lambda \\\\(\\\\(: x i32\\\\)\\\\)\nreturn x\n\\\\\;\n$")
+
 # memory tests
 valgrind_test(ast_mem00 $<TARGET_FILE:astmem> "a + b")
 valgrind_test(ast_mem01 $<TARGET_FILE:astmem> "a + b + c * d * e / hello")

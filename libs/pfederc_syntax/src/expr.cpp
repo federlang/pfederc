@@ -157,8 +157,22 @@ LambdaExpr::~LambdaExpr() {
 }
 
 std::string LambdaExpr::toString() const noexcept {
-  // TODO
-  return "";
+  std::string result = "lambda ";
+  if (!params.empty()) {
+    result += '(';
+    for (auto it = params.begin(); it != params.end(); ++it) {
+      if (it != params.begin())
+        result += ", ";
+      result += (*it)->toString();
+    }
+    result += ')';
+  }
+
+  result += '\n';
+
+  result += body->toString();
+  result += ';';
+  return result;
 }
 
 // TraitExpr
