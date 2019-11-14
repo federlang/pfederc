@@ -310,6 +310,8 @@ match_test(ast_templcall54 ast "a{b]" "^ERR\n")
 # newline tests
 match_test(ast_eol00 ast "a +\nb" "^\\\\(\\\\+ a b\\\\)\n$")
 match_test(ast_eol01 ast "a +\n\n\nb" "^\\\\(\\\\+ a b\\\\)\n$")
+match_test(ast_eol02 ast "++ \na" "^\\\\(\\\\+\\\\+ a\\\\)\n$")
+match_test(ast_eol03 ast "+ \na" "^\\\\(\\\\+ a\\\\)\n$")
 
 # memory tests
 valgrind_test(ast_mem00 $<TARGET_FILE:astmem> "a + b")

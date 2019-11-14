@@ -32,6 +32,9 @@ std::unique_ptr<Expr> Parser::parseUnary() noexcept {
   }
 
   lexer.next(); // eat unary operator
+  // ignore newline tekons
+  while (*lexer.getCurrentToken() == TOK_EOL)
+    lexer.next();
 
   const Precedence prec = std::get<0>(OPERATORS_INFO.at(type));
   std::unique_ptr<Expr> expr = parseExpression(prec);
