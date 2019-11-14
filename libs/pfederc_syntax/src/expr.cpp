@@ -84,8 +84,49 @@ FuncExpr::~FuncExpr() {
 }
 
 std::string FuncExpr::toString() const noexcept {
-  // TODO
-  return "";
+  std::string result = "func";
+  // TODO template
+  result += ' ';
+  result += getIdentifier().toString(getLexer());
+  if (!params.empty()) {
+    result += '(';
+    for (auto it = params.begin(); it != params.end(); ++it) {
+      if (it != params.begin())
+        result += ", ";
+      
+      const auto &tpl = **it;
+      if (std::get<0>(tpl)) {
+        result += std::get<0>(tpl)->toString(getLexer());
+        result += ": ";
+      }
+
+      result += std::get<1>(tpl)->toString();
+      if (std::get<2>(tpl)) {
+        result += " | ";
+        result += std::get<2>(tpl)->toString();
+        if (std::get<3>(tpl)) {
+          result += " = ";
+          result += std::get<3>(tpl)->toString();
+        }
+      }
+    }
+    result += ')';
+  }
+
+  if (returnExpr) {
+    result += ": ";
+    result += returnExpr->toString();
+  }
+
+  if (!body) {
+    result += ';';
+    return result;
+  }
+
+  result += '\n';
+  result += body->toString();
+  result += ';';
+  return result;
 }
 
 // FuncTypeExpr
