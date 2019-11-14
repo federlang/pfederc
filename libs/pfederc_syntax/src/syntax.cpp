@@ -363,8 +363,19 @@ std::unique_ptr<Expr> Parser::parseFunction() noexcept {
     }
   }
 
-  if (*lexer.getCurrentToken() == TOK_KW_TYPE)
-    return parseFuncType();
+  if (*lexer.getCurrentToken() == TOK_KW_TYPE) {
+    if (!templ->empty()) {
+      generateError(std::make_unique<SyntaxError>(LVL_ERROR,
+        STX_ERR_FUNC_VAR_NO_TEMPL, std::get<1>(*templ->at(0))->getPosition()));
+      err = true;
+    }
+
+    auto result = parseFuncType();
+    if (err)
+      return nullptr;
+
+    return result;
+  }
 
   // function decl./def.
   const Token *tok = lexer.getCurrentToken();
@@ -437,30 +448,37 @@ std::unique_ptr<BodyExpr> Parser::parseFunctionBody() noexcept {
 
 std::unique_ptr<Expr> Parser::parseLambda() noexcept {
   sanityExpect(TOK_KW_LAMBDA);
+   // TODO
 }
 
 std::unique_ptr<Expr> Parser::parseModule() noexcept {
   sanityExpect(TOK_KW_MOD);
+   // TODO
 }
 
 std::unique_ptr<Expr> Parser::parseClass() noexcept {
   sanityExpect(TOK_KW_CLASS);
+   // TODO
 }
 
 std::unique_ptr<Expr> Parser::parseEnum() noexcept {
   sanityExpect(TOK_KW_ENUM);
+   // TODO
 }
 
 std::unique_ptr<Expr> Parser::parseTrait() noexcept {
   sanityExpect(TOK_KW_TRAIT);
+   // TODO
 }
 
 std::unique_ptr<Expr> Parser::parseType() noexcept {
   sanityExpect(TOK_KW_TYPE);
+   // TODO
 }
 
 std::unique_ptr<Expr> Parser::parseUse() noexcept {
   sanityExpect(TOK_KW_USE);
+   // TODO
 }
 
 std::unique_ptr<Expr> Parser::parseFor(bool isdo) noexcept {
@@ -468,10 +486,12 @@ std::unique_ptr<Expr> Parser::parseFor(bool isdo) noexcept {
     sanityExpect(TOK_KW_DO);
   else
     sanityExpect(TOK_KW_FOR);
+   // TODO
 }
 
 std::unique_ptr<Expr> Parser::parseMatch() noexcept {
   sanityExpect(TOK_KW_MATCH);
+   // TODO
 }
 
 std::unique_ptr<Expr> Parser::parseIf(bool isensure) noexcept {
@@ -479,22 +499,27 @@ std::unique_ptr<Expr> Parser::parseIf(bool isensure) noexcept {
     sanityExpect(TOK_KW_ENSURE);
   else
     sanityExpect(TOK_KW_IF);
+   // TODO
 }
 
 std::unique_ptr<Expr> Parser::parseContinue() noexcept {
   sanityExpect(TOK_KW_CTN);
+   // TODO
 }
 
 std::unique_ptr<Expr> Parser::parseBreak() noexcept {
   sanityExpect(TOK_KW_BRK);
+   // TODO
 }
 
 std::unique_ptr<Expr> Parser::parseSafe() noexcept {
   sanityExpect(TOK_KW_SAFE);
+   // TODO
 }
 
 std::unique_ptr<Expr> Parser::parseTemplate() noexcept {
   sanityExpect(TOK_OP_TEMPL_BRACKET_OPEN);
+   // TODO
 }
 
 std::unique_ptr<TemplateDecl> Parser::fromDeclExprToTemplateDecl(BiOpExpr &bioprhs) noexcept {
