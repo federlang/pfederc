@@ -563,10 +563,12 @@ std::unique_ptr<Expr> Parser::parseLambda() noexcept {
     if (err)
       return nullptr;
 
-    return std::make_unique<LambdaExpr>(lexer, expr->getPosition(),
+    Position pos(expr->getPosition());
+
+    return std::make_unique<LambdaExpr>(lexer, pos,
       std::move(params), std::make_unique<BodyExpr>(lexer,
-        expr->getPosition(), std::vector<std::unique_ptr<Expr>>(),
-        std::move(expr)));
+        expr->getPosition(),
+        Exprs(), std::move(expr)));
   }
   // *newline* *body* *;*
   if (!expect(TOK_EOL)) {
