@@ -231,6 +231,10 @@ valgrind_test(tokenid_memint14 $<TARGET_FILE:tokenidmem> "(")
 valgrind_test(tokenid_memeof00 $<TARGET_FILE:tokenidmem> "              ")
 
 # -------------------------------- syntax ------------------------------------
+# simple
+match_test(ast00 ast "identifier" "^identifier\n$")
+match_test(ast01 ast "\\\"String\\\"" "^\"String\"\n$")
+match_test(ast02 ast "1234" "^1234\n$")
 # binary operators
 # good
 match_test(ast_biop00 ast "a == b" "^\\\\(== a b\\\\)\n$")
