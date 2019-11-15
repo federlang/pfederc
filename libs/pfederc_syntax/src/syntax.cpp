@@ -549,6 +549,23 @@ std::unique_ptr<Expr> Parser::parseLambda() noexcept {
     }
   }
 
+  if (*lexer.getCurrentToken() == TOK_OP_ASG) {
+    // *=* *expr*
+    lexer.next(); // eat =
+
+    std::unique_ptr<Expr> expr(parseExpression());
+    if (!expr) {
+      generateError(std::make_unique<SyntaxError>(LVL_ERROR,
+        STX_ERR_EXPECTED_EXPR, lexer.getCurrentToken()->getPosition()));
+      return nullptr;
+    }
+
+    return std::make_unique<LambdaExpr>(lexer, expr->getPosition(),
+      std::move(params), std::make_unique<BodyExpr>(lexer,
+        expr->getPosition(), std::vector<std::unique_ptr<Expr>>(),
+        std::move(expr)));
+  }
+  // *newline* *body* *;*
   if (!expect(TOK_EOL)) {
     generateError(std::make_unique<SyntaxError>(LVL_ERROR,
       STX_ERR_EXPECTED_EOL, lexer.getCurrentToken()->getPosition()));

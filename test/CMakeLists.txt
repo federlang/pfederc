@@ -331,6 +331,10 @@ match_test(ast_lambda00 ast "lambda\nreturn x\n\;"
 	"^lambda \nreturn x\n\\\\\;\n$")
 match_test(ast_lambda01 ast "lambda (x: i32)\nreturn x\n\;"
 	"^lambda \\\\(\\\\(: x i32\\\\)\\\\)\nreturn x\n\\\\\;\n$")
+match_test(ast_lambda03 ast "lambda (x: i32) = x"
+	"^lambda \\\\(\\\\(: x i32\\\\)\\\\)\nreturn x\n\\\\\;\n$")
+match_test(ast_lambda04 ast "lambda (x: i32) = x / x"
+	"^lambda \\\\(\\\\(: x i32\\\\)\\\\)\nreturn \\\\(/ x x\\\\)\n\\\\\;\n$")
 
 # memory tests
 valgrind_test(ast_mem00 $<TARGET_FILE:astmem> "a + b")
