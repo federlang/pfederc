@@ -560,6 +560,9 @@ std::unique_ptr<Expr> Parser::parseLambda() noexcept {
       return nullptr;
     }
 
+    if (err)
+      return nullptr;
+
     return std::make_unique<LambdaExpr>(lexer, expr->getPosition(),
       std::move(params), std::make_unique<BodyExpr>(lexer,
         expr->getPosition(), std::vector<std::unique_ptr<Expr>>(),
