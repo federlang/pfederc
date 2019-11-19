@@ -56,7 +56,7 @@ match_test(tokenid_id50 tokenid "__" "^TOK_ERR\n")
 match_test(tokenid_id51 tokenid "_0" "^TOK_ERR\n")
 # Keywords
 match_test(tokenid_kw00 tokenid "func" "^TOK_KW_FN\n$")
-match_test(tokenid_kw01 tokenid "mod" "^TOK_KW_MOD\n$")
+match_test(tokenid_kw01 tokenid "module" "^TOK_KW_MOD\n$")
 match_test(tokenid_kw02 tokenid "class" "^TOK_KW_CLASS\n$")
 match_test(tokenid_kw03 tokenid "enum" "^TOK_KW_ENUM\n$")
 match_test(tokenid_kw04 tokenid "trait" "^TOK_KW_TRAIT\n$")

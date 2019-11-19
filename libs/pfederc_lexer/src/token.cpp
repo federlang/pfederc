@@ -7,8 +7,7 @@ namespace pfederc {
     {KeywordTuple(TOK_KW_IF, "if"),
      KeywordTuple(TOK_KW_DO, "do")},
     // 3
-    {KeywordTuple(TOK_KW_MOD, "mod"),
-     KeywordTuple(TOK_KW_USE, "use"),
+    {KeywordTuple(TOK_KW_USE, "use"),
      KeywordTuple(TOK_KW_FOR, "for")},
     // 4
     {KeywordTuple(TOK_KW_FN, "func"),
@@ -25,6 +24,7 @@ namespace pfederc {
      KeywordTuple(TOK_KW_FALSE, "False")},
     // 6
     {KeywordTuple(TOK_KW_RET,    "return"),
+     KeywordTuple(TOK_KW_MOD,    "module"),
      KeywordTuple(TOK_KW_LAMBDA, "lambda"),
      KeywordTuple(TOK_KW_ENSURE, "ensure"),
      KeywordTuple(TOK_KW_SWITCH, "switch"),
