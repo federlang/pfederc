@@ -6,6 +6,8 @@
 
 ## Build
 
+### Linux
+
 Clone to your drive and build project:
 
 ```sh
@@ -30,4 +32,5 @@ ctest -j $(nproc)
 
 - C++ compiler (build)
 - cmake (build)
+- valgrind (optional, testing)
 - llvm
