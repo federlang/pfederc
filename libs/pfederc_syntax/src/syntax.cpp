@@ -647,9 +647,7 @@ std::unique_ptr<Expr> Parser::parseType() noexcept {
 
 std::unique_ptr<Expr> Parser::parseUse() noexcept {
   sanityExpect(TOK_KW_USE);
-  // TODO
-  if (*lexer.getCurrentToken() == TOK_KW_MOD) {
-    lexer.next(); // eat 'module'
+  if (expect(TOK_KW_MOD)) {
     if (!expect(TOK_ID)) {
       generateError(std::make_unique<SyntaxError>(LVL_ERROR,
         STX_ERR_EXPECTED_ID, lexer.getCurrentToken()->getPosition()));
@@ -661,6 +659,23 @@ std::unique_ptr<Expr> Parser::parseUse() noexcept {
 
     return std::make_unique<ProgNameExpr>(lexer, tok);
   }
+
+  std::unique_ptr<Expr> expr(parseExpression());
+  if (!expr)
+    return nullptr;
+
+  Position pos(expr->getPosition());
+
+  Exprs exprs;
+  while (isBiOpExpr(*expr, TOK_OP_COMMA)) {
+    BiOpExpr& biopexpr = dynamic_cast<BiOpExpr&>(*expr);
+    exprs.insert(exprs.begin(), biopexpr.getRightPtr());
+    expr = biopexpr.getLeftPtr();
+  }
+
+  exprs.insert(exprs.begin(), std::move(expr));
+
+  return std::make_unique<UseExpr>(lexer, pos, std::move(exprs));
 }
 
 std::unique_ptr<Expr> Parser::parseFor(bool isdo) noexcept {
@@ -830,7 +845,7 @@ ModBody Parser::parseModBody(bool isprog) noexcept {
 
         break;
       case EXPR_USE:
-        imports.push_back(dynamic_cast<UseExpr&>(*expr).getExpressionPtr());
+        imports.push_back(std::move(expr));
         break;
       default:
         defs.push_back(std::move(expr));

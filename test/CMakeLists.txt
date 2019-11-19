@@ -344,6 +344,11 @@ match_test(ast_lambda03 ast "lambda (x: i32) = x"
 	"^lambda \\\\(\\\\(: x i32\\\\)\\\\)\nreturn x\n\;\n$")
 match_test(ast_lambda04 ast "lambda (x: i32) = x / x"
 	"^lambda \\\\(\\\\(: x i32\\\\)\\\\)\nreturn \\\\(/ x x\\\\)\n\;\n$")
+# use tests
+match_test(ast_use00 ast "use mymod" "use mymod\n$")
+match_test(ast_use01 ast "use mymod.mymod" "use \\\\(\\\\. mymod mymod\\\\)\n$")
+match_test(ast_use02 ast "use mymod.mymod, amod"
+	"use \\\\(\\\\. mymod mymod\\\\), amod\n$")
 # module tests
 # good
 match_test(ast_mod00 ast "module mymodule\n;" "module mymodule\n;\n$")
@@ -358,6 +363,7 @@ fail_test(ast_mod51 ast "module mymodule\n")
 fail_test(ast_mod52 ast "module mymodule\nfunc myfunc x\n\;")
 fail_test(ast_mod53 ast "module mymodule\nx = 100\n\;")
 fail_test(ast_mod54 ast "module mymodule\nuse module hello\n\;")
+fail_test(ast_mod55 ast "module mymodule\nuse hello\n\;")
 
 # memory tests
 valgrind_test(ast_mem00 $<TARGET_FILE:astmem> "a + b")

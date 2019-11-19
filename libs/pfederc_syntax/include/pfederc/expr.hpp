@@ -164,16 +164,16 @@ namespace pfederc {
   }
 
   class UseExpr final : public Expr {
-    std::unique_ptr<Expr> expr;
+    Exprs exprs;
   public:
     UseExpr(const Lexer &lexer, const Position &pos,
-        std::unique_ptr<Expr> &&expr) noexcept;
+        Exprs &&exprs) noexcept;
     UseExpr(const UseExpr &) = delete;
     virtual ~UseExpr();
 
-    inline Expr &getExpression() const noexcept { return *expr; }
-    inline std::unique_ptr<Expr> getExpressionPtr() noexcept
-    { return std::move(expr); }
+    inline const Exprs &getExpressions() const noexcept { return exprs; }
+    inline Exprs getExpressionsPtr() noexcept
+    { return std::move(exprs); }
 
     virtual std::string toString() const noexcept;
   };

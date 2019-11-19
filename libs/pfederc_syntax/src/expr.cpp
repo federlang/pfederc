@@ -56,8 +56,8 @@ std::string TokenExpr::toString() const noexcept {
 
 // UseExpr
 UseExpr::UseExpr(const Lexer &lexer, const Position &pos,
-    std::unique_ptr<Expr> &&expr) noexcept
-    : Expr(lexer, EXPR_USE, pos), expr(std::move(expr)) {
+    Exprs &&exprs) noexcept
+    : Expr(lexer, EXPR_USE, pos), exprs(std::move(exprs)) {
 }
 
 UseExpr::~UseExpr() {
@@ -65,7 +65,15 @@ UseExpr::~UseExpr() {
 }
 
 std::string UseExpr::toString() const noexcept {
-  return "use " + getExpression().toString();
+  std::string result = "use ";
+  for (auto it = exprs.begin(); it != exprs.end(); ++it) {
+    if (it != exprs.begin())
+      result += ", ";
+      
+    result += (*it)->toString();
+  }
+
+  return result;
 }
 
 // ProgNameExpr
