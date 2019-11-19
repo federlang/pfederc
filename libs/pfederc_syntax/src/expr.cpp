@@ -68,6 +68,18 @@ std::string UseExpr::toString() const noexcept {
   return "use " + getExpression().toString();
 }
 
+// ProgNameExpr
+ProgNameExpr::ProgNameExpr(const Lexer &lexer, const Token *tok) noexcept
+    : Expr(lexer, EXPR_PROGNAME, tok->getPosition()), tok{tok} {
+}
+
+ProgNameExpr::~ProgNameExpr() {
+}
+
+std::string ProgNameExpr::toString() const noexcept {
+  return "use module " + getToken().toString(getLexer());
+}
+
 // FuncExpr
 FuncExpr::FuncExpr(const Lexer &lexer, const Position &pos,
     const Token *tokId,
@@ -268,7 +280,13 @@ ModExpr::~ModExpr() {
 }
 
 std::string ModExpr::toString() const noexcept {
-  return "mod " + getIdentifier().toString(getLexer()) + ";";
+  std::string result = "module " + getIdentifier().toString(getLexer()) + '\n';
+  for (const auto &expr : exprs) {
+    result += expr->toString();
+    result += '\n';
+  }
+  result += ';';
+  return result;
 }
 
 // SafeExpr

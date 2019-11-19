@@ -19,13 +19,17 @@ int main(int argc, char * argsv[]) {
   Parser parser(lex);
   auto expr = parser.parseExpression();
 
-  logLexerErrors(log, lex);
+  if (logLexerErrors(log, lex))
+    return 1;
 
   if (!expr) {
     std::cout << "ERR" << std::endl;
     logParserErrors(log, parser);
     return 1;
   }
+
+  if (logParserErrors(log, parser))
+    return 1;
 
   std::cout << expr->toString() << std::endl;
 

@@ -43,6 +43,7 @@ namespace pfederc {
   class ProgramExpr;
   class TokenExpr;
   class UseExpr;
+  class ProgNameExpr;
   class FuncExpr;
   class LambdaExpr;
   class TraitExpr;
@@ -171,6 +172,19 @@ namespace pfederc {
     virtual ~UseExpr();
 
     inline Expr &getExpression() const noexcept { return *expr; }
+    inline std::unique_ptr<Expr> getExpressionPtr() noexcept
+    { return std::move(expr); }
+
+    virtual std::string toString() const noexcept;
+  };
+
+  class ProgNameExpr final : public Expr {
+    const Token *tok;
+  public:
+    ProgNameExpr(const Lexer &lexer, const Token *tok) noexcept;
+    virtual ~ProgNameExpr();
+
+    inline const Token &getToken() const noexcept { return *tok; }
 
     virtual std::string toString() const noexcept;
   };

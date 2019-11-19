@@ -18,14 +18,24 @@ namespace pfederc {
     STX_ERR_EXPECTED_FUNCTION_ID,
     STX_ERR_EXPECTED_PARAMETERS,
     STX_ERR_INVALID_VARDECL_ID,
+    STX_ERR_EXPECTED_ID,
     STX_ERR_EXPECTED_VARDECL,
     STX_ERR_EXPECTED_GUARD,
     STX_ERR_EXPECTED_FN_DCL_DEF,
     STX_ERR_EXPECTED_STMT,
     STX_ERR_FUNC_VAR_NO_TEMPL,
     STX_ERR_EXPECTED_EOL,
+    STX_ERR_EXPECTED_EOF,
+    STX_ERR_EXPECTED_EOF_EOL,
     STX_ERR_EXPECTED_EXPR,
+    STX_ERR_INVALID_EXPR,
+    STX_ERR_PROGNAME,
   };
+
+  typedef std::tuple<const Token * /*progName*/,
+               Exprs /*&&imports*/,
+               Exprs /*&&defs*/,
+               bool /*error*/> ModBody;
 
   class Parser final {
     Lexer &lexer;
@@ -88,6 +98,7 @@ namespace pfederc {
     std::unique_ptr<Expr> parseSafe() noexcept;
     std::unique_ptr<Expr> parseTemplate() noexcept;
     std::unique_ptr<BodyExpr> parseFunctionBody() noexcept;
+    ModBody parseModBody(bool isprog = false) noexcept;
     std::unique_ptr<TemplateDecl> fromDeclExprToTemplateDecl(BiOpExpr &expr) noexcept;
     std::unique_ptr<TemplateDecls> parseTemplateDecl() noexcept;
   public:
@@ -113,10 +124,14 @@ namespace pfederc {
     Level logLevel;
     SyntaxErrorCode err;
     Position pos;
+    std::vector<Position> extraPos;
   public:
-    inline SyntaxError(Level logLevel, SyntaxErrorCode err, Position pos)
-      : logLevel{logLevel}, err{err}, pos(pos) {
+    inline SyntaxError(Level logLevel, SyntaxErrorCode err, Position pos,
+      std::vector<Position> &&extraPos = {})
+      : logLevel{logLevel}, err{err}, pos(pos),
+        extraPos(std::move(extraPos)) {
     }
+
     SyntaxError(const SyntaxError &) = delete;
     ~SyntaxError();
 

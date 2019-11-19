@@ -16,7 +16,7 @@ macro(build_test name)
 endmacro()
 
 macro(status_test name)
-	build_test("${name}")
+	build_test(${name})
 	add_test("${name}" "${name}")
 endmacro()
 
@@ -34,6 +34,11 @@ macro(valgrind_test testname name args)
 	if (VALGRIND)
 		add_test(NAME "${testname}" COMMAND ${VALGRIND} "${name}" ${args})
 	endif()
+endmacro()
+
+macro(fail_test testname name args)
+	add_test(NAME ${testname} COMMAND ${name} ${args})
+	set_property(TEST ${testname} PROPERTY WILL_FAIL TRUE)
 endmacro()
 
 status_test(tokenidtostr)
@@ -319,26 +324,40 @@ match_test(ast_eol02 ast "++ \na" "^\\\\(\\\\+\\\\+ a\\\\)\n$")
 match_test(ast_eol03 ast "+ \na" "^\\\\(\\\\+ a\\\\)\n$")
 
 # function tests
-match_test(ast_fn00 ast "func helloworld\;" "^func helloworld\\\\\;\n$")
+match_test(ast_fn00 ast "func helloworld\;" "^func helloworld\;\n$")
 match_test(ast_fn01 ast "func helloworld: i32\;"
-	"^func helloworld: i32\\\\\;\n$")
+	"^func helloworld: i32\;\n$")
 match_test(ast_fn02 ast "func helloworld(x: i32): i32\;"
-	"^func helloworld\\\\(x: i32\\\\): i32\\\\\;\n$")
+	"^func helloworld\\\\(x: i32\\\\): i32\;\n$")
 match_test(ast_fn03 ast "func helloworld(x: i32): i32\nreturn x\n\;"
-	"^func helloworld\\\\(x: i32\\\\): i32\nreturn x\n\\\\\;\n$")
+	"^func helloworld\\\\(x: i32\\\\): i32\nreturn x\n\;\n$")
 match_test(ast_fn04 ast "func helloworld(x: i32) = x\n"
-	"^func helloworld\\\\(x: i32\\\\):\nreturn x\n\\\\\;\n$")
+	"^func helloworld\\\\(x: i32\\\\):\nreturn x\n\;\n$")
 match_test(ast_fn05 ast "func helloworld(x: i32):\nreturn x\n\;"
-	"^func helloworld\\\\(x: i32\\\\):\nreturn x\n\\\\\;\n$")
+	"^func helloworld\\\\(x: i32\\\\):\nreturn x\n\;\n$")
 # lambda tests
 match_test(ast_lambda00 ast "lambda\nreturn x\n\;"
-	"^lambda \nreturn x\n\\\\\;\n$")
+	"^lambda \nreturn x\n\;\n$")
 match_test(ast_lambda01 ast "lambda (x: i32)\nreturn x\n\;"
-	"^lambda \\\\(\\\\(: x i32\\\\)\\\\)\nreturn x\n\\\\\;\n$")
+	"^lambda \\\\(\\\\(: x i32\\\\)\\\\)\nreturn x\n\;\n$")
 match_test(ast_lambda03 ast "lambda (x: i32) = x"
-	"^lambda \\\\(\\\\(: x i32\\\\)\\\\)\nreturn x\n\\\\\;\n$")
+	"^lambda \\\\(\\\\(: x i32\\\\)\\\\)\nreturn x\n\;\n$")
 match_test(ast_lambda04 ast "lambda (x: i32) = x / x"
-	"^lambda \\\\(\\\\(: x i32\\\\)\\\\)\nreturn \\\\(/ x x\\\\)\n\\\\\;\n$")
+	"^lambda \\\\(\\\\(: x i32\\\\)\\\\)\nreturn \\\\(/ x x\\\\)\n\;\n$")
+# module tests
+# good
+match_test(ast_mod00 ast "module mymodule\n;" "module mymodule\n;\n$")
+match_test(ast_mod01 ast
+	"module mymodule\nfunc myfunc \;\n\;" "module mymodule\nfunc myfunc\;\n\;\n$")
+match_test(ast_mod02 ast
+	"module mymodule\nfunc myfunc0 \;\nfunc myfunc1 \;\n\;"
+	"module mymodule\nfunc myfunc0\;\nfunc myfunc1\;\n\;\n$")
+# bad
+fail_test(ast_mod50 ast "module mymodule\;")
+fail_test(ast_mod51 ast "module mymodule\n")
+fail_test(ast_mod52 ast "module mymodule\nfunc myfunc x\n\;")
+fail_test(ast_mod53 ast "module mymodule\nx = 100\n\;")
+fail_test(ast_mod54 ast "module mymodule\nuse module hello\n\;")
 
 # memory tests
 valgrind_test(ast_mem00 $<TARGET_FILE:astmem> "a + b")
