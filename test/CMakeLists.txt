@@ -357,6 +357,13 @@ match_test(ast_mod01 ast
 match_test(ast_mod02 ast
 	"module mymodule\nfunc myfunc0 \;\nfunc myfunc1 \;\n\;"
 	"module mymodule\nfunc myfunc0\;\nfunc myfunc1\;\n\;\n$")
+match_test(ast_mod03 ast
+	"module mymod\nx := 10\n\;"
+	"module mymod\n\\\\(:= x 10\\\\)\n\;\n$")
+match_test(ast_mod04 ast
+	"module mymod\nx : i32 = 10\n\;"
+	"module mymod\n\\\\(= \\\\(: x i32\\\\) 10\\\\)\n\;\n$")
+
 # bad
 fail_test(ast_mod50 ast "module mymodule\;")
 fail_test(ast_mod51 ast "module mymodule\n")
@@ -364,6 +371,7 @@ fail_test(ast_mod52 ast "module mymodule\nfunc myfunc x\n\;")
 fail_test(ast_mod53 ast "module mymodule\nx = 100\n\;")
 fail_test(ast_mod54 ast "module mymodule\nuse module hello\n\;")
 fail_test(ast_mod55 ast "module mymodule\nuse hello\n\;")
+fail_test(ast_mod56 ast "module mymodule\nx = 20\n\;")
 
 # memory tests
 valgrind_test(ast_mem00 $<TARGET_FILE:astmem> "a + b")

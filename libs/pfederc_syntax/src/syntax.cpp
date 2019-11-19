@@ -821,11 +821,15 @@ ModBody Parser::parseModBody(bool isprog) noexcept {
     }
 
     if (expr) {
-      const bool validexpr = isprog ?
+      const bool validexpr = (isprog ?
         std::any_of(_ALLOWED_EXPR_PROG.begin(), _ALLOWED_EXPR_PROG.end(),
           [&expr](ExprType type) { return expr->getType() == type; }) :
         std::any_of(_ALLOWED_EXPR_MOD.begin(), _ALLOWED_EXPR_MOD.end(),
-          [&expr](ExprType type) { return expr->getType() == type; });
+          [&expr](ExprType type) { return expr->getType() == type; })) ||
+      // valid global assignments
+        isBiOpExpr(*expr, TOK_OP_ASG_DCL) ||
+        (isBiOpExpr(*expr, TOK_OP_ASG) &&
+        isBiOpExpr(dynamic_cast<BiOpExpr&>(*expr).getLeft(), TOK_OP_DCL));
 
       if (!validexpr) {
         generateError(std::make_unique<SyntaxError>(LVL_ERROR,
