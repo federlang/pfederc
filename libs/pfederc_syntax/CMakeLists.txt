@@ -4,6 +4,7 @@ project(pfederc_syntax)
 add_library(pfederc_syntax
 	"${pfederc_syntax_SOURCE_DIR}/src/expr.cpp"
 	"${pfederc_syntax_SOURCE_DIR}/src/syntax.cpp"
+  "${pfederc_syntax_SOURCE_DIR}/src/syntax_binary.cpp"
 	"${pfederc_syntax_SOURCE_DIR}/src/syntax_error.cpp")
 target_include_directories(pfederc_syntax PUBLIC
 	"${pfederc_syntax_SOURCE_DIR}/include")
