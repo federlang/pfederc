@@ -377,8 +377,8 @@ match_test(ast_arr00 ast "[ hello ]" "\\\\[hello\\\\]\n$")
 match_test(ast_arr01 ast "[0, 1]" "\\\\[0, 1\\\\]\n$")
 match_test(ast_arr02 ast "[0, 1, 2]" "\\\\[0, 1, 2\\\\]\n$")
 match_test(ast_arr03 ast "[Hello(); 100]" "\\\\[\\\\(Hello\\\\)\; 100\\\\]\n$")
-match_test(ast_arr04 ast "[(x := 0, y := 0); 100]"
-  "\\\\[\\\\(, \\\\(:= x 0\\\\) \\\\(:= y 0\\\\)\\\\)\; 100\\\\]")
+match_test(ast_arr04 ast "[x; 100]"
+  "\\\\[x\; 100\\\\]")
 # bad
 fail_test(ast_arr50 ast "[ hello")
 fail_test(ast_arr51 ast "[ Hello(); ]")
