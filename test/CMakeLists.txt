@@ -363,7 +363,6 @@ match_test(ast_mod03 ast
 match_test(ast_mod04 ast
 	"module mymod\nx : i32 = 10\n\;"
 	"module mymod\n\\\\(= \\\\(: x i32\\\\) 10\\\\)\n\;\n$")
-
 # bad
 fail_test(ast_mod50 ast "module mymodule\;")
 fail_test(ast_mod51 ast "module mymodule\n")
@@ -372,6 +371,18 @@ fail_test(ast_mod53 ast "module mymodule\nx = 100\n\;")
 fail_test(ast_mod54 ast "module mymodule\nuse module hello\n\;")
 fail_test(ast_mod55 ast "module mymodule\nuse hello\n\;")
 fail_test(ast_mod56 ast "module mymodule\nx = 20\n\;")
+# array tests
+# good
+match_test(ast_arr00 ast "[ hello ]" "\\\\[hello\\\\]\n$")
+match_test(ast_arr01 ast "[0, 1]" "\\\\[0, 1\\\\]\n$")
+match_test(ast_arr02 ast "[0, 1, 2]" "\\\\[0, 1, 2\\\\]\n$")
+match_test(ast_arr03 ast "[Hello(); 100]" "\\\\[\\\\(Hello\\\\)\; 100\\\\]\n$")
+match_test(ast_arr04 ast "[(x := 0, y := 0); 100]"
+  "\\\\[\\\\(, \\\\(:= x 0\\\\) \\\\(:= y 0\\\\)\\\\)\; 100\\\\]")
+# bad
+fail_test(ast_arr50 ast "[ hello")
+fail_test(ast_arr51 ast "[ Hello(); ]")
+fail_test(ast_arr52 ast "[ ; 100 ]")
 
 # memory tests
 valgrind_test(ast_mem00 $<TARGET_FILE:astmem> "a + b")

@@ -8,6 +8,7 @@
 #include <functional>
 #include <iostream>
 #include <istream>
+#include <list>
 #include <map>
 #include <memory>
 #include <ostream>

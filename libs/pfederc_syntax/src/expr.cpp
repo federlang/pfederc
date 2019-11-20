@@ -507,27 +507,31 @@ ArrayCpyExpr::ArrayCpyExpr(const Lexer &lexer, const Position &pos,
 }
 
 std::string ArrayCpyExpr::toString() const noexcept {
-  // TODO
-  return "";
+  return "[" + valueExpr->toString() + "; " + lengthExpr->toString() + "]";
 }
 
 // ArrayLitExpr
 ArrayLitExpr::ArrayLitExpr(const Lexer &lexer, const Position &pos,
-     std::unique_ptr<Expr> &&expr0,
-     std::unique_ptr<Expr> &&expr1,
-     Exprs &&exprs) noexcept
+     std::list<std::unique_ptr<Expr>> &&exprs) noexcept
      : Expr(lexer, EXPR_ARRLIT, pos),
        exprs(std::move(exprs)) {
-  exprs.insert(exprs.begin(), std::move(expr1));
-  exprs.insert(exprs.begin(), std::move(expr0));
 }
 
 ArrayLitExpr::~ArrayLitExpr() {
 }
 
 std::string ArrayLitExpr::toString() const noexcept {
-  // TODO
-  return "";
+  std::string result = "[";
+  for (auto it = exprs.begin(); it != exprs.end(); ++it) {
+    if (it != exprs.begin())
+      result += ", ";
+
+    result += (*it)->toString();
+  }
+
+  result += ']';
+
+  return result;
 }
 
 // ArrayEmptyExpr
@@ -541,8 +545,7 @@ ArrayEmptyExpr::~ArrayEmptyExpr() {
 
 
 std::string ArrayEmptyExpr::toString() const noexcept {
-  // TODO
-  return "";
+  return "[" + typeExpr->toString() + "]";
 }
 
 // ErrorExpr

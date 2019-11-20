@@ -81,7 +81,7 @@ namespace pfederc {
     inline ExprType getType() const noexcept { return type; }
     inline const Position &getPosition() const noexcept { return pos; }
 
-    inline virtual std::string toString() const noexcept { return ""; }
+    inline virtual std::string toString() const noexcept = 0;
   };
 
   typedef std::tuple<std::vector<const Token*> /* idcall */,
@@ -574,23 +574,19 @@ namespace pfederc {
   };
 
   class ArrayLitExpr final : public Expr {
-    Exprs exprs;
+    std::list<std::unique_ptr<Expr>> exprs;
   public:
     /*!\brief Initializes ArrayLitExpr
      * \param lexer
      * \param pos
-     * \param expr0 Ensure at least two expressions
-     * \param expr1 Ensure at least two expressions
-     * \param exprs Does not start with neither contain expr0, expr1
+     * \param exprs Length is at least 2
      */
     ArrayLitExpr(const Lexer &lexer, const Position &pos,
-        std::unique_ptr<Expr> &&expr0,
-        std::unique_ptr<Expr> &&expr1,
-        Exprs &&exprs) noexcept;
+        std::list<std::unique_ptr<Expr>> &&exprs) noexcept;
     ArrayLitExpr(const ArrayLitExpr &) = delete;
     virtual ~ArrayLitExpr();
 
-    /*!\return Returns the array's values
+    /*!\return Returns the array's values. Length is at least 2.
      */
     inline const auto &getValues() const noexcept { return exprs; }
 
