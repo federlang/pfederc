@@ -636,8 +636,8 @@ std::unique_ptr<Expr> Parser::parseClass() noexcept {
       }
 
       constructAttributes.insert(constructAttributes.begin(),
-        reinterpret_cast<std::unique_ptr<BiOpExpr>&&>(
-          std::move(biopexpr.getRightPtr())));
+        std::unique_ptr<BiOpExpr>(
+          dynamic_cast<BiOpExpr*>(biopexpr.getRightPtr().release())));
       // advance to next left expression
       expr = biopexpr.getLeftPtr();
     }
@@ -648,7 +648,8 @@ std::unique_ptr<Expr> Parser::parseClass() noexcept {
       // soft error
     } else {
       constructAttributes.insert(constructAttributes.begin(),
-        reinterpret_cast<std::unique_ptr<BiOpExpr>&&>(std::move(expr)));
+        std::unique_ptr<BiOpExpr>(
+          dynamic_cast<BiOpExpr*>(expr.release())));
     }
 
     if (!expect(TOK_BRACKET_CLOSE)) {
@@ -674,10 +675,12 @@ std::unique_ptr<Expr> Parser::parseClass() noexcept {
     std::unique_ptr<Expr> expr(parseExpression());
     if (expr && expr->getType() == EXPR_FUNC) {
       functions.push_back(
-        reinterpret_cast<std::unique_ptr<FuncExpr>&&>(std::move(expr)));
+        std::unique_ptr<FuncExpr>(
+          dynamic_cast<FuncExpr*>(expr.release())));
     } else if (expr && isBiOpExpr(*expr, TOK_OP_DCL)) {
       attributes.push_back(
-        reinterpret_cast<std::unique_ptr<BiOpExpr>&&>(std::move(expr)));
+        std::unique_ptr<BiOpExpr>(
+          dynamic_cast<BiOpExpr*>(expr.release())));
     } else if (expr) {
       generateError(std::make_unique<SyntaxError>(LVL_ERROR,
         STX_ERR_CLASS_SCOPE, expr->getPosition()));
