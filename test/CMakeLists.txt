@@ -383,6 +383,27 @@ match_test(ast_arr04 ast "[(x := 0, y := 0); 100]"
 fail_test(ast_arr50 ast "[ hello")
 fail_test(ast_arr51 ast "[ Hello(); ]")
 fail_test(ast_arr52 ast "[ ; 100 ]")
+fail_test(ast_arr53 ast "[ hello, ]")
+# class tests
+# good
+match_test(ast_class00 ast "class MyClass(x: i32)\n\;"
+	"class MyClass\\\\(\\\\(: x i32\\\\)\\\\)\n\;\n$")
+match_test(ast_class01 ast "class MyClass(x: i32, y: i32)\n\;"
+	"class MyClass\\\\(\\\\(: x i32\\\\), \\\\(: y i32\\\\)\\\\)\n\;\n$")
+match_test(ast_class02 ast "class MyClass\nx: i32\n\;"
+	"class MyClass\n\\\\(: x i32\\\\)\n\;\n$")
+match_test(ast_class03 ast "class MyClass\nx: i32\ny: i32\n\;"
+	"class MyClass\n\\\\(: x i32\\\\)\n\\\\(: y i32\\\\)\n\;\n$")
+match_test(ast_class04 ast "class MyClass\nfunc myfunc \;\n\;"
+	"class MyClass\nfunc myfunc\;\n\;\n$")
+match_test(ast_class05 ast "class MyClass\nfunc myfunc0\;\nfunc myfunc1\;\n\;"
+	"class MyClass\nfunc myfunc0\;\nfunc myfunc1\;\n\;\n$")
+# bad
+fail_test(ast_class50 ast "class MyClass")
+fail_test(ast_class51 ast "class MyClass(x: i32)")
+fail_test(ast_class52 ast "class MyClass \;")
+fail_test(ast_class53 ast "class MyClass\nx = i32\;")
+fail_test(ast_class54 ast "class MyClass\nx := i32\;")
 
 # memory tests
 valgrind_test(ast_mem00 $<TARGET_FILE:astmem> "a + b")
@@ -395,3 +416,5 @@ valgrind_test(ast_mem06 $<TARGET_FILE:astmem> "a(b, c, d, e)")
 valgrind_test(ast_mem07 $<TARGET_FILE:astmem> "a.f.g(b, c, d, e)")
 valgrind_test(ast_mem08 $<TARGET_FILE:astmem> "lambda (x: i32) = x / x")
 valgrind_test(ast_mem09 $<TARGET_FILE:astmem> "func helloworld(x: i32):\nreturn x\n\;")
+valgrind_test(ast_mem10 $<TARGET_FILE:astmem> "class MyClass(x: i32)\n\;")
+valgrind_test(ast_mem11 $<TARGET_FILE:astmem> "class MyClass(x: i32, y: i32)\n\;")

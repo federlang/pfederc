@@ -225,9 +225,9 @@ std::string TraitExpr::toString() const noexcept {
 ClassExpr::ClassExpr(const Lexer &lexer, const Position &pos,
     const Token *tokId,
     std::unique_ptr<TemplateDecls> &&templs,
-    std::vector<std::unique_ptr<BiOpExpr>> &&constructAttributes,
-    std::vector<std::unique_ptr<BiOpExpr>> &&attributes,
-    std::vector<std::unique_ptr<FuncExpr>> &&functions) noexcept
+    std::list<std::unique_ptr<BiOpExpr>> &&constructAttributes,
+    std::list<std::unique_ptr<BiOpExpr>> &&attributes,
+    std::list<std::unique_ptr<FuncExpr>> &&functions) noexcept
     : Expr(lexer, EXPR_CLASS, pos), tokId{tokId},
       templs(std::move(templs)),
       constructAttributes(std::move(constructAttributes)),
@@ -239,8 +239,41 @@ ClassExpr::~ClassExpr() {
 }
 
 std::string ClassExpr::toString() const noexcept {
-  // TODO
-  return "";
+  std::string result = "class";
+  if (templs) {
+  // TODO: Template
+  }
+
+  result += ' ';
+  result += tokId->toString(getLexer());
+  for (auto it = constructAttributes.begin();
+      it != constructAttributes.end(); ++it) {
+    if (it == constructAttributes.begin())
+      result += '(';
+    else
+      result += ", ";
+
+    result += (*it)->toString();
+  }
+
+  if (!constructAttributes.empty())
+    result += ')';
+
+  result += '\n';
+
+  for (const auto &biopexpr : attributes) {
+    result += biopexpr->toString();
+    result += '\n';
+  }
+
+  for (const auto &function : functions) {
+    result += function->toString();
+    result += '\n';
+  }
+
+  result += ';';
+
+  return result;
 }
 
 // TraitImplExpr

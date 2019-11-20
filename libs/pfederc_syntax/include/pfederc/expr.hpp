@@ -289,16 +289,16 @@ namespace pfederc {
   class ClassExpr final : public Expr {
     const Token *tokId;
     std::unique_ptr<TemplateDecls> templs;
-    std::vector<std::unique_ptr<BiOpExpr>> constructAttributes;
-    std::vector<std::unique_ptr<BiOpExpr>> attributes;
-    std::vector<std::unique_ptr<FuncExpr>> functions;
+    std::list<std::unique_ptr<BiOpExpr>> constructAttributes;
+    std::list<std::unique_ptr<BiOpExpr>> attributes;
+    std::list<std::unique_ptr<FuncExpr>> functions;
   public:
     ClassExpr(const Lexer &lexer, const Position &pos,
       const Token *tokId,
       std::unique_ptr<TemplateDecls> &&templs,
-      std::vector<std::unique_ptr<BiOpExpr>> &&constructAttributes,
-      std::vector<std::unique_ptr<BiOpExpr>> &&attributes,
-      std::vector<std::unique_ptr<FuncExpr>> &&functions) noexcept;
+      std::list<std::unique_ptr<BiOpExpr>> &&constructAttributes,
+      std::list<std::unique_ptr<BiOpExpr>> &&attributes,
+      std::list<std::unique_ptr<FuncExpr>> &&functions) noexcept;
     ClassExpr(const ClassExpr &) = delete;
     virtual ~ClassExpr();
 
