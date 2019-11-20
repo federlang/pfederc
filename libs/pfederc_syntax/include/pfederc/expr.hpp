@@ -81,7 +81,7 @@ namespace pfederc {
     inline ExprType getType() const noexcept { return type; }
     inline const Position &getPosition() const noexcept { return pos; }
 
-    inline virtual std::string toString() const noexcept = 0;
+    virtual std::string toString() const noexcept = 0;
   };
 
   typedef std::tuple<std::vector<const Token*> /* idcall */,
