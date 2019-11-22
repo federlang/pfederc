@@ -31,6 +31,7 @@ namespace pfederc {
     STX_ERR_EXPECTED_EXPR,
     STX_ERR_PROGNAME,
     STX_ERR_CLASS_SCOPE,
+    STX_ERR_EXPECTED_CONSTRUCTION,
   };
 
   typedef std::tuple<const Token * /*progName*/,

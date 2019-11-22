@@ -376,7 +376,7 @@ fail_test(ast_mod56 ast "module mymodule\nx = 20\n\;")
 match_test(ast_arr00 ast "[ hello ]" "\\\\[hello\\\\]\n$")
 match_test(ast_arr01 ast "[0, 1]" "\\\\[0, 1\\\\]\n$")
 match_test(ast_arr02 ast "[0, 1, 2]" "\\\\[0, 1, 2\\\\]\n$")
-match_test(ast_arr03 ast "[Hello(); 100]" "\\\\[\\\\(Hello\\\\)\; 100\\\\]\n$")
+match_test(ast_arr03 ast "[Hello()\; 100]" "\\\\[\\\\(Hello\\\\)\; 100\\\\]\n$")
 match_test(ast_arr04 ast "[x; 100]"
   "\\\\[x\; 100\\\\]")
 # bad
@@ -404,6 +404,17 @@ fail_test(ast_class51 ast "class MyClass(x: i32)")
 fail_test(ast_class52 ast "class MyClass \;")
 fail_test(ast_class53 ast "class MyClass\nx = i32\;")
 fail_test(ast_class54 ast "class MyClass\nx := i32\;")
+# safe expr
+# good
+match_test(ast_safe00 ast "safe MyClass()" "safe \\\\(MyClass\\\\)\n$")
+match_test(ast_safe01 ast "safe [0,1]" "safe \\\\[0, 1\\\\]\n$")
+match_test(ast_safe02 ast "safe [MyClass()\; 100]"
+	"safe \\\\[\\\\(MyClass\\\\)\; 100\\\\]\n$")
+match_test(ast_safe03 ast "safe [MyClass]" "safe \\\\[MyClass\\\\]\n$")
+# bad
+fail_test(ast_safe50 ast "safe 100")
+fail_test(ast_safe51 ast "safe arr[42]")
+fail_test(ast_safe52 ast "safe var")
 
 # memory tests
 valgrind_test(ast_mem00 $<TARGET_FILE:astmem> "a + b")
