@@ -190,6 +190,7 @@ namespace pfederc {
   };
 
   typedef std::tuple<const Token* /* opt varname */,
+			bool /* is mutable, default: false */,
       std::unique_ptr<Expr> /* type */,
       std::unique_ptr<Expr> /* opt guard */,
       std::unique_ptr<Expr> /* opt guard result */> FuncParameter;
@@ -536,9 +537,16 @@ namespace pfederc {
     inline const Token &getOperator() const noexcept { return *tokOp; }
 
     inline const Expr &getExpression() const noexcept { return *expr; }
+		inline std::unique_ptr<Expr> getExpressionPtr() noexcept
+		{ return std::move(expr); }
 
     virtual std::string toString() const noexcept;
   };
+
+	inline bool isUnOpExpr(const Expr &expr, TokenType type) noexcept {
+		return expr.getType() == EXPR_UNOP &&
+			dynamic_cast<const UnOpExpr&>(expr).getOperator() == type;
+	}
 
   class BodyExpr final : public Expr {
     Exprs exprs;

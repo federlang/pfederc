@@ -4,22 +4,53 @@ using namespace pfederc;
 std::unique_ptr<FuncParameter> Parser::fromExprDeclToFunctionParam(
     std::unique_ptr<Expr> &&expr, std::unique_ptr<Expr> &&guard,
     std::unique_ptr<Expr> &&guardResult) noexcept {
+	// '&'id ':' expr | id ':' expr | '&' expr | expr
   if (isBiOpExpr(*expr, TOK_OP_DCL)) {
+		// '&'id ':' expr | id ':' expr
     BiOpExpr &biopdcl = dynamic_cast<BiOpExpr&>(*expr);
-    if (!isTokenExpr(biopdcl.getLeft(), TOK_ID)) {
+
+		std::unique_ptr<Expr> idexpr;
+		bool ismutable;
+		if (isUnOpExpr(biopdcl.getLeft(), TOK_OP_BAND)) {
+			std::unique_ptr<UnOpExpr> unopexpr =
+					std::unique_ptr<UnOpExpr>(dynamic_cast<UnOpExpr*>(biopdcl.getLeftPtr().release()));
+			ismutable = true;
+			idexpr = unopexpr->getExpressionPtr();
+		} else {
+			idexpr = biopdcl.getLeftPtr();
+			ismutable = false;
+		}
+
+    if (!isTokenExpr(*idexpr, TOK_ID)) {
       generateError(std::make_unique<SyntaxError>(LVL_ERROR,
-        STX_ERR_INVALID_VARDECL_ID, biopdcl.getLeft().getPosition()));
+        STX_ERR_INVALID_VARDECL_ID, idexpr->getPosition()));
       return nullptr;
     }
 
+		// TODO: biopdcl.getRight() not '&' expr !
+
     return std::make_unique<FuncParameter>(
-      &dynamic_cast<const TokenExpr&>(biopdcl.getLeft()).getToken(),
+      &dynamic_cast<const TokenExpr&>(*idexpr).getToken(),
+			ismutable,
       biopdcl.getRightPtr(),
       std::move(guard), std::move(guardResult));
   }
+	// '&' expr | expr
+	std::unique_ptr<Expr> typeexpr;
+	bool ismutable;
+	if (isUnOpExpr(*expr, TOK_OP_MUT)) {
+		std::unique_ptr<UnOpExpr> unopexpr =
+			std::unique_ptr<UnOpExpr>(dynamic_cast<UnOpExpr*>(expr.release()));
+		typeexpr = unopexpr->getExpressionPtr();
+		ismutable = true;
+	} else {
+		typeexpr = std::move(expr);
+		ismutable = false;
+	}
 
   return std::make_unique<FuncParameter>(
-    nullptr, std::move(expr), std::move(guard), std::move(guardResult));
+    nullptr, ismutable, std::move(typeexpr),
+		std::move(guard), std::move(guardResult));
 }
 
 std::unique_ptr<FuncParameter> Parser::fromExprGuardToFunctionParam(

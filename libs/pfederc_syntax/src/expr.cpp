@@ -117,18 +117,21 @@ std::string FuncExpr::toString() const noexcept {
         result += ", ";
       
       const auto &tpl = **it;
+			if (std::get<1>(tpl))
+				result += '&';
+
       if (std::get<0>(tpl)) {
         result += std::get<0>(tpl)->toString(getLexer());
         result += ": ";
       }
 
-      result += std::get<1>(tpl)->toString();
-      if (std::get<2>(tpl)) {
+      result += std::get<2>(tpl)->toString();
+      if (std::get<3>(tpl)) {
         result += " | ";
         result += std::get<2>(tpl)->toString();
-        if (std::get<3>(tpl)) {
+        if (std::get<4>(tpl)) {
           result += " = ";
-          result += std::get<3>(tpl)->toString();
+          result += std::get<4>(tpl)->toString();
         }
       }
     }

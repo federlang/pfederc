@@ -88,6 +88,8 @@ namespace pfederc {
     std::unique_ptr<Expr> parseLambda() noexcept;
     std::unique_ptr<Expr> parseModule() noexcept;
     std::unique_ptr<Expr> parseClass() noexcept;
+		std::tuple<bool /* err */, std::list<std::unique_ptr<BiOpExpr>> /* attrs */, std::list<std::unique_ptr<FuncExpr>> /* funcs */>
+			parseClassBody(const Token *const tokId);
     std::unique_ptr<Expr> parseEnum() noexcept;
     std::unique_ptr<Expr> parseTrait() noexcept;
     std::unique_ptr<Expr> parseType() noexcept;
