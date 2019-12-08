@@ -149,6 +149,10 @@ namespace pfederc {
   class TokenExpr final : public Expr {
     const Token *tok;
   public:
+		/*!\brief Initializes TokenExpr
+		 * \param lexer
+		 * \param tok Return value of getToken(), Position of token is lexer input position
+		 */
     TokenExpr(const Lexer &lexer, const Token *tok) noexcept;
     TokenExpr(const TokenExpr &) = delete;
     virtual ~TokenExpr();
@@ -166,6 +170,11 @@ namespace pfederc {
   class UseExpr final : public Expr {
     Exprs exprs;
   public:
+		/*!\brief Initializes UseExpr
+		 * \param lexer
+		 * \param pos Position in lexer input
+		 * \param exprs Return value of getExpressions(), getExpressionsPtr()
+		 */
     UseExpr(const Lexer &lexer, const Position &pos,
         Exprs &&exprs) noexcept;
     UseExpr(const UseExpr &) = delete;
@@ -181,6 +190,10 @@ namespace pfederc {
   class ProgNameExpr final : public Expr {
     const Token *tok;
   public:
+		/*!\brief Initializes ProgNameExpr
+		 * \param lexer
+		 * \param tok Return value of getToken()
+		 */
     ProgNameExpr(const Lexer &lexer, const Token *tok) noexcept;
     virtual ~ProgNameExpr();
 
@@ -203,6 +216,16 @@ namespace pfederc {
     std::unique_ptr<BodyExpr> body; // optional
     bool autoDetectReturnType;
   public:
+		/*!\brief Initializes FuncExpr
+		 * \param lexer
+		 * \param pos Position in lexer input
+		 * \param tokId Return value of getIdentifier()
+		 * \param templs Return value of getTemplates()
+		 * \param params Return value of getParameters()
+		 * \param returnExpr Return value of getReturn()
+		 * \param body Return value of getBody()
+		 * \param autoDetectReturnType Return value of isAutoReturnType()
+		 */
     FuncExpr(const Lexer &lexer, const Position &pos,
       const Token *tokId,
       std::unique_ptr<TemplateDecls> &&templs,
@@ -226,6 +249,11 @@ namespace pfederc {
      */
     inline const BodyExpr *getBody() const noexcept { return body.get(); }
 
+		/*!\return Returns true, if function has auto-detect return type (infered from
+		 * return statement), otherwise false.
+		 *
+		 * If true is returned, getReturn must return nullptr.
+		 */
     inline bool isAutoReturnType() const noexcept
     { return autoDetectReturnType; }
 
@@ -236,6 +264,12 @@ namespace pfederc {
     std::vector<std::unique_ptr<FuncParameter>> params; // optional
     std::unique_ptr<Expr> returnExpr; // optional
   public:
+		/*!\brief Initializes FuncTypeExpr
+		 * \param lexer
+		 * \param pos Position in lexer input
+		 * \param params Return value of getParameters()
+		 * \param returnExpr Return value of getReturn()
+		 */
     FuncTypeExpr(const Lexer &lexer, const Position &pos,
       std::vector<std::unique_ptr<FuncParameter>> &&params,
       std::unique_ptr<Expr> &&returnExpr) noexcept;
@@ -253,6 +287,12 @@ namespace pfederc {
     Exprs params;
     std::unique_ptr<BodyExpr> body;
   public:
+		/*!\brief Initializes LambdaExpr
+		 * \param lexer
+		 * \param pos Position in lexer input
+		 * \param params Return value of getParameters()
+		 * \param body Return value of getBody()
+		 */
     LambdaExpr(const Lexer &lexer, const Position &pos,
       Exprs &&params,
       std::unique_ptr<BodyExpr> &&body) noexcept;
@@ -272,6 +312,13 @@ namespace pfederc {
     std::unique_ptr<TemplateDecls> templs;
     std::vector<std::unique_ptr<FuncExpr>> functions;
   public:
+		/*!\brief Initializes TraitExpr
+		 * \param lexer
+		 * \param pos Position in lexer input
+		 * \param tokId Return value of getIdentifier()
+		 * \param templs Return value of getTemplates()
+		 * \param functions Return value of getFunctions()
+		 */
     TraitExpr(const Lexer &lexer, const Position &pos,
       const Token *tokId,
       std::unique_ptr<TemplateDecls> &&templs,
@@ -294,6 +341,15 @@ namespace pfederc {
     std::list<std::unique_ptr<BiOpExpr>> attributes;
     std::list<std::unique_ptr<FuncExpr>> functions;
   public:
+		/*!\brief Initializes ClassExpr
+		 * \param lexer
+		 * \param pos Position in lexer
+		 * \param tokId Return value of getIdentifier()
+		 * \param templs Return value of getTemplates()
+		 * \param constructAttributes Return value of getConstructorAttributes()
+		 * \param attributes Return value of getAttributes()
+		 * \param functions Return value of getFunctions()
+		 */
     ClassExpr(const Lexer &lexer, const Position &pos,
       const Token *tokId,
       std::unique_ptr<TemplateDecls> &&templs,
@@ -324,6 +380,14 @@ namespace pfederc {
     std::unique_ptr<Expr> implTrait;
     std::vector<std::unique_ptr<FuncExpr>> functions;
   public:
+		/*!\brief Initializes TraitImplExpr
+		 * \param lexer
+		 * \param pos Position in lexer input
+		 * \param classTokId Return value of getIdentifier()
+		 * \param templs Return value of getTemplates()
+		 * \param implTrait Return value of getImplementedTrait()
+		 * \param functions Return value of getFunctions()
+		 */
     TraitImplExpr(const Lexer &lexer, const Position &pos,
         const Token *classTokId, std::unique_ptr<TemplateDecls> &&templs,
         std::unique_ptr<Expr> &&implTrait,
@@ -349,6 +413,13 @@ namespace pfederc {
     std::unique_ptr<TemplateDecls> templs;
     std::vector<EnumConstructor> constructors;
   public:
+		/*!\brief Initializes EnumExpr
+		 * \param lexer
+		 * \param pos Position in lexer input
+		 * \param tokId Return value of getIdentifier()
+		 * \param templs Return value of getTemplates()
+		 * \param constructors Return value of getConstructors()
+		 */
     EnumExpr(const Lexer &lexer, const Position &pos,
         const Token *tokId,
         std::unique_ptr<TemplateDecls> &&templs,
@@ -368,6 +439,12 @@ namespace pfederc {
     const Token *tokId;
     Exprs exprs;
   public:
+		/*!\brief Initializes ModExpr
+		 * \param lexer
+		 * \param pos Position in lexer input
+		 * \param tokId Return value of getidentifier()
+		 * \param exprs Return value of getExpressions()
+		 */
     ModExpr(const Lexer &lexer, const Position &pos,
         const Token *tokId, Exprs &&exprs) noexcept;
     ModExpr(const ModExpr &) = delete;
@@ -382,6 +459,11 @@ namespace pfederc {
   class SafeExpr final : public Expr {
     std::unique_ptr<Expr> expr;
   public:
+		/*!\brief Initializes SafeExpr
+		 * \param lexer
+		 * \param pos Position in lexer input
+		 * \param expr Return vlaue of getExpression()
+		 */
     SafeExpr(const Lexer &lexer, const Position &pos,
         std::unique_ptr<Expr> &&expr) noexcept;
     SafeExpr(const SafeExpr &) = delete;
@@ -405,9 +487,9 @@ namespace pfederc {
   public:
     /*!\brief Initializes IfExpr
      * \param lexer
-     * \param pos
-     * \param ifCases size() >= 1
-     * \param elseExpr optional else expression
+     * \param pos Position in lexer input
+     * \param ifCases Return value of getCases()
+     * \param elseExpr Return value of getElse()
      */
     IfExpr(const Lexer &lexer, const Position &pos,
         std::vector<IfCase> &&ifCases,
@@ -433,10 +515,10 @@ namespace pfederc {
     /*!\brief Initializes LoopExpr
      * \param lexer
      * \param type Either EXPR_LOOP_DO or EXPR_LOOP_FOR
-     * \param pos
-     * \param initExpr Optional init expression (statement)
-     * \param condExpr Loop continuation condition
-     * \param itExpr Optional iterator step expression
+     * \param pos Position in lexer input
+     * \param initExpr Return value of getInitialization()
+     * \param condExpr Return value of getCondition()
+     * \param itExpr Return value of getIterator()
      */
     LoopExpr(const Lexer &lexer, ExprType type, const Position &pos,
         std::unique_ptr<Expr> &&initExpr,
@@ -473,9 +555,9 @@ namespace pfederc {
   public:
     /*!\brief Initializes MatchExpr
      * \param lexer
-     * \param pos
-     * \param cases
-     * \param anyCase Optional any case
+     * \param pos Position in lexer input
+     * \param cases Return vlaue of getCases()
+     * \param anyCase Return value of getAnCase()
      */
     MatchExpr(const Lexer &lexer, const Position &pos,
         std::vector<MatchPattern> &&cases,
@@ -498,6 +580,13 @@ namespace pfederc {
     const Token *tokOp;
     std::unique_ptr<Expr> lhs, rhs;
   public:
+		/*!\brief Initializes BiOpExpr
+		 * \param lexer
+		 * \param pos Position in lexer input
+		 * \param tokOp Return value of getOperator()
+		 * \param lhs Return value of getLeft(), getLeftPtr()
+		 * \param rhs Return value of getRight(), getRightPtr()
+		 */
     BiOpExpr(const Lexer &lexer, const Position &pos,
         const Token *tokOp,
         std::unique_ptr<Expr> &&lhs, std::unique_ptr<Expr> &&rhs) noexcept;
@@ -529,6 +618,12 @@ namespace pfederc {
     const Token *tokOp;
     std::unique_ptr<Expr> expr;
   public:
+		/*!\brief Initializes UnOpExpr
+		 * \param lexer
+		 * \param pos Position in lexer input
+		 * \param tokOp Return value of getOperator()
+		 * \param expr Return vlaue of getExpression(), getExpresionPtr()
+		 */
     UnOpExpr(const Lexer &lexer, const Position &pos,
         const Token *tokOp, std::unique_ptr<Expr> &&expr) noexcept;
     UnOpExpr(const UnOpExpr &) = delete;
@@ -552,6 +647,12 @@ namespace pfederc {
     Exprs exprs;
     std::unique_ptr<Expr> retExpr;
   public:
+		/*!\brief Initializes BodyExpr
+		 * \param lex
+		 * \param pos Position in lexer input
+		 * \param exprs Return value of getExpressions()
+		 * \param retExpr Return value of getReturn()
+		 */
     BodyExpr(const Lexer &lex, const Position &pos,
         Exprs &&exprs, std::unique_ptr<Expr> &&retExpr) noexcept;
     BodyExpr(const BodyExpr &) = delete;
@@ -569,6 +670,12 @@ namespace pfederc {
   class ArrayCpyExpr final : public Expr {
     std::unique_ptr<Expr> valueExpr, lengthExpr;
   public:
+		/*!\brief Initializes ArrayCpyExpr
+		 * \param lexer
+		 * \param pos Position in lexer input
+		 * \param valueexpr Return value of getValue()
+		 * \param lengthExpr Return value of getLength()
+		 */
     ArrayCpyExpr(const Lexer &lexer, const Position &pos,
         std::unique_ptr<Expr> &&valuexpr,
         std::unique_ptr<Expr> &&lengthExpr) noexcept;
@@ -586,8 +693,8 @@ namespace pfederc {
   public:
     /*!\brief Initializes ArrayLitExpr
      * \param lexer
-     * \param pos
-     * \param exprs Length is at least 2
+     * \param pos Position in lexer input
+     * \param exprs Return vlaue of getValues().
      */
     ArrayLitExpr(const Lexer &lexer, const Position &pos,
         std::list<std::unique_ptr<Expr>> &&exprs) noexcept;
@@ -604,6 +711,11 @@ namespace pfederc {
   class ArrayEmptyExpr final : public Expr {
     std::unique_ptr<Expr> typeExpr;
   public:
+		/*!\brief Initializes ArrayEmptyExpr
+		 * \param lexer
+		 * \param pos Position in lexer input
+		 * \param typeExpr Return value of getType
+		 */
     ArrayEmptyExpr(const Lexer &lexer, const Position &pos,
         std::unique_ptr<Expr> &&typeExpr) noexcept;
     ArrayEmptyExpr(const ArrayEmptyExpr &) = delete;
