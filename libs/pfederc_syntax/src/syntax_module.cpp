@@ -69,7 +69,7 @@ ModBody Parser::parseModBody(bool isprog) noexcept {
 
     std::unique_ptr<Expr> expr(parseExpression());
     if ((isprog && *lexer.getCurrentToken() != TOK_EOF)
-        && *lexer.getCurrentToken() != TOK_EOL) {
+        || *lexer.getCurrentToken() != TOK_EOL) {
       if (isprog)
         generateError(std::make_unique<SyntaxError>(LVL_ERROR,
           STX_ERR_EXPECTED_EOF_EOL, lexer.getCurrentToken()->getPosition()));
@@ -77,6 +77,8 @@ ModBody Parser::parseModBody(bool isprog) noexcept {
         generateError(std::make_unique<SyntaxError>(LVL_ERROR,
           STX_ERR_EXPECTED_EOL, lexer.getCurrentToken()->getPosition()));
       err = true;
+
+      skipToStmtEol();
     } else if (*lexer.getCurrentToken() == TOK_EOL) {
       lexer.next(); // eat eol
     }
