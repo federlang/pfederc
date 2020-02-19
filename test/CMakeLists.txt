@@ -56,6 +56,7 @@ match_test(tokenid_id02 tokenid "_Var0123456789" "^TOK_ID\n$")
 match_test(tokenid_id03 tokenid "snake_cases_used" "^TOK_ID\n$")
 match_test(tokenid_id04 tokenid "ABCDEFGHIJKLMNOPQRSTUVWXYZ" "^TOK_ID\n$")
 match_test(tokenid_id05 tokenid "abcdefghijklmnopqrtstuvwyz" "^TOK_ID\n$")
+match_test(tokenid_id06 tokenid "a0bcdefghijklmnopqrtstuvwyz" "^TOK_ID\n$")
 ## bad
 match_test(tokenid_id50 tokenid "__" "^TOK_ERR\n")
 match_test(tokenid_id51 tokenid "_0" "^TOK_ERR\n")
@@ -396,6 +397,7 @@ fail_test(ast_lambda50 ast "lambda (x: i32) = x /")
 fail_test(ast_lambda51 ast "lambda (x: i32) = ")
 fail_test(ast_lambda52 ast "lambda (x: i32")
 fail_test(ast_lambda53 ast "lambda (")
+fail_test(ast_lambda54 ast "lambda")
 
 # use tests
 # good
@@ -433,6 +435,8 @@ fail_test(ast_mod55 ast "module mymodule\nuse hello\n\;")
 fail_test(ast_mod56 ast "module mymodule\nx = 20\n\;")
 fail_test(ast_mod57 ast "module mymodule\nfunc myfunc x\n\;hello\n\;")
 fail_test(ast_mod58 ast "module mymodule\nfunc myfunc\;\;")
+fail_test(ast_mod59 ast "module")
+fail_test(ast_mod60 ast "module mymodule")
 
 # array tests
 # good
@@ -530,6 +534,7 @@ match_test(ast_safe03 ast "safe [MyClass]" "safe \\\\[MyClass\\\\]\n$")
 fail_test(ast_safe50 ast "safe 100")
 fail_test(ast_safe51 ast "safe arr[42]")
 fail_test(ast_safe52 ast "safe var")
+fail_test(ast_safe53 ast "safe")
 
 # memory tests
 valgrind_test(ast_mem00 $<TARGET_FILE:astmem> "a + b")
@@ -544,4 +549,4 @@ valgrind_test(ast_mem08 $<TARGET_FILE:astmem> "lambda (x: i32) = x / x")
 valgrind_test(ast_mem09 $<TARGET_FILE:astmem> "func helloworld(x: i32):\nreturn x\n\;")
 valgrind_test(ast_mem10 $<TARGET_FILE:astmem> "class MyClass(x: i32)\n\;")
 valgrind_test(ast_mem11 $<TARGET_FILE:astmem> "class MyClass(x: i32, y: i32)\n\;")
-valgrind_test(ast_mem12 $<TARGET_FILE:astmem> "class enum func trait class trait")
+valgrind_test(ast_mem12 $<TARGET_FILE:astmem> "class enum func trait class trait type")
