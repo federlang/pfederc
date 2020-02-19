@@ -110,7 +110,7 @@ namespace pfederc {
 
   typedef std::tuple<const Token * /* id */,
     std::unique_ptr<Expr>> TemplateDecl;
-  typedef std::vector<std::unique_ptr<TemplateDecl>> TemplateDecls;
+  typedef std::vector<TemplateDecl> TemplateDecls;
 
   typedef std::vector<std::unique_ptr<Expr>> Exprs;
 
@@ -309,25 +309,30 @@ namespace pfederc {
 
   class TraitExpr final : public Expr {
     const Token *tokId; //!< trait identifier
+    std::vector<std::unique_ptr<Expr>> impltraits;
     std::unique_ptr<TemplateDecls> templs;
-    std::vector<std::unique_ptr<FuncExpr>> functions;
+    std::list<std::unique_ptr<FuncExpr>> functions;
   public:
     /*!\brief Initializes TraitExpr
      * \param lexer
      * \param pos Position in lexer input
      * \param tokId Return value of getIdentifier()
      * \param templs Return value of getTemplates()
+     * \param impltraits Return value of getInheritedTraits()
      * \param functions Return value of getFunctions()
      */
     TraitExpr(const Lexer &lexer, const Position &pos,
       const Token *tokId,
       std::unique_ptr<TemplateDecls> &&templs,
-      std::vector<std::unique_ptr<FuncExpr>> &&functions) noexcept;
+      std::vector<std::unique_ptr<Expr>> &&impltraits,
+      std::list<std::unique_ptr<FuncExpr>> &&functions) noexcept;
     TraitExpr(const TraitExpr &) = delete;
     virtual ~TraitExpr();
 
     inline const Token &getIdentifier() const noexcept { return *tokId; }
     inline const auto &getTemplates() const noexcept { return templs; }
+    inline const auto &getInheritedTraits() const noexcept
+    { return impltraits; }
     inline const auto &getFunctions() const noexcept
     { return functions; }
 

@@ -16,46 +16,60 @@ std::unique_ptr<TemplateDecl> Parser::fromDeclExprToTemplateDecl(BiOpExpr &biopr
 std::unique_ptr<TemplateDecls> Parser::parseTemplateDecl() noexcept {
   sanityExpect(TOK_OP_TEMPL_BRACKET_OPEN);
 
+  bool err = false;
+
   std::unique_ptr<Expr> expr(parseExpression());
   std::unique_ptr<TemplateDecls> result(new TemplateDecls());
 
-  while (isBiOpExpr(*expr, TOK_OP_COMMA)) {
+  while (expr && isBiOpExpr(*expr, TOK_OP_COMMA)) {
     BiOpExpr &biopexpr = dynamic_cast<BiOpExpr&>(*expr);
     std::unique_ptr<Expr> rhs(biopexpr.getRightPtr());
     if (!isBiOpExpr(*rhs, TOK_OP_DCL)) {
       generateError(std::make_unique<SyntaxError>(LVL_ERROR,
         STX_ERR_EXPECTED_VARDECL, rhs->getPosition()));
-      return nullptr;
+
+      // next iterator step
+      expr = biopexpr.getLeftPtr();
+
+      continue;
     }
 
     BiOpExpr &bioprhs = dynamic_cast<BiOpExpr&>(*rhs);
     std::unique_ptr<TemplateDecl> templdecl(fromDeclExprToTemplateDecl(bioprhs));
     if (!templdecl)
-      return nullptr;
+      err = true;
+    else
     // success, push on result
-    result->push_back(TemplateDecl(std::get<0>(*templdecl), std::get<1>(*templdecl).release()));
+      result->push_back(TemplateDecl(std::get<0>(*templdecl), std::get<1>(*templdecl).release()));
     // next iterator step
     expr = biopexpr.getLeftPtr();
   }
 
-  if (!isBiOpExpr(*expr, TOK_OP_DCL)) {
+  if (expr && !isBiOpExpr(*expr, TOK_OP_DCL)) {
     generateError(std::make_unique<SyntaxError>(LVL_ERROR,
       STX_ERR_EXPECTED_VARDECL, expr->getPosition()));
     return nullptr;
   }
   
-  BiOpExpr &bioprhs = dynamic_cast<BiOpExpr&>(*expr);
-  std::unique_ptr<TemplateDecl> templdecl(fromDeclExprToTemplateDecl(bioprhs));
-  if (!templdecl)
-    return nullptr;
-  // success, push on result
-  result->push_back(TemplateDecl(std::get<0>(*templdecl), std::get<1>(*templdecl).release()));
+  if (expr) {
+    BiOpExpr &bioprhs = dynamic_cast<BiOpExpr&>(*expr);
+    std::unique_ptr<TemplateDecl> templdecl(fromDeclExprToTemplateDecl(bioprhs));
+    if (!templdecl)
+      err = true;
+    // success, push on result
+    else
+      result->push_back(TemplateDecl(std::get<0>(*templdecl), std::get<1>(*templdecl).release()));
+  }
 
   if (!expect(TOK_TEMPL_BRACKET_CLOSE)) {
     generateError(std::make_unique<SyntaxError>(LVL_ERROR,
           STX_ERR_EXPECTED_TEMPL_CLOSING_BRACKET,
           lexer.getCurrentToken()->getPosition()));
+    err = true;
   }
+
+  if (err)
+    return nullptr;
 
   return result;
 }

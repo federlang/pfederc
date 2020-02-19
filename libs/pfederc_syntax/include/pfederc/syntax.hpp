@@ -32,6 +32,11 @@ namespace pfederc {
     STX_ERR_EXPECTED_EXPR,
     STX_ERR_PROGNAME,
     STX_ERR_CLASS_SCOPE,
+    STX_ERR_TRAIT_SCOPE,
+    STX_ERR_TRAIT_SCOPE_FUNC_TEMPL,
+    STX_ERR_TRAIT_SCOPE_FUNC_BODY,
+    STX_ERR_ENUM_SCOPE,
+    STX_ERR_CLASS_TRAIT_SCOPE,
     STX_ERR_EXPECTED_CONSTRUCTION,
   };
 
@@ -89,10 +94,15 @@ namespace pfederc {
     std::unique_ptr<Expr> parseLambda() noexcept;
     std::unique_ptr<Expr> parseModule() noexcept;
     std::unique_ptr<Expr> parseClass() noexcept;
-		std::tuple<bool /* err */, std::list<std::unique_ptr<BiOpExpr>> /* attrs */, std::list<std::unique_ptr<FuncExpr>> /* funcs */>
-			parseClassBody(const Token *const tokId);
+    void parseClassBody(const Token *const tokId, bool &err,
+        std::list<std::unique_ptr<BiOpExpr>> &attrs,
+        std::list<std::unique_ptr<FuncExpr>> &funcs) noexcept;
     std::unique_ptr<Expr> parseEnum() noexcept;
     std::unique_ptr<Expr> parseTrait() noexcept;
+    void parseTraitBody(bool &err,
+        std::list<std::unique_ptr<FuncExpr>> &functions) noexcept;
+    void parseTraitImpl(bool &err,
+        std::vector<std::unique_ptr<Expr>> &impltraits) noexcept;
     std::unique_ptr<Expr> parseType() noexcept;
     std::unique_ptr<Expr> parseUse() noexcept;
     std::unique_ptr<Expr> parseFor(bool isdo = false) noexcept;
