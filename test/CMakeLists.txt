@@ -349,7 +349,7 @@ match_test(ast_trait00 ast "trait MyTrait\n\;"
 match_test(ast_trait01 ast "trait{X: MyOtherTrait} MyTrait\n\;"
   "^trait{X: MyOtherTrait} MyTrait\n\;\n$")
 match_test(ast_trait02 ast "trait{X: MyOtherTrait} MyTrait : MyInheritedTrait\n\;"
-  "^trait{X: MyOtherTrait} MyTrait : MyInheritedTrait\n\;\n")
+  "^trait{X: MyOtherTrait} MyTrait: MyInheritedTrait\n\;\n")
 match_test(ast_trait03 ast "trait MyTrait\nfunc helloworld\;\n\;"
   "^trait MyTrait\nfunc helloworld\;\n\;\n$")
 match_test(ast_trait04 ast "trait MyTrait\nfunc helloworld0\;\nfunc helloworld1\;\n\;"
@@ -357,6 +357,7 @@ match_test(ast_trait04 ast "trait MyTrait\nfunc helloworld0\;\nfunc helloworld1\
 # bad
 fail_test(ast_trait50 ast "trait MyTrait")
 fail_test(ast_trait51 ast "trait MyTrait\nfunc helloworld\n\;\n\;")
+fail_test(ast_trait52 ast "trait{X: Option<Null>} MyTrait\n\;")
 
 # type tests
 # good
@@ -430,6 +431,8 @@ match_test(ast_class04 ast "class MyClass\nfunc myfunc \;\n\;"
 	"class MyClass\nfunc myfunc\;\n\;\n$")
 match_test(ast_class05 ast "class MyClass\nfunc myfunc0\;\nfunc myfunc1\;\n\;"
 	"class MyClass\nfunc myfunc0\;\nfunc myfunc1\;\n\;\n$")
+match_test(ast_class06 ast "class{X: MyTrait} MyClass\nfunc myfunc0\;\nfunc myfunc1\;\n\;"
+  "class{X: MyTrait} MyClass\nfunc myfunc0\;\nfunc myfunc1\;\n\;\n$")
 # bad
 fail_test(ast_class50 ast "class MyClass")
 fail_test(ast_class51 ast "class MyClass(x: i32)")
