@@ -319,6 +319,9 @@ match_test(ast_templcall51 ast "a{b" "^ERR\n")
 match_test(ast_templcall52 ast "a{}" "^ERR\n")
 match_test(ast_templcall53 ast "a{b)" "^ERR\n")
 match_test(ast_templcall54 ast "a{b]" "^ERR\n")
+match_test(ast_templcall55 ast "a{b]}" "^ERR\n")
+match_test(ast_templcall56 ast "a{b)}" "^ERR\n")
+match_test(ast_templcall57 ast "a{b,}" "^ERR\n")
 
 # newline tests
 match_test(ast_eol00 ast "a +\nb" "^\\\\(\\\\+ a b\\\\)\n$")
@@ -421,6 +424,7 @@ fail_test(ast_arr50 ast "[ hello")
 fail_test(ast_arr51 ast "[ Hello(); ]")
 fail_test(ast_arr52 ast "[ ; 100 ]")
 fail_test(ast_arr53 ast "[ hello, ]")
+fail_test(ast_arr54 ast "[ hello )]")
 
 # class tests
 # good
@@ -444,13 +448,20 @@ fail_test(ast_class51 ast "class MyClass(x: i32)")
 fail_test(ast_class52 ast "class MyClass \;")
 fail_test(ast_class53 ast "class MyClass\nx = i32\;")
 fail_test(ast_class54 ast "class MyClass\nx := i32\;")
+fail_test(ast_class55 ast "class MyClass\n")
 
 # class trait tests
 # good
 match_test(ast_classtrait00 ast "class trait MyClass : MyTrait\nfunc helloworld\n\;\n\;"
-  "^class trait MyClass : MyTrait\nfunc helloworld\n\;\n\;\n$")
+  "^class trait MyClass: MyTrait\nfunc helloworld\n\;\n\;\n$")
+match_test(ast_classtrait01 ast "class trait MyClass : MyTrait\n\;"
+  "^class trait MyClass: MyTrait\n\;\n$")
 # bad
 fail_test(ast_classtrait50 ast "class trait MyClass : MyTrait\nfunc helloworld\;\n\;")
+fail_test(ast_classtrait51 ast "class trait MyClass : MyTrait0, MyTrait1\n\;")
+fail_test(ast_classtrait52 ast "class trait MyClass : MyTrait")
+fail_test(ast_classtrait53 ast "class trait MyClass : MyTrait\;")
+fail_test(ast_classtrait54 ast "class trait MyClass : MyTrait\n")
 
 # safe expr
 # good

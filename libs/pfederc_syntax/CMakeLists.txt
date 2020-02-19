@@ -7,6 +7,7 @@ add_library(pfederc_syntax
   "${pfederc_syntax_SOURCE_DIR}/src/syntax_array.cpp"
   "${pfederc_syntax_SOURCE_DIR}/src/syntax_binary.cpp"
   "${pfederc_syntax_SOURCE_DIR}/src/syntax_class.cpp"
+  "${pfederc_syntax_SOURCE_DIR}/src/syntax_classtrait.cpp"
   "${pfederc_syntax_SOURCE_DIR}/src/syntax_enum.cpp"
 	"${pfederc_syntax_SOURCE_DIR}/src/syntax_error.cpp"
 	"${pfederc_syntax_SOURCE_DIR}/src/syntax_func.cpp"

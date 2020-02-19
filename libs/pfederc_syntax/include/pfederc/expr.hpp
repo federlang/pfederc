@@ -385,7 +385,7 @@ namespace pfederc {
     const Token *classTokId;
     std::unique_ptr<TemplateDecls> templs;
     std::unique_ptr<Expr> implTrait;
-    std::vector<std::unique_ptr<FuncExpr>> functions;
+    std::list<std::unique_ptr<FuncExpr>> functions;
   public:
     /*!\brief Initializes TraitImplExpr
      * \param lexer
@@ -398,7 +398,7 @@ namespace pfederc {
     TraitImplExpr(const Lexer &lexer, const Position &pos,
         const Token *classTokId, std::unique_ptr<TemplateDecls> &&templs,
         std::unique_ptr<Expr> &&implTrait,
-        std::vector<std::unique_ptr<FuncExpr>> &&functions) noexcept;
+        std::list<std::unique_ptr<FuncExpr>> &&functions) noexcept;
     TraitImplExpr(const TraitImplExpr &) = delete;
     virtual ~TraitImplExpr();
 

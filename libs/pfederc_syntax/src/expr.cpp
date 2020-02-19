@@ -334,7 +334,7 @@ TraitImplExpr::TraitImplExpr(const Lexer &lexer, const Position &pos,
     const Token *classTokId,
     std::unique_ptr<TemplateDecls> &&templs,
     std::unique_ptr<Expr> &&implTrait,
-    std::vector<std::unique_ptr<FuncExpr>> &&functions) noexcept
+    std::list<std::unique_ptr<FuncExpr>> &&functions) noexcept
     : Expr(lexer, EXPR_TRAITIMPL, pos), classTokId{classTokId},
       templs(std::move(templs)),
       implTrait(std::move(implTrait)), functions(std::move(functions)) {
@@ -344,7 +344,25 @@ TraitImplExpr::~TraitImplExpr() {
 }
 
 std::string TraitImplExpr::toString() const noexcept {
-  return "";
+  std::string result = "class trait";
+  if (templs)
+    result += _templateToString(*templs);
+
+  result += ' ';
+
+  result += classTokId->toString(getLexer());
+  result += ": ";
+  result += implTrait->toString();
+  result += '\n';
+
+  for (auto &func : functions) {
+    result += func->toString();
+    result += '\n';
+  }
+
+  result += ';';
+
+  return result;
 }
 
 // EnumExpr

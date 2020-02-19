@@ -3,10 +3,11 @@ using namespace pfederc;
 
 std::unique_ptr<Expr> Parser::parseClass() noexcept {
   sanityExpect(TOK_KW_CLASS);
+  // maybe it's a class trait
+  if (*lexer.getCurrentToken() == TOK_KW_TRAIT)
+    return parseClassTrait();
 
   bool err = false;
-
-  std::list<std::unique_ptr<BiOpExpr>> constructAttributes;
 
   // class templ?
   std::unique_ptr<TemplateDecls> templ;
@@ -23,45 +24,10 @@ std::unique_ptr<Expr> Parser::parseClass() noexcept {
     err = true;
   }
 
+  std::list<std::unique_ptr<BiOpExpr>> constructAttributes;
   // class templ? id constructor?
   if (*lexer.getCurrentToken() == TOK_OP_BRACKET_OPEN) {
-    const Token *const constructStart = lexer.getCurrentToken();
-    lexer.next();
-
-    std::unique_ptr<Expr> expr(parseExpression());
-    while (isBiOpExpr(*expr, TOK_OP_COMMA)) {
-      BiOpExpr &biopexpr = dynamic_cast<BiOpExpr&>(*expr);
-      if (!isBiOpExpr(biopexpr.getRight(), TOK_OP_DCL)) {
-        generateError(std::make_unique<SyntaxError>(LVL_ERROR,
-          STX_ERR_EXPECTED_VARDECL, biopexpr.getRight().getPosition()));
-        // advance to next left expression
-        expr = biopexpr.getLeftPtr();
-        continue;
-      }
-
-      constructAttributes.insert(constructAttributes.begin(),
-        std::unique_ptr<BiOpExpr>(
-          dynamic_cast<BiOpExpr*>(biopexpr.getRightPtr().release())));
-      // advance to next left expression
-      expr = biopexpr.getLeftPtr();
-    }
-
-    if (!isBiOpExpr(*expr, TOK_OP_DCL)) {
-      generateError(std::make_unique<SyntaxError>(LVL_ERROR,
-        STX_ERR_EXPECTED_VARDECL, expr->getPosition()));
-      // soft error
-    } else {
-      constructAttributes.insert(constructAttributes.begin(),
-        std::unique_ptr<BiOpExpr>(
-          dynamic_cast<BiOpExpr*>(expr.release())));
-    }
-
-    if (!expect(TOK_BRACKET_CLOSE)) {
-      generateError(std::make_unique<SyntaxError>(LVL_ERROR,
-        STX_ERR_EXPECTED_CLOSING_BRACKET,
-        lexer.getCurrentToken()->getPosition(),
-        std::vector<Position>{ constructStart->getPosition() }));
-    }
+    parseClassConstructor(err, constructAttributes);
   }
   // class templ? id constructor? newline
   if (!expect(TOK_EOL)) {
@@ -76,6 +42,47 @@ std::unique_ptr<Expr> Parser::parseClass() noexcept {
   return std::make_unique<ClassExpr>(lexer, tokId->getPosition(),
     tokId, std::move(templ), std::move(constructAttributes),
     std::move(attrs), std::move(functions));
+}
+
+void Parser::parseClassConstructor(bool &err,
+    std::list<std::unique_ptr<BiOpExpr>> &constructAttributes) noexcept {
+  const Token *const constructStart = lexer.getCurrentToken();
+  lexer.next();
+
+  std::unique_ptr<Expr> expr(parseExpression());
+  while (isBiOpExpr(*expr, TOK_OP_COMMA)) {
+    BiOpExpr &biopexpr = dynamic_cast<BiOpExpr&>(*expr);
+    if (!isBiOpExpr(biopexpr.getRight(), TOK_OP_DCL)) {
+      generateError(std::make_unique<SyntaxError>(LVL_ERROR,
+        STX_ERR_EXPECTED_VARDECL, biopexpr.getRight().getPosition()));
+      // advance to next left expression
+      expr = biopexpr.getLeftPtr();
+      continue;
+    }
+
+    constructAttributes.insert(constructAttributes.begin(),
+      std::unique_ptr<BiOpExpr>(
+        dynamic_cast<BiOpExpr*>(biopexpr.getRightPtr().release())));
+    // advance to next left expression
+    expr = biopexpr.getLeftPtr();
+  }
+
+  if (!isBiOpExpr(*expr, TOK_OP_DCL)) {
+    generateError(std::make_unique<SyntaxError>(LVL_ERROR,
+      STX_ERR_EXPECTED_VARDECL, expr->getPosition()));
+    // soft error
+  } else {
+    constructAttributes.insert(constructAttributes.begin(),
+      std::unique_ptr<BiOpExpr>(
+        dynamic_cast<BiOpExpr*>(expr.release())));
+  }
+
+  if (!expect(TOK_BRACKET_CLOSE)) {
+    generateError(std::make_unique<SyntaxError>(LVL_ERROR,
+      STX_ERR_EXPECTED_CLOSING_BRACKET,
+      lexer.getCurrentToken()->getPosition(),
+      std::vector<Position>{ constructStart->getPosition() }));
+  }
 }
 
 void Parser::parseClassBody(const Token *const tokId, bool &err,

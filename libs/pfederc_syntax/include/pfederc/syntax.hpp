@@ -35,6 +35,8 @@ namespace pfederc {
     STX_ERR_TRAIT_SCOPE,
     STX_ERR_TRAIT_SCOPE_FUNC_TEMPL,
     STX_ERR_TRAIT_SCOPE_FUNC_BODY,
+    STX_ERR_TRAITCLASS_SCOPE_FUNC_BODY,
+    STX_ERR_TRAITCLASS_IMPL,
     STX_ERR_ENUM_SCOPE,
     STX_ERR_CLASS_TRAIT_SCOPE,
     STX_ERR_EXPECTED_CONSTRUCTION,
@@ -97,6 +99,11 @@ namespace pfederc {
     std::unique_ptr<Expr> parseClass() noexcept;
     void parseClassBody(const Token *const tokId, bool &err,
         std::list<std::unique_ptr<BiOpExpr>> &attrs,
+        std::list<std::unique_ptr<FuncExpr>> &funcs) noexcept;
+    void parseClassConstructor(bool &err,
+        std::list<std::unique_ptr<BiOpExpr>> &constructorAttributes) noexcept;
+    std::unique_ptr<Expr> parseClassTrait() noexcept;
+    void parseClassTraitBody(bool &err,
         std::list<std::unique_ptr<FuncExpr>> &funcs) noexcept;
     std::unique_ptr<Expr> parseEnum() noexcept;
     std::unique_ptr<Expr> parseTrait() noexcept;
