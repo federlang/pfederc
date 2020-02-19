@@ -97,6 +97,7 @@ namespace pfederc {
     TOK_OP_LOR,     //!< ||
     TOK_OP_LAND,    //!< &&
     TOK_OP_ARG,     //!< \<\>
+    TOK_OP_NONE,    //!< *expr* *expr*
     TOK_OP_BOR,     //!< |
     TOK_OP_BXOR,    //!< ^
     TOK_OP_BAND,    //!< &

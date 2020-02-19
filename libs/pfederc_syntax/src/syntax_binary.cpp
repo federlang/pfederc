@@ -1,12 +1,24 @@
 #include "pfederc/syntax.hpp"
 using namespace pfederc;
 
+inline static bool couldBeOperator(TokenType type) noexcept {
+  return type != TOK_EOL && type != TOK_EOF && type != TOK_STMT
+    && type != TOK_BRACKET_CLOSE
+    && type != TOK_ARR_BRACKET_CLOSE
+    && type != TOK_TEMPL_BRACKET_CLOSE;
+}
+
+inline TokenType _getOperatorType(const Token &tok) {
+  return isTokenTypeOperator(tok.getType()) ?
+    tok.getType() : TOK_OP_NONE;
+}
+
 inline static bool _binary_continue_condition(const Token &lookahead,
     const Precedence minPrecedence, Precedence &prec) noexcept {
-  if (!isTokenTypeOperator(lookahead.getType()))
+  if (!couldBeOperator(lookahead.getType()))
     return false;
 
-  const auto &info = OPERATORS_INFO.at(lookahead.getType());
+  const auto &info = OPERATORS_INFO.at(_getOperatorType(lookahead));
   prec = std::get<0>(info);
   return std::get<1>(info) == OperatorType::BINARY
     && prec >= minPrecedence;
@@ -14,10 +26,10 @@ inline static bool _binary_continue_condition(const Token &lookahead,
 
 inline static bool _binary_inner_continue_condition(const Token &lookahead,
     const Precedence opPrecedence, Precedence &prec) noexcept {
-  if (!isTokenTypeOperator(lookahead.getType()))
+  if (!couldBeOperator(lookahead.getType()))
     return false;
 
-  const auto &info = OPERATORS_INFO.at(lookahead.getType());
+  const auto &info = OPERATORS_INFO.at(_getOperatorType(lookahead));
   prec = std::get<0>(info);
   return std::get<1>(info) == OperatorType::BINARY &&
     (std::get<0>(info) > opPrecedence ||
@@ -31,15 +43,17 @@ std::unique_ptr<Expr> Parser::parseBinary(std::unique_ptr<Expr> lhs,
   Token *lookahead = lexer.getCurrentToken();
   while (_binary_continue_condition(*lookahead, minPrecedence, prec)) {
     const Token *op = lexer.getCurrentToken();
-    lexer.next(); // advance to next unprocessed token
+    TokenType optype = _getOperatorType(*op);
+    if (optype != TOK_OP_NONE)
+      lexer.next(); // advance to next unprocessed token
     
     // ignore newline tekons
     while (*lexer.getCurrentToken() == TOK_EOL)
       lexer.next();
 
     std::unique_ptr<Expr> rhs;
-    if (TOKEN_BRACKETS.find(op->getType()) != TOKEN_BRACKETS.end()) {
-      if (*op == TOK_OP_BRACKET_OPEN
+    if (TOKEN_BRACKETS.find(optype) != TOKEN_BRACKETS.end()) {
+      if (optype == TOK_OP_BRACKET_OPEN
           && *lexer.getCurrentToken() == TOK_BRACKET_CLOSE) {
         const Token *const closingBracket = lexer.getCurrentToken();
         // empty function call
@@ -56,9 +70,9 @@ std::unique_ptr<Expr> Parser::parseBinary(std::unique_ptr<Expr> lhs,
         if (!rhs)
           return nullptr;
 
-        if (!expect(TOKEN_BRACKETS.at(op->getType()))) {
+        if (!expect(TOKEN_BRACKETS.at(optype))) {
           generateError(std::make_unique<SyntaxError>(LVL_ERROR,
-            STX_ERR_BRACKETS.at(op->getType()),
+            STX_ERR_BRACKETS.at(optype),
             op->getPosition() + rhs->getPosition() +
             lexer.getCurrentToken()->getPosition()));
           return nullptr;
@@ -86,7 +100,7 @@ std::unique_ptr<Expr> Parser::parseBinary(std::unique_ptr<Expr> lhs,
 
     lhs = std::make_unique<BiOpExpr>(lexer,
       lhs->getPosition() + rhs->getPosition(),
-      op, std::move(lhs), std::move(rhs));
+      op, optype, std::move(lhs), std::move(rhs));
   }
 
   return lhs;
