@@ -364,6 +364,19 @@ std::string EnumExpr::toString() const noexcept {
   return "";
 }
 
+// TypeExpr
+TypeExpr::TypeExpr(const Lexer &lexer, const Position &pos,
+    const Token *tokId, std::unique_ptr<Expr> &&expr) noexcept
+  : Expr(lexer, EXPR_TYPE, pos), tokId{tokId}, expr(std::move(expr)) {
+}
+
+TypeExpr::~TypeExpr() {
+}
+
+std::string TypeExpr::toString() const noexcept {
+  return "type " + expr->toString() + ' ' + tokId->toString(expr->getLexer());
+}
+
 // ModExpr
 ModExpr::ModExpr(const Lexer &lexer, const Position &pos,
     const Token *tokId, Exprs &&exprs) noexcept
@@ -474,8 +487,9 @@ std::string MatchExpr::toString() const noexcept {
 // BiOpExpr
 BiOpExpr::BiOpExpr(const Lexer &lexer, const Position &pos,
      const Token *tokOp,
+     TokenType opType,
      std::unique_ptr<Expr> &&lhs, std::unique_ptr<Expr> &&rhs) noexcept
-     : Expr(lexer, EXPR_BIOP, pos), tokOp{tokOp},
+     : Expr(lexer, EXPR_BIOP, pos), tokOp{tokOp}, opType{opType},
        lhs(std::move(lhs)), rhs(std::move(rhs)) {
 }
 
@@ -483,12 +497,12 @@ BiOpExpr::~BiOpExpr() {
 }
 
 std::string BiOpExpr::toString() const noexcept {
-  switch (getOperator().getType()) {
+  switch (getOperatorType()) {
   case TOK_OP_BRACKET_OPEN:
   case TOK_OP_ARR_BRACKET_OPEN:
   case TOK_OP_TEMPL_BRACKET_OPEN: {
     std::string result;
-    switch (getOperator().getType()) {
+    switch (getOperatorType()) {
       case TOK_OP_BRACKET_OPEN:
         result += '(';
         break;
@@ -514,7 +528,7 @@ std::string BiOpExpr::toString() const noexcept {
 
     args = expr->toString() + args;
     result += args;
-    switch (getOperator().getType()) {
+    switch (getOperatorType()) {
       case TOK_OP_BRACKET_OPEN:
         result += ')';
         break;
@@ -531,9 +545,11 @@ std::string BiOpExpr::toString() const noexcept {
 
     return result;
   }
+  case TOK_OP_NONE:
+    return "( " + getLeft().toString() + ' ' + getRight().toString() + ')';
   default:
-    return "(" + getOperator().toString(getLexer()) + " " +
-      getLeft().toString() + " " + getRight().toString() + ")";
+    return '(' + getOperatorToken().toString(getLexer()) + ' ' +
+      getLeft().toString() + ' ' + getRight().toString() + ')';
   }
 }
 
@@ -547,11 +563,11 @@ UnOpExpr::~UnOpExpr() {
 }
 
 std::string UnOpExpr::toString() const noexcept {
-  if (getOperator().getType() == TOK_OP_BRACKET_OPEN) {
+  if (getOperatorType() == TOK_OP_BRACKET_OPEN) {
     return "(" + getExpression().toString() + ")";
   }
 
-  return "(" + getOperator().toString(getLexer()) +
+  return "(" + getOperatorToken().toString(getLexer()) +
     " " + getExpression().toString() + ")";
 }
 

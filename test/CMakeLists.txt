@@ -365,7 +365,9 @@ fail_test(ast_trait52 ast "trait{X: Option<Null>} MyTrait\n\;")
 # type tests
 # good
 match_test(ast_type00 ast "type Option{MyTrait} MyTraitOption"
-  "^type Option{MyTrait} MyTraitOption\n$")
+  "^type {Option MyTrait} MyTraitOption\n$")
+match_test(ast_type01 ast "type i32 myi32"
+  "^type i32 myi32\n$")
 # bad
 fail_test(ast_type50 ast "type MyTrait")
 fail_test(ast_type51 ast "type Option{MyTrait MyTraitOption}")

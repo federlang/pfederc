@@ -20,6 +20,7 @@ namespace pfederc {
     EXPR_CLASS,
     EXPR_TRAITIMPL,
     EXPR_ENUM,
+    EXPR_TYPE,
     EXPR_MOD,
     EXPR_SAFE,
     EXPR_IF,
@@ -158,6 +159,7 @@ namespace pfederc {
     virtual ~TokenExpr();
 
     inline const Token &getToken() const noexcept { return *tok; }
+    inline const Token *getTokenPtr() const noexcept { return tok; }
 
     virtual std::string toString() const noexcept;
   };
@@ -440,6 +442,27 @@ namespace pfederc {
     virtual std::string toString() const noexcept;
   };
 
+  class TypeExpr final : public Expr {
+    const Token *tokId;
+    std::unique_ptr<Expr> expr;
+  public:
+    /*!\brief Initializes TypeExpr
+     * \param lexer
+     * \param pos Position in lexer input
+     * \param TokId Return value of getIdentifier()
+     * \param expr Return value of getExpression()
+     */
+    TypeExpr(const Lexer &lexer, const Position &pos,
+        const Token *tokId, std::unique_ptr<Expr> &&expr) noexcept;
+    TypeExpr(const TypeExpr &) = delete;
+    virtual ~TypeExpr();
+
+    inline const auto &getIdentifier() const noexcept { return *tokId; }
+    inline const Expr &getExpresion() const noexcept { return *expr; }
+
+    virtual std::string toString() const noexcept;
+  };
+
   class ModExpr final : public Expr {
     const Token *tokId;
     Exprs exprs;
@@ -583,22 +606,25 @@ namespace pfederc {
 
   class BiOpExpr final : public Expr {
     const Token *tokOp;
+    TokenType opType;
     std::unique_ptr<Expr> lhs, rhs;
   public:
     /*!\brief Initializes BiOpExpr
      * \param lexer
      * \param pos Position in lexer input
-     * \param tokOp Return value of getOperator()
+     * \param tokOp Return value of getOperatorToken()
+     * \param opType Return value of getOperatorType()
      * \param lhs Return value of getLeft(), getLeftPtr()
      * \param rhs Return value of getRight(), getRightPtr()
      */
     BiOpExpr(const Lexer &lexer, const Position &pos,
-        const Token *tokOp,
+        const Token *tokOp, TokenType opType,
         std::unique_ptr<Expr> &&lhs, std::unique_ptr<Expr> &&rhs) noexcept;
     BiOpExpr(const BiOpExpr &) = delete;
     virtual ~BiOpExpr();
 
-    inline const Token &getOperator() const noexcept { return *tokOp; }
+    inline const Token &getOperatorToken() const noexcept { return *tokOp; }
+    inline TokenType getOperatorType() const noexcept { return opType; }
 
     inline std::unique_ptr<Expr> getRightPtr() noexcept
     { return std::move(rhs); }
@@ -616,7 +642,7 @@ namespace pfederc {
    */
   inline bool isBiOpExpr(const Expr &expr, TokenType type) noexcept {
     return expr.getType() == EXPR_BIOP &&
-      dynamic_cast<const BiOpExpr&>(expr).getOperator() == type;
+      dynamic_cast<const BiOpExpr&>(expr).getOperatorType() == type;
   }
 
   class UnOpExpr final : public Expr {
@@ -626,7 +652,8 @@ namespace pfederc {
     /*!\brief Initializes UnOpExpr
      * \param lexer
      * \param pos Position in lexer input
-     * \param tokOp Return value of getOperator()
+     * \param tokOp Return value of getOperatorToken()
+     * \param opType Return value of getOperatorType()
      * \param expr Return vlaue of getExpression(), getExpresionPtr()
      */
     UnOpExpr(const Lexer &lexer, const Position &pos,
@@ -634,7 +661,8 @@ namespace pfederc {
     UnOpExpr(const UnOpExpr &) = delete;
     virtual ~UnOpExpr();
 
-    inline const Token &getOperator() const noexcept { return *tokOp; }
+    inline const Token &getOperatorToken() const noexcept { return *tokOp; }
+    inline TokenType getOperatorType() const noexcept { return tokOp->getType(); }
 
     inline const Expr &getExpression() const noexcept { return *expr; }
     inline std::unique_ptr<Expr> getExpressionPtr() noexcept
@@ -645,7 +673,7 @@ namespace pfederc {
 
   inline bool isUnOpExpr(const Expr &expr, TokenType type) noexcept {
     return expr.getType() == EXPR_UNOP &&
-      dynamic_cast<const UnOpExpr&>(expr).getOperator() == type;
+      dynamic_cast<const UnOpExpr&>(expr).getOperatorType() == type;
   }
 
   class BodyExpr final : public Expr {
