@@ -187,6 +187,7 @@ std::unique_ptr<Expr> Parser::parseSafe() noexcept {
   sanityExpect(TOK_KW_SAFE);
 
   std::unique_ptr<Expr> expr(parseExpression());
+
   if (!expr)
     return nullptr;
 
@@ -198,17 +199,21 @@ std::unique_ptr<Expr> Parser::parseSafe() noexcept {
   case EXPR_ARREMPTY:
     return std::make_unique<SafeExpr>(lexer, pos, std::move(expr));
   case EXPR_UNOP:
-    if (dynamic_cast<const UnOpExpr&>(*expr).getOperator() == TOK_OP_BRACKET_OPEN)
+    if (dynamic_cast<const UnOpExpr&>(*expr).getOperatorType() == TOK_OP_BRACKET_OPEN)
       return std::make_unique<SafeExpr>(lexer, pos, std::move(expr));
+    break;
   case EXPR_BIOP:
-    if (dynamic_cast<const BiOpExpr&>(*expr).getOperator() == TOK_OP_BRACKET_OPEN)
+    if (dynamic_cast<const BiOpExpr&>(*expr).getOperatorType() == TOK_OP_BRACKET_OPEN)
       return std::make_unique<SafeExpr>(lexer, pos, std::move(expr));
+    break;
   default:
     generateError(std::make_unique<SyntaxError>(LVL_ERROR,
       STX_ERR_EXPECTED_CONSTRUCTION,
       expr->getPosition()));
     return nullptr;
   }
+
+  return nullptr;
 }
 
 std::unique_ptr<Expr> Parser::parseExpression(Precedence prec) noexcept {
