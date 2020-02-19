@@ -1,6 +1,27 @@
 #include "pfederc/expr.hpp"
 using namespace pfederc;
 
+static std::string _templateToString(const TemplateDecls &tmpls) {
+  std::string result;
+  result += "{";
+
+  bool first = true;
+  for (const TemplateDecl &tmpl : tmpls) {
+    if (!first)
+      result += ", ";
+    else
+      first = false;
+
+    const auto &snd = std::get<1>(tmpl);
+    result += std::get<0>(tmpl)->toString(snd->getLexer());
+    result += ": ";
+    result += snd->toString();
+  }
+
+  result += "}";
+  return result;
+}
+
 // Expr
 Expr::Expr(const Lexer &lexer, ExprType type, const Position &pos) noexcept
     : lexer{lexer}, type{type}, pos(pos) {
@@ -107,7 +128,10 @@ FuncExpr::~FuncExpr() {
 
 std::string FuncExpr::toString() const noexcept {
   std::string result = "func";
-  // TODO template
+  if (templs) {
+    result += _templateToString(*templs);
+  }
+
   result += ' ';
   result += getIdentifier().toString(getLexer());
   if (!params.empty()) {
@@ -206,20 +230,46 @@ std::string LambdaExpr::toString() const noexcept {
 TraitExpr::TraitExpr(const Lexer &lexer, const Position &pos,
     const Token *tokId,
     std::unique_ptr<TemplateDecls> &&templs,
-    std::vector<std::unique_ptr<FuncExpr>> &&functions) noexcept
+    std::vector<std::unique_ptr<Expr>> &&impltraits,
+    std::list<std::unique_ptr<FuncExpr>> &&functions) noexcept
     : Expr(lexer, EXPR_TRAIT, pos), tokId{tokId},
-      templs(std::move(templs)), functions(std::move(functions)) {
+      templs(std::move(templs)),
+      impltraits(std::move(impltraits)), functions(std::move(functions)) {
 }
 
 TraitExpr::~TraitExpr() {
 }
 
 std::string TraitExpr::toString() const noexcept {
-  std::string result("trait ");
+  std::string result("trait");
+  if (templs) {
+    result += _templateToString(*templs);
+  }
 
+  result += ' ';
   result += getIdentifier().toString(getLexer());
 
-  // TODO
+  if (!impltraits.empty()) {
+    result += ": ";
+    bool first = true;
+    for (auto &impltrait : impltraits) {
+      if (!first)
+        result += ", ";
+      else
+        first = false;
+
+      result += impltrait->toString();
+    }
+  }
+
+  result += '\n';
+  bool first = false;
+  for (auto &func : functions) {
+    result += func->toString();
+    result += '\n';
+  }
+
+  result += ';';
 
   return result;
 }
@@ -244,7 +294,7 @@ ClassExpr::~ClassExpr() {
 std::string ClassExpr::toString() const noexcept {
   std::string result = "class";
   if (templs) {
-  // TODO: Template
+    result += _templateToString(*templs);
   }
 
   result += ' ';

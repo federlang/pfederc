@@ -214,6 +214,7 @@ std::unique_ptr<Expr> Parser::parseSafe() noexcept {
 std::unique_ptr<Expr> Parser::parseExpression(Precedence prec) noexcept {
   auto primary = parsePrimary();
   if (!primary) {
+    lexer.next();
     generateError(std::make_unique<SyntaxError>(LVL_ERROR,
       STX_ERR_EXPECTED_EXPR, lexer.getCurrentToken()->getPosition()));
     return nullptr; // error forwarding

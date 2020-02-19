@@ -49,13 +49,3 @@ std::unique_ptr<Expr> Parser::parseEnum() noexcept {
   if (err)
     return nullptr;
 }
-
-std::unique_ptr<Expr> Parser::parseTrait() noexcept {
-  sanityExpect(TOK_KW_TRAIT);
-   // TODO
-}
-
-std::unique_ptr<Expr> Parser::parseType() noexcept {
-  sanityExpect(TOK_KW_TYPE);
-   // TODO
-}

@@ -27,7 +27,6 @@ std::unique_ptr<FuncParameter> Parser::fromExprDeclToFunctionParam(
       return nullptr;
     }
 
-    // TODO: biopdcl.getRight() not '&' expr !
     if (isUnOpExpr(biopdcl.getRight(), TOK_OP_BAND)) {
       generateError(std::make_unique<SyntaxError>(LVL_ERROR,
         STX_ERR_INVALID_VARDECL, biopdcl.getRight().getPosition()));
@@ -185,7 +184,7 @@ std::unique_ptr<Expr> Parser::parseFunction() noexcept {
   if (*lexer.getCurrentToken() == TOK_KW_TYPE) {
     if (!templ->empty()) {
       generateError(std::make_unique<SyntaxError>(LVL_ERROR,
-        STX_ERR_FUNC_VAR_NO_TEMPL, std::get<1>(*templ->at(0))->getPosition()));
+        STX_ERR_FUNC_VAR_NO_TEMPL, std::get<1>(templ->at(0))->getPosition()));
       err = true;
     }
 
