@@ -33,7 +33,7 @@ std::unique_ptr<TemplateDecls> Parser::parseTemplateDecl() noexcept {
     if (!templdecl)
       return nullptr;
     // success, push on result
-    result->push_back(std::move(templdecl));
+    result->push_back(TemplateDecl(std::get<0>(*templdecl), std::get<1>(*templdecl).release()));
     // next iterator step
     expr = biopexpr.getLeftPtr();
   }
@@ -49,7 +49,13 @@ std::unique_ptr<TemplateDecls> Parser::parseTemplateDecl() noexcept {
   if (!templdecl)
     return nullptr;
   // success, push on result
-  result->push_back(std::move(templdecl));
+  result->push_back(TemplateDecl(std::get<0>(*templdecl), std::get<1>(*templdecl).release()));
+
+  if (!expect(TOK_TEMPL_BRACKET_CLOSE)) {
+    generateError(std::make_unique<SyntaxError>(LVL_ERROR,
+          STX_ERR_EXPECTED_TEMPL_CLOSING_BRACKET,
+          lexer.getCurrentToken()->getPosition()));
+  }
 
   return result;
 }
