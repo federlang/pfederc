@@ -6,6 +6,12 @@ std::unique_ptr<Expr> Parser::parseType() noexcept {
   sanityExpect(TOK_KW_TYPE);
 
   std::unique_ptr<Expr> expr(parseExpression());
+  if (!expr) {
+    generateError(std::make_unique<SyntaxError>(LVL_ERROR,
+          STX_ERR_INVALID_TYPE_EXPR, lexer.getCurrentToken()->getPosition()));
+    return nullptr;
+  }
+
   if (!isBiOpExpr(*expr, TOK_OP_NONE)) {
     generateError(std::make_unique<SyntaxError>(LVL_ERROR,
           STX_ERR_INVALID_TYPE_EXPR, expr->getPosition()));

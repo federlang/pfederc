@@ -347,6 +347,7 @@ match_test(ast_fn06 ast "func helloworld(&x: i32):\nreturn x\n\;"
 # bad
 fail_test(ast_fn50 ast "func helloworld(x: &i32): i32\;")
 fail_test(ast_fn51 ast "func helloworld(x: i32): i32")
+fail_test(ast_fn52 ast "func helloworld(x: i32): i32\nx+\nx++\n\;")
 
 # trait tests
 # good
@@ -375,6 +376,10 @@ match_test(ast_type01 ast "type i32 myi32"
 # bad
 fail_test(ast_type50 ast "type MyTrait")
 fail_test(ast_type51 ast "type Option{MyTrait MyTraitOption}")
+fail_test(ast_type52 ast "type")
+fail_test(ast_type53 ast "type\n")
+fail_test(ast_type54 ast "type\;")
+fail_test(ast_type55 ast "type hello \;")
 
 # lambda tests
 # good
@@ -393,10 +398,17 @@ fail_test(ast_lambda52 ast "lambda (x: i32")
 fail_test(ast_lambda53 ast "lambda (")
 
 # use tests
+# good
 match_test(ast_use00 ast "use mymod" "use mymod\n$")
 match_test(ast_use01 ast "use mymod.mymod" "use \\\\(\\\\. mymod mymod\\\\)\n$")
 match_test(ast_use02 ast "use mymod.mymod, amod"
 	"use \\\\(\\\\. mymod mymod\\\\), amod\n$")
+# bad
+fail_test(ast_use50 ast "use")
+fail_test(ast_use51 ast "use mymod0,")
+fail_test(ast_use52 ast "use mymod0,mymod1,")
+fail_test(ast_use53 ast "use mymod0.")
+
 # module tests
 # good
 match_test(ast_mod00 ast "module mymodule\n;" "module mymodule\n;\n$")
@@ -420,6 +432,8 @@ fail_test(ast_mod54 ast "module mymodule\nuse module hello\n\;")
 fail_test(ast_mod55 ast "module mymodule\nuse hello\n\;")
 fail_test(ast_mod56 ast "module mymodule\nx = 20\n\;")
 fail_test(ast_mod57 ast "module mymodule\nfunc myfunc x\n\;hello\n\;")
+fail_test(ast_mod58 ast "module mymodule\nfunc myfunc\;\;")
+
 # array tests
 # good
 match_test(ast_arr00 ast "[ hello ]" "\\\\[hello\\\\]\n$")
