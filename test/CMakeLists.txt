@@ -324,6 +324,7 @@ match_test(ast_eol02 ast "++ \na" "^\\\\(\\\\+\\\\+ a\\\\)\n$")
 match_test(ast_eol03 ast "+ \na" "^\\\\(\\\\+ a\\\\)\n$")
 
 # function tests
+# good
 match_test(ast_fn00 ast "func helloworld\;" "^func helloworld\;\n$")
 match_test(ast_fn01 ast "func helloworld: i32\;"
 	"^func helloworld: i32\;\n$")
@@ -337,6 +338,9 @@ match_test(ast_fn05 ast "func helloworld(x: i32):\nreturn x\n\;"
 	"^func helloworld\\\\(x: i32\\\\):\nreturn x\n\;\n$")
 match_test(ast_fn06 ast "func helloworld(&x: i32):\nreturn x\n\;"
 	"^func helloworld\\\\(&x: i32\\\\):\nreturn x\n\;\n$")
+# bad
+fail_test(ast_fn50 ast "func helloworld(x: &i32): i32\;")
+fail_test(ast_fn51 ast "func helloworld(x: i32): i32")
 
 # lambda tests
 match_test(ast_lambda00 ast "lambda\nreturn x\n\;"
