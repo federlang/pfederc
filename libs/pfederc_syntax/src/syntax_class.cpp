@@ -69,25 +69,18 @@ std::unique_ptr<Expr> Parser::parseClass() noexcept {
       STX_ERR_EXPECTED_EOL, lexer.getCurrentToken()->getPosition()));
   }
 
-	auto tpl = parseClassBody(tokId);
-
-  if (err)
-    return nullptr;
-	if (std::get<0>(tpl))
-			return nullptr;
+  std::list<std::unique_ptr<BiOpExpr>> attrs;
+  std::list<std::unique_ptr<FuncExpr>> functions;
+	parseClassBody(tokId, err, attrs, functions);
 
   return std::make_unique<ClassExpr>(lexer, tokId->getPosition(),
     tokId, std::move(templ), std::move(constructAttributes),
-    std::move(std::get<1>(tpl)), std::move(std::get<2>(tpl)));
+    std::move(attrs), std::move(functions));
 }
 
-
-std::tuple<bool /* err */, std::list<std::unique_ptr<BiOpExpr>> /* attrs */, std::list<std::unique_ptr<FuncExpr>> /* funcs */>
-		Parser::parseClassBody(const Token *const tokId) {
-
-	bool err = false;
-  std::list<std::unique_ptr<BiOpExpr>> attributes;
-  std::list<std::unique_ptr<FuncExpr>> functions;
+void Parser::parseClassBody(const Token *const tokId, bool &err,
+    std::list<std::unique_ptr<BiOpExpr>> &attributes,
+    std::list<std::unique_ptr<FuncExpr>> &functions) noexcept {
 
   // classbody
   while (*lexer.getCurrentToken() != TOK_STMT
@@ -125,10 +118,4 @@ std::tuple<bool /* err */, std::list<std::unique_ptr<BiOpExpr>> /* attrs */, std
       std::vector<Position> { tokId->getPosition() }));
     err = true;
   }
-
-	return std::tuple<bool,
-				 std::list<std::unique_ptr<BiOpExpr>>,
-				 std::list<std::unique_ptr<FuncExpr>>>(err,
-						                        std::move(attributes),
-																		std::move(functions));
 }
