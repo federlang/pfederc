@@ -378,8 +378,38 @@ EnumExpr::~EnumExpr() {
 }
 
 std::string EnumExpr::toString() const noexcept {
-  // TODO
-  return "";
+  std::string result = "enum";
+  if (templs)
+    result += _templateToString(*templs);
+
+  result += ' ';
+  result += tokId->toString(getLexer());
+  result += '\n';
+
+  for (auto &constructor : constructors) {
+    result += std::get<0>(constructor)->toString(getLexer());
+    auto &params = std::get<1>(constructor);
+    if (!params.empty()){
+      result += '(';
+      bool first = true;
+      for (auto &param : params) {
+        if (!first)
+          result += ", ";
+        else
+          first = false;
+
+        result += param->toString();
+      }
+
+      result += ')';
+    }
+
+    result += '\n';
+  }
+
+  result += ';';
+
+  return result;
 }
 
 // TypeExpr
@@ -623,7 +653,7 @@ ArrayCpyExpr::ArrayCpyExpr(const Lexer &lexer, const Position &pos,
        lengthExpr(std::move(lengthExpr)) {
 }
 
- ArrayCpyExpr::~ArrayCpyExpr() {
+ArrayCpyExpr::~ArrayCpyExpr() {
 }
 
 std::string ArrayCpyExpr::toString() const noexcept {

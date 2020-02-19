@@ -28,7 +28,7 @@ std::unique_ptr<Expr> Parser::parseClassTrait() noexcept {
   std::unique_ptr<Expr> impltrait(parseExpression());
   if (!impltrait)
     err = true;
-  if (isBiOpExpr(*impltrait, TOK_OP_COMMA)) {
+  else if (isBiOpExpr(*impltrait, TOK_OP_COMMA)) {
     generateError(std::make_unique<SyntaxError>(LVL_ERROR,
           STX_ERR_TRAITCLASS_IMPL, impltrait->getPosition()));
   }
@@ -92,6 +92,7 @@ void Parser::parseClassTraitBody(bool &err,
       generateError(std::make_unique<SyntaxError>(LVL_ERROR,
         STX_ERR_EXPECTED_EOL, lexer.getCurrentToken()->getPosition()));
       // soft error
+      skipToStmtEol();
     }
   }
 }

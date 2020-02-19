@@ -38,6 +38,7 @@ namespace pfederc {
     STX_ERR_TRAITCLASS_SCOPE_FUNC_BODY,
     STX_ERR_TRAITCLASS_IMPL,
     STX_ERR_ENUM_SCOPE,
+    STX_ERR_ENUM_BODY,
     STX_ERR_CLASS_TRAIT_SCOPE,
     STX_ERR_EXPECTED_CONSTRUCTION,
     STX_ERR_INVALID_TYPE_EXPR,
@@ -81,6 +82,11 @@ namespace pfederc {
      */
     bool expect(TokenType type) noexcept;
 
+    /*!\brief Skips till nexts Stmt or newline.
+     * \return Returns true if current token is not EOF, otherwise false.
+     */
+    bool skipToStmtEol() noexcept;
+
     std::unique_ptr<Expr> parseArray() noexcept;
     std::unique_ptr<Expr> parseBrackets() noexcept;
     std::unique_ptr<FuncParameter> fromExprDeclToFunctionParam(
@@ -106,6 +112,7 @@ namespace pfederc {
     void parseClassTraitBody(bool &err,
         std::list<std::unique_ptr<FuncExpr>> &funcs) noexcept;
     std::unique_ptr<Expr> parseEnum() noexcept;
+    void parseEnumBody(bool &err, std::vector<EnumConstructor> &constructors) noexcept;
     std::unique_ptr<Expr> parseTrait() noexcept;
     void parseTraitBody(bool &err,
         std::list<std::unique_ptr<FuncExpr>> &functions) noexcept;

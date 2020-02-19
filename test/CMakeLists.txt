@@ -364,6 +364,7 @@ match_test(ast_trait04 ast "trait MyTrait\nfunc helloworld0\;\nfunc helloworld1\
 fail_test(ast_trait50 ast "trait MyTrait")
 fail_test(ast_trait51 ast "trait MyTrait\nfunc helloworld\n\;\n\;")
 fail_test(ast_trait52 ast "trait{X: Option<Null>} MyTrait\n\;")
+fail_test(ast_trait53 ast "trait MyTrait\nfunc helloworld\;hello\n\;")
 
 # type tests
 # good
@@ -376,6 +377,7 @@ fail_test(ast_type50 ast "type MyTrait")
 fail_test(ast_type51 ast "type Option{MyTrait MyTraitOption}")
 
 # lambda tests
+# good
 match_test(ast_lambda00 ast "lambda\nreturn x\n\;"
 	"^lambda \nreturn x\n\;\n$")
 match_test(ast_lambda01 ast "lambda (x: i32)\nreturn x\n\;"
@@ -384,6 +386,12 @@ match_test(ast_lambda03 ast "lambda (x: i32) = x"
 	"^lambda \\\\(\\\\(: x i32\\\\)\\\\)\nreturn x\n\;\n$")
 match_test(ast_lambda04 ast "lambda (x: i32) = x / x"
 	"^lambda \\\\(\\\\(: x i32\\\\)\\\\)\nreturn \\\\(/ x x\\\\)\n\;\n$")
+# bad
+fail_test(ast_lambda50 ast "lambda (x: i32) = x /")
+fail_test(ast_lambda51 ast "lambda (x: i32) = ")
+fail_test(ast_lambda52 ast "lambda (x: i32")
+fail_test(ast_lambda53 ast "lambda (")
+
 # use tests
 match_test(ast_use00 ast "use mymod" "use mymod\n$")
 match_test(ast_use01 ast "use mymod.mymod" "use \\\\(\\\\. mymod mymod\\\\)\n$")
@@ -411,6 +419,7 @@ fail_test(ast_mod53 ast "module mymodule\nx = 100\n\;")
 fail_test(ast_mod54 ast "module mymodule\nuse module hello\n\;")
 fail_test(ast_mod55 ast "module mymodule\nuse hello\n\;")
 fail_test(ast_mod56 ast "module mymodule\nx = 20\n\;")
+fail_test(ast_mod57 ast "module mymodule\nfunc myfunc x\n\;hello\n\;")
 # array tests
 # good
 match_test(ast_arr00 ast "[ hello ]" "\\\\[hello\\\\]\n$")
@@ -449,6 +458,10 @@ fail_test(ast_class52 ast "class MyClass \;")
 fail_test(ast_class53 ast "class MyClass\nx = i32\;")
 fail_test(ast_class54 ast "class MyClass\nx := i32\;")
 fail_test(ast_class55 ast "class MyClass\n")
+fail_test(ast_class56 ast "class MyClass(x: i32, y: i32")
+fail_test(ast_class57 ast "class MyClass\nfunc myfunc \;hello\n\;")
+fail_test(ast_class58 ast "class \n\;")
+fail_test(ast_class59 ast "class")
 
 # class trait tests
 # good
@@ -462,6 +475,35 @@ fail_test(ast_classtrait51 ast "class trait MyClass : MyTrait0, MyTrait1\n\;")
 fail_test(ast_classtrait52 ast "class trait MyClass : MyTrait")
 fail_test(ast_classtrait53 ast "class trait MyClass : MyTrait\;")
 fail_test(ast_classtrait54 ast "class trait MyClass : MyTrait\n")
+fail_test(ast_classtrait55 ast "class trait MyClass : MyTrait\nfunc helloworld\;hello\n\;")
+fail_test(ast_classtrait56 ast "class trait\n\;")
+fail_test(ast_classtrait57 ast "class trait")
+
+# enum tests
+# good
+match_test(ast_enum00 ast "enum MyEnum\n\;"
+  "^enum MyEnum\n\;\n$")
+match_test(ast_enum01 ast "enum MyEnum\nMyConstructor0\n\;"
+  "^enum MyEnum\nMyConstructor0\n\;\n$")
+match_test(ast_enum02 ast "enum MyEnum\nMyConstructor0(MyClass)\n\;"
+  "^enum MyEnum\nMyConstructor0\\\\(MyClass\\\\)\n\;\n$")
+match_test(ast_enum03 ast "enum MyEnum\nMyConstructor0\nMyConstructor1\n\;"
+  "^enum MyEnum\nMyConstructor0\nMyConstructor1\n\;\n$")
+match_test(ast_enum04 ast "enum MyEnum\nMyConstructor0\nMyConstructor1(MyClass0,MyClass1)\n\;"
+  "^enum MyEnum\nMyConstructor0\nMyConstructor1\\\\(MyClass0, MyClass1\\\\)\n\;\n$")
+match_test(ast_enum05 ast "enum MyEnum\nMyConstructor0\nMyConstructor1(MyClass0,MyClass1,MyClass2)\n\;"
+  "^enum MyEnum\nMyConstructor0\nMyConstructor1\\\\(MyClass0, MyClass1, MyClass2\\\\)\n\;\n$")
+# bad
+fail_test(ast_enum50 ast "enum MyEnum")
+fail_test(ast_enum51 ast "enum MyEnum\n")
+fail_test(ast_enum52 ast "enum MyEnum\nMyConstructor\;")
+fail_test(ast_enum53 ast "enum MyEnum\nMyConstructor(\n\;")
+fail_test(ast_enum54 ast "enum MyEnum\nMyConstructor(MyClass\n\;")
+fail_test(ast_enum55 ast "enum MyEnum\nMyConstructor(MyClass,\n\;")
+fail_test(ast_enum56 ast "enum MyEnum\nMyConstructor,\n\;")
+fail_test(ast_enum57 ast "enum MyEnum\n,\n\;")
+fail_test(ast_enum58 ast "enum\n\;")
+fail_test(ast_enum59 ast "enum")
 
 # safe expr
 # good
@@ -488,3 +530,4 @@ valgrind_test(ast_mem08 $<TARGET_FILE:astmem> "lambda (x: i32) = x / x")
 valgrind_test(ast_mem09 $<TARGET_FILE:astmem> "func helloworld(x: i32):\nreturn x\n\;")
 valgrind_test(ast_mem10 $<TARGET_FILE:astmem> "class MyClass(x: i32)\n\;")
 valgrind_test(ast_mem11 $<TARGET_FILE:astmem> "class MyClass(x: i32, y: i32)\n\;")
+valgrind_test(ast_mem12 $<TARGET_FILE:astmem> "class enum func trait class trait")

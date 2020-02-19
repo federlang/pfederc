@@ -116,6 +116,7 @@ void Parser::parseClassBody(const Token *const tokId, bool &err,
       generateError(std::make_unique<SyntaxError>(LVL_ERROR,
         STX_ERR_EXPECTED_EOL, lexer.getCurrentToken()->getPosition()));
       // soft error
+      skipToStmtEol();
     }
   }
   // end of class body

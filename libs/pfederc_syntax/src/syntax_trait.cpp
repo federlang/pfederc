@@ -21,6 +21,7 @@ std::unique_ptr<Expr> Parser::parseTrait() noexcept {
 
   std::vector<std::unique_ptr<Expr>> impltraits;
   if (*lexer.getCurrentToken() == TOK_OP_DCL) {
+    lexer.next(); // eat :
     parseTraitImpl(err, impltraits);
   }
 
@@ -48,7 +49,6 @@ std::unique_ptr<Expr> Parser::parseTrait() noexcept {
 
 void Parser::parseTraitImpl(bool &err,
     std::vector<std::unique_ptr<Expr>> &impltraits) noexcept {
-  sanityExpect(TOK_OP_DCL);
   // inherit traits
   std::unique_ptr<Expr> expr(parseExpression());
   // comma separated list of expressions
@@ -56,13 +56,13 @@ void Parser::parseTraitImpl(bool &err,
     BiOpExpr &biopexpr = dynamic_cast<BiOpExpr&>(*expr);
     auto rhs = biopexpr.getRightPtr();
     if (rhs)
-      impltraits.push_back(std::move(rhs));
+      impltraits.insert(impltraits.begin(), std::move(rhs));
     // next iterator step
     expr = biopexpr.getLeftPtr();
   }
 
   if (expr)
-    impltraits.push_back(std::move(expr));
+    impltraits.insert(impltraits.begin(), std::move(expr));
 }
 
 void Parser::parseTraitBody(bool &err,
@@ -103,6 +103,7 @@ void Parser::parseTraitBody(bool &err,
       generateError(std::make_unique<SyntaxError>(LVL_ERROR,
         STX_ERR_EXPECTED_EOL, lexer.getCurrentToken()->getPosition()));
       // soft error
+      skipToStmtEol();
     }
   }
 }

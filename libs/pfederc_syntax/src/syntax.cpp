@@ -14,6 +14,15 @@ namespace pfederc {
 Parser::~Parser() {
 }
 
+bool Parser::skipToStmtEol() noexcept {
+  while (*lexer.getCurrentToken() != TOK_EOL
+      && *lexer.getCurrentToken() != TOK_EOF
+      && *lexer.getCurrentToken() != TOK_STMT)
+    lexer.next();
+
+  return *lexer.getCurrentToken() != TOK_EOF;
+}
+
 std::unique_ptr<Expr> Parser::parseUnary() noexcept {
   const Token *tok = lexer.getCurrentToken();
   if (*tok == TOK_OP_BRACKET_OPEN)

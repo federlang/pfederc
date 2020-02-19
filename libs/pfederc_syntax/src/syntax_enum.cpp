@@ -2,6 +2,7 @@
 using namespace pfederc;
 
 std::unique_ptr<Expr> Parser::parseEnum() noexcept {
+  Position pos(lexer.getCurrentToken()->getPosition());
   sanityExpect(TOK_KW_ENUM);
 
   bool err = false; // hard errors
@@ -24,6 +25,25 @@ std::unique_ptr<Expr> Parser::parseEnum() noexcept {
       STX_ERR_EXPECTED_EOL, lexer.getCurrentToken()->getPosition()));
   }
 
+  std::vector<EnumConstructor> constructors;
+  parseEnumBody(err, constructors);
+
+  if (!expect(TOK_STMT)) {
+    generateError(std::make_unique<SyntaxError>(LVL_ERROR,
+      STX_ERR_EXPECTED_STMT, lexer.getCurrentToken()->getPosition(),
+      std::vector<Position> { tokId->getPosition() }));
+    err = true;
+  }
+
+  if (err)
+    return nullptr;
+
+  return std::make_unique<EnumExpr>(lexer, pos + tokId->getPosition(),
+      tokId, std::move(templ), std::move(constructors));
+}
+
+void Parser::parseEnumBody(bool &err,
+    std::vector<EnumConstructor> &constructors) noexcept {
   while (*lexer.getCurrentToken() != TOK_STMT
       && *lexer.getCurrentToken() != TOK_EOF) {
     if (*lexer.getCurrentToken() == TOK_EOL) {
@@ -36,16 +56,27 @@ std::unique_ptr<Expr> Parser::parseEnum() noexcept {
       generateError(std::make_unique<SyntaxError>(LVL_ERROR,
         STX_ERR_EXPECTED_ID, tokConstructorId->getPosition()));
       err = true;
+      skipToStmtEol();
+      continue;
+    }
+
+    std::vector<std::unique_ptr<Expr>> args;
+    if (*lexer.getCurrentToken() == TOK_OP_BRACKET_OPEN) {
+      lexer.next(); // eat (
+
+      parseTraitImpl(err, args);
+      if (!expect(TOK_BRACKET_CLOSE)) {
+        generateError(std::make_unique<SyntaxError>(LVL_ERROR,
+          STX_ERR_EXPECTED_CLOSING_BRACKET, lexer.getCurrentToken()->getPosition()));
+      }
+    }
+
+    constructors.push_back(EnumConstructor(tokConstructorId, std::move(args)));
+
+    if (!expect(TOK_EOL)) {
+      generateError(std::make_unique<SyntaxError>(LVL_ERROR,
+        STX_ERR_EXPECTED_EOL, lexer.getCurrentToken()->getPosition()));
+      skipToStmtEol();
     }
   }
-
-  if (!expect(TOK_STMT)) {
-    generateError(std::make_unique<SyntaxError>(LVL_ERROR,
-      STX_ERR_EXPECTED_STMT, lexer.getCurrentToken()->getPosition(),
-      std::vector<Position> { tokId->getPosition() }));
-    err = true;
-  }
-
-  if (err)
-    return nullptr;
 }

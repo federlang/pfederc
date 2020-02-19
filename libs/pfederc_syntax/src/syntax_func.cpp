@@ -309,6 +309,7 @@ std::unique_ptr<BodyExpr> Parser::parseFunctionBody() noexcept {
     if (!expect(TOK_EOL)) {
       generateError(std::make_unique<SyntaxError>(LVL_ERROR,
         STX_ERR_EXPECTED_EOL, lexer.getCurrentToken()->getPosition()));
+      skipToStmtEol();
       err = true;
     }
 

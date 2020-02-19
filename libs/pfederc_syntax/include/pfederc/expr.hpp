@@ -413,7 +413,7 @@ namespace pfederc {
     virtual std::string toString() const noexcept;
   };
 
-  typedef std::tuple<const Token&, std::vector<std::unique_ptr<Expr>>> EnumConstructor;
+  typedef std::tuple<const Token*, std::vector<std::unique_ptr<Expr>>> EnumConstructor;
 
   class EnumExpr final : public Expr {
     const Token *tokId;
