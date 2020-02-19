@@ -342,6 +342,30 @@ match_test(ast_fn06 ast "func helloworld(&x: i32):\nreturn x\n\;"
 fail_test(ast_fn50 ast "func helloworld(x: &i32): i32\;")
 fail_test(ast_fn51 ast "func helloworld(x: i32): i32")
 
+# trait tests
+# good
+match_test(ast_trait00 ast "trait MyTrait\n\;"
+  "^trait MyTrait\n\;\n$")
+match_test(ast_trait01 ast "trait{X: MyOtherTrait} MyTrait\n\;"
+  "^trait{X: MyOtherTrait} MyTrait\n\;\n$")
+match_test(ast_trait02 ast "trait{X: MyOtherTrait} MyTrait : MyInheritedTrait\n\;"
+  "^trait{X: MyOtherTrait} MyTrait : MyInheritedTrait\n\;\n")
+match_test(ast_trait03 ast "trait MyTrait\nfunc helloworld\;\n\;"
+  "^trait MyTrait\nfunc helloworld\;\n\;\n$")
+match_test(ast_trait04 ast "trait MyTrait\nfunc helloworld0\;\nfunc helloworld1\;\n\;"
+  "^trait MyTrait\nfunc helloworld0\;\nfunc helloworld1\;\n\;\n$")
+# bad
+fail_test(ast_trait50 ast "trait MyTrait")
+fail_test(ast_trait51 ast "trait MyTrait\nfunc helloworld\n\;\n\;")
+
+# type tests
+# good
+match_test(ast_type00 ast "type Option{MyTrait} MyTraitOption"
+  "^type Option{MyTrait} MyTraitOption\n$")
+# bad
+fail_test(ast_type50 ast "type MyTrait")
+fail_test(ast_type51 ast "type Option{MyTrait MyTraitOption}")
+
 # lambda tests
 match_test(ast_lambda00 ast "lambda\nreturn x\n\;"
 	"^lambda \nreturn x\n\;\n$")
@@ -391,6 +415,7 @@ fail_test(ast_arr50 ast "[ hello")
 fail_test(ast_arr51 ast "[ Hello(); ]")
 fail_test(ast_arr52 ast "[ ; 100 ]")
 fail_test(ast_arr53 ast "[ hello, ]")
+
 # class tests
 # good
 match_test(ast_class00 ast "class MyClass(x: i32)\n\;"
@@ -411,6 +436,14 @@ fail_test(ast_class51 ast "class MyClass(x: i32)")
 fail_test(ast_class52 ast "class MyClass \;")
 fail_test(ast_class53 ast "class MyClass\nx = i32\;")
 fail_test(ast_class54 ast "class MyClass\nx := i32\;")
+
+# class trait tests
+# good
+match_test(ast_classtrait00 ast "class trait MyClass : MyTrait\nfunc helloworld\n\;\n\;"
+  "^class trait MyClass : MyTrait\nfunc helloworld\n\;\n\;\n$")
+# bad
+fail_test(ast_classtrait50 ast "class trait MyClass : MyTrait\nfunc helloworld\;\n\;")
+
 # safe expr
 # good
 match_test(ast_safe00 ast "safe MyClass()" "safe \\\\(MyClass\\\\)\n$")
