@@ -746,9 +746,10 @@ std::string UnOpExpr::toString() const noexcept {
 
 // BodyExpr
 BodyExpr::BodyExpr(const Lexer &lex, const Position &pos,
-     Exprs &&exprs, std::unique_ptr<Expr> &&retExpr) noexcept
+     Exprs &&exprs, std::unique_ptr<Expr> &&retExpr,
+     ReturnControlType rct) noexcept
      : Expr(lex, EXPR_BODY, pos), exprs(std::move(exprs)),
-       retExpr(std::move(retExpr)) {
+       retExpr(std::move(retExpr)), rct{rct} {
 }
 
 BodyExpr::~BodyExpr() {
@@ -761,11 +762,27 @@ std::string BodyExpr::toString() const noexcept {
     result += '\n';
   }
 
+  switch (rct) {
+  case ReturnControlType::RETURN:
+      result += "return";
+      break;
+  case ReturnControlType::CONTINUE:
+      result += "continue";
+      break;
+  case ReturnControlType::BREAK:
+      result += "break";
+      break;
+  default:
+      break;
+  };
+
   if (retExpr) {
-    result += "return ";
+    result += ' ';
     result += retExpr->toString();
-    result += '\n';
   }
+
+  if (rct != ReturnControlType::NONE)
+    result += '\n';
 
   return result;
 }

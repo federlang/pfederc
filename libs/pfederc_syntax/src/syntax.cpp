@@ -116,10 +116,6 @@ std::unique_ptr<Expr> Parser::parsePrimary(std::unique_ptr<Capabilities> &&caps)
     return parseFor();
   case TOK_KW_DO:
     return parseFor(true);
-  case TOK_KW_CTN:
-    return parseContinue();
-  case TOK_KW_BRK:
-    return parseBreak();
   case TOK_KW_SAFE:
     return parseSafe();
 
@@ -179,16 +175,6 @@ std::unique_ptr<Expr> Parser::parseUse() noexcept {
   return std::make_unique<UseExpr>(lexer, pos, std::move(exprs));
 }
 
-std::unique_ptr<Expr> Parser::parseContinue() noexcept {
-  sanityExpect(TOK_KW_CTN);
-  // TODO
-}
-
-std::unique_ptr<Expr> Parser::parseBreak() noexcept {
-  sanityExpect(TOK_KW_BRK);
-  // TODO
-}
-
 std::unique_ptr<Expr> Parser::parseSafe() noexcept {
   Position pos(lexer.getCurrentToken()->getPosition());
   sanityExpect(TOK_KW_SAFE);
@@ -227,8 +213,8 @@ std::unique_ptr<Expr> Parser::parseExpression(Precedence prec) noexcept {
   auto primary = parsePrimary();
   if (!primary) {
     lexer.next();
-    generateError(std::make_unique<SyntaxError>(LVL_ERROR,
-      STX_ERR_EXPECTED_EXPR, lexer.getCurrentToken()->getPosition()));
+    /*generateError(std::make_unique<SyntaxError>(LVL_ERROR,
+      STX_ERR_EXPECTED_EXPR, lexer.getCurrentToken()->getPosition()));*/
     return nullptr; // error forwarding
   }
   

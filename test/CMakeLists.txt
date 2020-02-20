@@ -615,6 +615,17 @@ fail_test(ast_do53 ast "do\n\;")
 fail_test(ast_do54 ast "do\nfor True")
 fail_test(ast_do55 ast "do i := 0\n\; for")
 
+# continue
+fail_test(ast_ctn00 ast "for True\ncontinue\n\;"
+  "^for True\ncontinue\n\;\n$")
+fail_test(ast_ctn01 ast "do\ncontinue\n\; for True"
+  "^do\ncontinue\n\; for True\n$")
+# break
+fail_test(ast_brk00 ast "for True\nbreak\n\;"
+  "^for True\nbreak\n\;\n$")
+fail_test(ast_brk01 ast "do\nbreak\n\; for True"
+  "^do\nbreak\n\; for True\n$")
+
 # if
 # good
 match_test(ast_if00 ast "if True\n\;"

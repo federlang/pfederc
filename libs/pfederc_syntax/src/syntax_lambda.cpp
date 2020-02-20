@@ -49,7 +49,7 @@ std::unique_ptr<Expr> Parser::parseLambda() noexcept {
     return std::make_unique<LambdaExpr>(lexer, pos,
       std::move(params), std::make_unique<BodyExpr>(lexer,
         expr->getPosition(),
-        Exprs(), std::move(expr)));
+        Exprs(), std::move(expr), ReturnControlType::RETURN));
   }
   // *newline* *body* *;*
   if (!expect(TOK_EOL)) {

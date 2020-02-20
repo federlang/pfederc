@@ -233,7 +233,7 @@ std::unique_ptr<Expr> Parser::parseFunction(std::unique_ptr<Capabilities> &&caps
       tok, std::move(templ), std::move(parameters),
       nullptr,
       std::make_unique<BodyExpr>(lexer, returnExprPos->getPosition(),
-      Exprs(), std::move(returnExprPos)), true);
+        Exprs(), std::move(returnExprPos), ReturnControlType::RETURN), true);
   }
 
   std::unique_ptr<Expr> returnExpr;
@@ -324,14 +324,38 @@ std::unique_ptr<BodyExpr> Parser::parseFunctionBody() noexcept {
   }
 
   std::unique_ptr<Expr> returnExpr;
-  if (*lexer.getCurrentToken() == TOK_KW_RET) {
+  ReturnControlType rct{ReturnControlType::NONE};
+  if (*lexer.getCurrentToken() == TOK_KW_RET
+      || *lexer.getCurrentToken() == TOK_KW_CTN
+      || *lexer.getCurrentToken() == TOK_KW_BRK) {
+    switch (lexer.getCurrentToken()->getType()) {
+    case TOK_KW_RET:
+      rct = ReturnControlType::RETURN;
+      break;
+    case TOK_KW_CTN:
+      rct = ReturnControlType::CONTINUE;
+      break;
+    case TOK_KW_BRK:
+      rct = ReturnControlType::BREAK;
+      break;
+    default:
+      fatal(__FILE__, __LINE__, "Return control is neither ret, ctn or brk.");
+      break;
+    }
+
     pos = pos + lexer.getCurrentToken()->getPosition();
-    lexer.next(); // eat return
-    returnExpr = parseExpression();
-    if (returnExpr)
-      pos = pos + returnExpr->getPosition();
-    else
-      err = true;
+    lexer.next(); // eat return,ctn,brk
+
+    if (rct == ReturnControlType::RETURN
+        || (*lexer.getCurrentToken() != TOK_EOF
+            && *lexer.getCurrentToken() != TOK_EOL
+            && *lexer.getCurrentToken() != TOK_STMT)) {
+      returnExpr = parseExpression();
+      if (returnExpr)
+        pos = pos + returnExpr->getPosition();
+      else
+        err = true;
+    }
   }
 
   skipEol();
@@ -340,5 +364,5 @@ std::unique_ptr<BodyExpr> Parser::parseFunctionBody() noexcept {
     return nullptr;
 
   return std::make_unique<BodyExpr>(lexer,
-    pos, std::move(exprs), std::move(returnExpr));
+    pos, std::move(exprs), std::move(returnExpr), rct);
 }

@@ -706,9 +706,19 @@ namespace pfederc {
       dynamic_cast<const UnOpExpr&>(expr).getOperatorType() == type;
   }
 
+  /*!\brief The type used to jump to different code position
+   */
+  enum class ReturnControlType {
+    NONE,
+    RETURN,
+    CONTINUE,
+    BREAK,
+  };
+
   class BodyExpr final : public Expr {
     Exprs exprs;
     std::unique_ptr<Expr> retExpr;
+    ReturnControlType rct;
   public:
     /*!\brief Initializes BodyExpr
      * \param lex
@@ -717,7 +727,8 @@ namespace pfederc {
      * \param retExpr Return value of getReturn()
      */
     BodyExpr(const Lexer &lex, const Position &pos,
-        Exprs &&exprs, std::unique_ptr<Expr> &&retExpr) noexcept;
+        Exprs &&exprs, std::unique_ptr<Expr> &&retExpr,
+        ReturnControlType rct) noexcept;
     BodyExpr(const BodyExpr &) = delete;
     virtual ~BodyExpr();
 
@@ -726,6 +737,8 @@ namespace pfederc {
     /*!\brief Optional return statement
      */
     inline const Expr *getReturn() const noexcept { return retExpr.get(); }
+
+    inline ReturnControlType getReturnType() const noexcept { return rct; }
 
     virtual std::string toString() const noexcept;
   };
