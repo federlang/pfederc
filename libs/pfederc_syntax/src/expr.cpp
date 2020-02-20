@@ -3,7 +3,7 @@ using namespace pfederc;
 
 static std::string _templateToString(const TemplateDecls &tmpls) {
   std::string result;
-  result += "{";
+  result += '{';
 
   bool first = true;
   for (const TemplateDecl &tmpl : tmpls) {
@@ -18,7 +18,7 @@ static std::string _templateToString(const TemplateDecls &tmpls) {
     result += snd->toString();
   }
 
-  result += "}";
+  result += '}';
   return result;
 }
 
@@ -81,13 +81,13 @@ ProgramExpr::~ProgramExpr() {
 std::string ProgramExpr::toString() const noexcept {
   std::string result;
   if (progName)
-    result += "use mod " + progName->toString(getLexer()) + "\n";
+    result += "use mod " + progName->toString(getLexer()) + '\n';
 
   for (auto &expr : imports)
-    result += expr->toString() + "\n";
+    result += expr->toString() + '\n';
 
   for (auto &expr : defs)
-    result += expr->toString() + "\n";
+    result += expr->toString() + '\n';
 
   return result;
 }
@@ -200,7 +200,7 @@ std::string FuncExpr::toString() const noexcept {
     result += ": ";
     result += returnExpr->toString();
   } else if (autoDetectReturnType) {
-    result += ":";
+    result += ':';
   }
 
   if (!body) {
@@ -531,7 +531,7 @@ std::string IfExpr::toString() const noexcept {
   else
     result += "if ";
 
-  result += std::get<0>(ifCases[0])->toString() + "\n";
+  result += std::get<0>(ifCases[0])->toString() + '\n';
   result += std::get<1>(ifCases[0])->toString();
 
   for (size_t i = 1; i < ifCases.size(); ++i) {
@@ -541,7 +541,7 @@ std::string IfExpr::toString() const noexcept {
     else
       result += "if ";
 
-    result += std::get<0>(ifCases[i])->toString() + "\n";
+    result += std::get<0>(ifCases[i])->toString() + '\n';
     result += std::get<1>(ifCases[i])->toString();
   }
 
@@ -703,11 +703,11 @@ UnOpExpr::~UnOpExpr() {
 
 std::string UnOpExpr::toString() const noexcept {
   if (getOperatorType() == TOK_OP_BRACKET_OPEN) {
-    return "(" + getExpression().toString() + ")";
+    return '(' + getExpression().toString() + ')';
   }
 
-  return "(" + getOperatorToken().toString(getLexer()) +
-    " " + getExpression().toString() + ")";
+  return '(' + getOperatorToken().toString(getLexer()) +
+    ' ' + getExpression().toString() + ')';
 }
 
 // BodyExpr
@@ -748,7 +748,7 @@ ArrayCpyExpr::~ArrayCpyExpr() {
 }
 
 std::string ArrayCpyExpr::toString() const noexcept {
-  return "[" + valueExpr->toString() + "; " + lengthExpr->toString() + "]";
+  return '[' + valueExpr->toString() + "; " + lengthExpr->toString() + ']';
 }
 
 // ArrayLitExpr
@@ -786,7 +786,7 @@ ArrayEmptyExpr::~ArrayEmptyExpr() {
 
 
 std::string ArrayEmptyExpr::toString() const noexcept {
-  return "[" + typeExpr->toString() + "]";
+  return '[' + typeExpr->toString() + ']';
 }
 
 // ErrorExpr
