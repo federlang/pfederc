@@ -585,6 +585,8 @@ match_test(ast_for03 ast "for True\nhello()\n\;"
 	"^for True\n\\\\(hello\\\\)\n\;\n$")
 match_test(ast_for04 ast "for True\n\n\nhello()\n\n\;"
 	"^for True\n\\\\(hello\\\\)\n\;\n$")
+match_test(ast_for05 ast "for i := 0\;\n i < 100\;\n ++i\n\;"
+	"^for \\\\(:= i 0\\\\)\; \\\\(< i 100\\\\)\; \\\\(\\\\+\\\\+ i\\\\)\n\;\n$")
 # bad
 fail_test(ast_for50 ast "for\n\;")
 fail_test(ast_for51 ast "for")
@@ -603,6 +605,8 @@ match_test(ast_do03 ast "do\nhello()\n\; for True"
 	"^do\n\\\\(hello\\\\)\n\; for True\n$")
 match_test(ast_do04 ast "do\n\n\nhello()\n\n\n\; for True"
 	"^do\n\\\\(hello\\\\)\n\; for True\n$")
+match_test(ast_do05 ast "do i := 0\n\; for i < 100\;\n ++i"
+	"^do \\\\(:= i 0\\\\)\n\; for \\\\(< i 100\\\\)\; \\\\(\\\\+\\\\+ i\\\\)\n$")
 # bad
 fail_test(ast_do50 ast "do\n\; for")
 fail_test(ast_do51 ast "do")

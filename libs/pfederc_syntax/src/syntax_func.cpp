@@ -334,8 +334,7 @@ std::unique_ptr<BodyExpr> Parser::parseFunctionBody() noexcept {
       err = true;
   }
 
-  while (*lexer.getCurrentToken() == TOK_EOL)
-    lexer.next();
+  skipEol();
 
   if (err)
     return nullptr;

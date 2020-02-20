@@ -99,6 +99,9 @@ namespace pfederc {
      * \return Returns true if current token is not EOF, otherwise false.
      */
     bool skipToEol() noexcept;
+    /*!\brief Calls next token as long as current one is EOL
+     */
+    void skipEol() noexcept;
 
     std::unique_ptr<Expr> parseCapabilities() noexcept;
     void parseCapabilityEnsure(std::vector<std::unique_ptr<Expr>> &required,

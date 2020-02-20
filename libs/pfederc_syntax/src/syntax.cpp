@@ -31,6 +31,11 @@ bool Parser::skipToEol() noexcept {
   return *lexer.getCurrentToken() != TOK_EOF;
 }
 
+void Parser::skipEol() noexcept {
+  while (*lexer.getCurrentToken() == TOK_EOL)
+    lexer.next();
+}
+
 std::unique_ptr<Expr> Parser::parseUnary() noexcept {
   const Token *tok = lexer.getCurrentToken();
   if (*tok == TOK_OP_BRACKET_OPEN)

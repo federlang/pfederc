@@ -17,8 +17,10 @@ std::unique_ptr<Expr> Parser::parseFor(bool isdo) noexcept {
   } else {
     condExpr = parseExpression();
     if (expect(TOK_STMT)) {
+      skipEol();
       itExpr = parseExpression();
       if (expect(TOK_STMT)) {
+        skipEol();
         // switch expressions
         initExpr = std::move(condExpr);
         condExpr = std::move(itExpr);
@@ -49,8 +51,10 @@ std::unique_ptr<Expr> Parser::parseFor(bool isdo) noexcept {
       skipToEol();
     } else {
       condExpr = parseExpression();
-      if (expect(TOK_STMT))
+      if (expect(TOK_STMT)) {
+        skipEol();
         itExpr = parseExpression();
+      }
     }
   }
 
