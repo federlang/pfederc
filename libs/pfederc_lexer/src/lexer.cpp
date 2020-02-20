@@ -88,6 +88,7 @@ inline static std::string _logLexerErrorBase(const Lexer &lexer, const Position 
 
 inline static std::string _logLexerErrorMark(const Lexer &lexer, const Position &pos) noexcept {
   std::string result = lexer.getLineAt(pos.line) + '\n';
+  const size_t lineStartIdx = lexer.getLineIndices()[lexer.getLineNumber(pos.startIndex)];
   // if end position not in same line
   const size_t lastLine = lexer.getLineNumber(pos.endIndex);
   if (lastLine > pos.line) {
@@ -96,7 +97,7 @@ inline static std::string _logLexerErrorMark(const Lexer &lexer, const Position 
     }
   }
   // print space till start
-  for (size_t i = 0; i < pos.startIndex && i < lexer.getFileContent().size(); ++i)  {
+  for (size_t i = lineStartIdx; i < pos.startIndex && i < lexer.getFileContent().size(); ++i)  {
     const uint8_t c = lexer.getFileContent()[i];
     const uint8_t d = c & 0xF0;
     if (c == '\t')

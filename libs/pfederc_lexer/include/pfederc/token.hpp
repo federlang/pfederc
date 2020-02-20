@@ -133,6 +133,24 @@ namespace pfederc {
     TOK_ANY,        //!< \_
   };
 
+  inline bool isNumberType(TokenType type) noexcept {
+    switch(type) {
+    case TOK_INT8:
+    case TOK_INT16:
+    case TOK_INT32:
+    case TOK_INT64:
+    case TOK_UINT8:
+    case TOK_UINT16:
+    case TOK_UINT32:
+    case TOK_UINT64:
+    case TOK_FLT32:
+    case TOK_FLT64:
+      return true;
+    default:
+      return false;
+    }
+  }
+
   constexpr TokenType TOK_KW_START = TOK_KW_FN;
   constexpr TokenType TOK_KW_END = TOK_KW_FALSE;
   /*!\return Returns true if type is a keyword, otherwise false.
