@@ -611,6 +611,54 @@ fail_test(ast_do53 ast "do\n\;")
 fail_test(ast_do54 ast "do\nfor True")
 fail_test(ast_do55 ast "do i := 0\n\; for")
 
+# if
+# good
+match_test(ast_if00 ast "if True\n\;"
+	"^if True\n\;\n$")
+match_test(ast_if01 ast "if False\nelse if True\n\;"
+	"^if False\nelse if True\n\;")
+match_test(ast_if02 ast "if False\nelse if True\nelse\n\;"
+	"^if False\nelse if True\nelse\n\;\n$")
+match_test(ast_if03 ast "if x == y\n\;"
+	"^if \\\\(== x y\\\\)\n\;\n$")
+match_test(ast_if04 ast "if True\nhello()\n\;"
+	"^if True\n\\\\(hello\\\\)\n\;\n$")
+match_test(ast_if05 ast "if True\nhello()\nelse\nworld()\n\;"
+	"^if True\n\\\\(hello\\\\)\nelse\n\\\\(world\\\\)\n\;\n$")
+# bad
+fail_test(ast_if50 ast "if")
+fail_test(ast_if51 ast "if\n")
+fail_test(ast_if52 ast "if\n\;")
+fail_test(ast_if53 ast "if\nelse\n")
+fail_test(ast_if54 ast "if\nelse")
+fail_test(ast_if55 ast "if x == y")
+fail_test(ast_if56 ast "if True\nelse if\n\;")
+fail_test(ast_if57 ast "if True\nelse False\n\;")
+
+# ensure
+# good
+match_test(ast_ensure00 ast "ensure True\n\;"
+	"^ensure True\n\;\n$")
+match_test(ast_ensure01 ast "ensure False\nelse ensure True\n\;"
+	"^ensure False\nelse ensure True\n\;")
+match_test(ast_ensure02 ast "ensure False\nelse ensure True\nelse\n\;"
+	"^ensure False\nelse ensure True\nelse\n\;\n$")
+match_test(ast_ensure03 ast "ensure x == y\n\;"
+	"^ensure \\\\(== x y\\\\)\n\;\n$")
+match_test(ast_ensure04 ast "ensure True\nhello()\n\;"
+	"^ensure True\n\\\\(hello\\\\)\n\;\n$")
+match_test(ast_ensure05 ast "ensure True\nhello()\nelse\nworld()\n\;"
+	"^ensure True\n\\\\(hello\\\\)\nelse\n\\\\(world\\\\)\n\;\n$")
+# bad
+fail_test(ast_ensure50 ast "ensure")
+fail_test(ast_ensure51 ast "ensure\n")
+fail_test(ast_ensure52 ast "ensure\n\;")
+fail_test(ast_ensure53 ast "ensure\nelse\n")
+fail_test(ast_ensure54 ast "ensure\nelse")
+fail_test(ast_ensure55 ast "ensure x == y")
+fail_test(ast_ensure56 ast "ensure True\nelse ensure\n\;")
+fail_test(ast_ensure57 ast "ensure True\nelse False\n\;")
+
 # memory tests
 valgrind_test(ast_mem00 $<TARGET_FILE:astmem> "a + b")
 valgrind_test(ast_mem01 $<TARGET_FILE:astmem> "a + b + c * d * e / hello")

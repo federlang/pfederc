@@ -44,6 +44,9 @@ namespace pfederc {
     STX_ERR_INVALID_TYPE_EXPR,
 
     STX_ERR_EXPECTED_FOR,
+    STX_ERR_EXPECTED_STMT_ELSE,
+    STX_ERR_EXPECTED_EOL_IF,
+    STX_ERR_EXPECTED_EOL_ENSURE,
     
     STX_ERR_INVALID_CAPS_ENSURE,
     STX_ERR_INVALID_CAPS_DIRECTIVE,
@@ -137,6 +140,7 @@ namespace pfederc {
     std::unique_ptr<Expr> parseFor(bool isdo = false) noexcept;
     std::unique_ptr<Expr> parseMatch() noexcept;
     std::unique_ptr<Expr> parseIf(bool isensure = false) noexcept;
+    IfCase parseIfStart(bool isensure) noexcept;
     std::unique_ptr<Expr> parseContinue() noexcept;
     std::unique_ptr<Expr> parseBreak() noexcept;
     std::unique_ptr<Expr> parseSafe() noexcept;

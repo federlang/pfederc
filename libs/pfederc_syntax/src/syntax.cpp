@@ -179,22 +179,14 @@ std::unique_ptr<Expr> Parser::parseMatch() noexcept {
    // TODO
 }
 
-std::unique_ptr<Expr> Parser::parseIf(bool isensure) noexcept {
-  if (isensure)
-    sanityExpect(TOK_KW_ENSURE);
-  else
-    sanityExpect(TOK_KW_IF);
-   // TODO
-}
-
 std::unique_ptr<Expr> Parser::parseContinue() noexcept {
   sanityExpect(TOK_KW_CTN);
-   // TODO
+  // TODO
 }
 
 std::unique_ptr<Expr> Parser::parseBreak() noexcept {
   sanityExpect(TOK_KW_BRK);
-   // TODO
+  // TODO
 }
 
 std::unique_ptr<Expr> Parser::parseSafe() noexcept {

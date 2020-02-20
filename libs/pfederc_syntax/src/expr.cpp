@@ -550,6 +550,8 @@ std::string IfExpr::toString() const noexcept {
     result += getElse()->toString();
   }
 
+  result += ';';
+
   return result;
 }
 

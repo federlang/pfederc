@@ -300,7 +300,8 @@ std::unique_ptr<BodyExpr> Parser::parseFunctionBody() noexcept {
   Exprs exprs;
   while (*lexer.getCurrentToken() != TOK_KW_RET
       && *lexer.getCurrentToken() != TOK_STMT
-      && *lexer.getCurrentToken() != TOK_EOF) {
+      && *lexer.getCurrentToken() != TOK_EOF
+      && *lexer.getCurrentToken() != TOK_KW_ELSE) {
     if (*lexer.getCurrentToken() == TOK_EOL) {
       lexer.next();
       continue;
