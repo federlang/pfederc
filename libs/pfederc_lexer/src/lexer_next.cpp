@@ -76,12 +76,27 @@ std::unique_ptr<Token> Lexer::nextToken() noexcept {
   if (result)
     return result;
 
+  if (currentChar == '#')
+    return nextTokenCapability();
+
   if (currentChar == std::char_traits<char>::eof())
     return nextTokenEOF();
 
   return generateError(std::make_unique<LexerError>(LVL_ERROR,
       LEX_ERR_GENERAL_INVALID_CHARACTER,
       getCurrentCursor()));
+}
+
+std::unique_ptr<Token> Lexer::nextTokenCapability() noexcept {
+  nextChar(); // eat #
+  if (currentChar == '!') {
+    nextChar(); // eat !
+    return std::make_unique<Token>(currentToken,
+        TOK_ENSURE, getCurrentCursor());
+  }
+
+  return std::make_unique<Token>(currentToken,
+      TOK_DIRECTIVE, getCurrentCursor());
 }
 
 std::unique_ptr<Token> Lexer::nextTokenLine() noexcept {

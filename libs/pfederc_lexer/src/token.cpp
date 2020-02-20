@@ -91,6 +91,8 @@ namespace pfederc {
     { TOK_ERR, "TOK_ERR" },
     { TOK_EOL, "TOK_EOL" },
     { TOK_EOF, "TOK_EOF" },
+    { TOK_DIRECTIVE, "TOK_DIRECTIVE" },
+    { TOK_ENSURE, "TOK_ENSURE" },
     { TOK_ID, "TOK_ID" },
     { TOK_INT8, "TOK_INT8" },
     { TOK_INT16, "TOK_INT16" },

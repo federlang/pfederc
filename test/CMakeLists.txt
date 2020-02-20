@@ -203,7 +203,10 @@ match_test(tokenid_eol tokenid "\n" "^TOK_EOL\n$")
 # EOF
 match_test(tokenid_eof tokenid " " "^TOK_EOF\n$")
 # Any
-match_test(tokeid_any tokenid "_" "^TOK_ANY\n$")
+match_test(tokenid_any tokenid "_" "^TOK_ANY\n$")
+# Directive
+match_test(tokenid_directive tokenid "#" "^TOK_DIRECTIVE\n$")
+match_test(tokenid_ensure tokenid "#!" "^TOK_ENSURE\n$")
 
 # comments and spaces
 # good
@@ -535,6 +538,40 @@ fail_test(ast_safe50 ast "safe 100")
 fail_test(ast_safe51 ast "safe arr[42]")
 fail_test(ast_safe52 ast "safe var")
 fail_test(ast_safe53 ast "safe")
+
+# capabilities
+# good
+match_test(ast_caps00 ast "#Inline\nfunc helloworld\n\;"
+	"^#Inline\nfunc helloworld\n\;\n$")
+match_test(ast_caps01 ast "#Unused\n#Inline\n#Constant\nfunc helloworld\;"
+	"^#Unused\n#Inline\n#Constant\nfunc helloworld\;\n$")
+match_test(ast_caps02 ast "#Unused\n#Constant\n#Inline\nfunc helloworld\;"
+	"^#Unused\n#Inline\n#Constant\nfunc helloworld\;\n$")
+match_test(ast_caps03 ast "#!requires x == true\nfunc hello\;"
+	"^#!requires \\\\(== x true\\\\)\nfunc hello\;\n$")
+match_test(ast_caps04 ast "#!ensures x == true\nfunc hello\;"
+	"^#!ensures \\\\(== x true\\\\)\nfunc hello\;\n$")
+match_test(ast_caps05 ast "#!ensures x == true\n#!requires x == false\nfunc hello\;"
+	"^#!requires \\\\(== x false\\\\)\n#!ensures \\\\(== x true\\\\)\nfunc hello\;\n$")
+match_test(ast_caps06 ast "#Inline\nclass MyClass\n\;"
+	"^#Inline\nclass MyClass\n\;\n$")
+match_test(ast_caps07 ast "#Inline\ntrait MyTrait\n\;"
+	"^#Inline\ntrait MyTrait\n\;\n$")
+match_test(ast_caps08 ast "#Inline\nclass trait MyClass : MyTrait\n\;"
+	"^#Inline\nclass trait MyClass: MyTrait\n\;\n$")
+match_test(ast_caps09 ast "#Inline\ntype i32 myi32"
+	"^#Inline\ntype i32 myi32\n$")
+# bad
+fail_test(ast_caps50 ast "#Inline\nenum Option\n\;")
+fail_test(ast_caps51 ast "#Inline\nx := 100\n\;")
+fail_test(ast_caps52 ast "#Inline\n#Inline\nfunc hello\;")
+fail_test(ast_caps53 ast "#NotADirective\nfunc hello\;")
+fail_test(ast_caps54 ast "#")
+fail_test(ast_caps55 ast "#!")
+fail_test(ast_caps56 ast "#Inline\n")
+fail_test(ast_caps57 ast "#!requires x\n")
+fail_test(ast_caps58 ast "#Inline")
+fail_test(ast_caps59 ast "#!requires x")
 
 # memory tests
 valgrind_test(ast_mem00 $<TARGET_FILE:astmem> "a + b")

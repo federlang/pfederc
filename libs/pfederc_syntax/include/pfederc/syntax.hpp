@@ -42,6 +42,10 @@ namespace pfederc {
     STX_ERR_CLASS_TRAIT_SCOPE,
     STX_ERR_EXPECTED_CONSTRUCTION,
     STX_ERR_INVALID_TYPE_EXPR,
+    
+    STX_ERR_INVALID_CAPS_ENSURE,
+    STX_ERR_INVALID_CAPS_DIRECTIVE,
+    STX_ERR_INVALID_CAPS_FOLLOWUP,
   };
 
   typedef std::tuple<const Token * /*progName*/,
@@ -61,7 +65,7 @@ namespace pfederc {
     /*!\return Returns nullptr if the current token isn't a valid
      * primary expression (beginning), otherwise an expression is returned.
      */
-    std::unique_ptr<Expr> parsePrimary() noexcept;
+    std::unique_ptr<Expr> parsePrimary(std::unique_ptr<Capabilities> &&caps = nullptr) noexcept;
 
     /*!\return Returns nullptr if the current token isn't a valid
      * binary expression (beginning), otherwise an expression is returned.
@@ -86,7 +90,15 @@ namespace pfederc {
      * \return Returns true if current token is not EOF, otherwise false.
      */
     bool skipToStmtEol() noexcept;
+    /*!\brief Skips till nexts newline.
+     * \return Returns true if current token is not EOF, otherwise false.
+     */
+    bool skipToEol() noexcept;
 
+    std::unique_ptr<Expr> parseCapabilities() noexcept;
+    void parseCapabilityEnsure(std::vector<std::unique_ptr<Expr>> &required,
+        std::vector<std::unique_ptr<Expr>> &ensures) noexcept;
+    void parseCapabilityDirective(bool &isunused, bool &isinline, bool &isconstant) noexcept;
     std::unique_ptr<Expr> parseArray() noexcept;
     std::unique_ptr<Expr> parseBrackets() noexcept;
     std::unique_ptr<FuncParameter> fromExprDeclToFunctionParam(
@@ -99,26 +111,26 @@ namespace pfederc {
     std::unique_ptr<FuncParameter> fromExprToFunctionParam(
       std::unique_ptr<Expr> &&expr) noexcept;
     std::unique_ptr<Expr> parseFuncReturnType() noexcept;
-    std::unique_ptr<Expr> parseFunction() noexcept;
+    std::unique_ptr<Expr> parseFunction(std::unique_ptr<Capabilities> &&caps) noexcept;
     std::unique_ptr<Expr> parseLambda() noexcept;
     std::unique_ptr<Expr> parseModule() noexcept;
-    std::unique_ptr<Expr> parseClass() noexcept;
+    std::unique_ptr<Expr> parseClass(std::unique_ptr<Capabilities> &&caps) noexcept;
     void parseClassBody(const Token *const tokId, bool &err,
         std::list<std::unique_ptr<BiOpExpr>> &attrs,
         std::list<std::unique_ptr<FuncExpr>> &funcs) noexcept;
     void parseClassConstructor(bool &err,
         std::list<std::unique_ptr<BiOpExpr>> &constructorAttributes) noexcept;
-    std::unique_ptr<Expr> parseClassTrait() noexcept;
+    std::unique_ptr<Expr> parseClassTrait(std::unique_ptr<Capabilities> &&caps) noexcept;
     void parseClassTraitBody(bool &err,
         std::list<std::unique_ptr<FuncExpr>> &funcs) noexcept;
     std::unique_ptr<Expr> parseEnum() noexcept;
     void parseEnumBody(bool &err, std::vector<EnumConstructor> &constructors) noexcept;
-    std::unique_ptr<Expr> parseTrait() noexcept;
+    std::unique_ptr<Expr> parseTrait(std::unique_ptr<Capabilities> &&caps) noexcept;
     void parseTraitBody(bool &err,
         std::list<std::unique_ptr<FuncExpr>> &functions) noexcept;
     void parseTraitImpl(bool &err,
         std::vector<std::unique_ptr<Expr>> &impltraits) noexcept;
-    std::unique_ptr<Expr> parseType() noexcept;
+    std::unique_ptr<Expr> parseType(std::unique_ptr<Capabilities> &&caps) noexcept;
     std::unique_ptr<Expr> parseUse() noexcept;
     std::unique_ptr<Expr> parseFor(bool isdo = false) noexcept;
     std::unique_ptr<Expr> parseMatch() noexcept;

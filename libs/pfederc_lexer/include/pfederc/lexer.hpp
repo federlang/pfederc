@@ -67,6 +67,8 @@ namespace pfederc {
     std::unique_ptr<Token> nextLineComment() noexcept;
     std::unique_ptr<Token> nextRegionCommentDoc() noexcept;
     std::unique_ptr<Token> nextLineCommentDoc() noexcept;
+    // capabilities
+    std::unique_ptr<Token> nextTokenCapability() noexcept;
 
     std::unique_ptr<Token> generateError(std::unique_ptr<LexerError> &&err) noexcept;
   public:

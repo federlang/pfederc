@@ -23,6 +23,14 @@ bool Parser::skipToStmtEol() noexcept {
   return *lexer.getCurrentToken() != TOK_EOF;
 }
 
+bool Parser::skipToEol() noexcept {
+  while (*lexer.getCurrentToken() != TOK_EOL
+      && *lexer.getCurrentToken() != TOK_EOF)
+    lexer.next();
+
+  return *lexer.getCurrentToken() != TOK_EOF;
+}
+
 std::unique_ptr<Expr> Parser::parseUnary() noexcept {
   const Token *tok = lexer.getCurrentToken();
   if (*tok == TOK_OP_BRACKET_OPEN)
@@ -54,7 +62,7 @@ std::unique_ptr<Expr> Parser::parseUnary() noexcept {
     tok->getPosition() + expr->getPosition(), tok, std::move(expr));
 }
 
-std::unique_ptr<Expr> Parser::parsePrimary() noexcept {
+std::unique_ptr<Expr> Parser::parsePrimary(std::unique_ptr<Capabilities> &&caps) noexcept {
   const Token *tok = lexer.getCurrentToken();
   if (isTokenTypeOperator(tok->getType()))
     return parseUnary();
@@ -78,19 +86,19 @@ std::unique_ptr<Expr> Parser::parsePrimary() noexcept {
     lexer.next();
     return std::make_unique<TokenExpr>(lexer, tok);
   case TOK_KW_FN:
-    return parseFunction();
+    return parseFunction(std::move(caps));
   case TOK_KW_LAMBDA:
     return parseLambda();
   case TOK_KW_MOD:
     return parseModule();
   case TOK_KW_CLASS:
-    return parseClass();
+    return parseClass(std::move(caps));
   case TOK_KW_ENUM:
     return parseEnum();
   case TOK_KW_TRAIT:
-    return parseTrait();
+    return parseTrait(std::move(caps));
   case TOK_KW_TYPE:
-    return parseType();
+    return parseType(std::move(caps));
   case TOK_KW_USE:
     return parseUse();
   case TOK_KW_IF:
@@ -109,6 +117,12 @@ std::unique_ptr<Expr> Parser::parsePrimary() noexcept {
     return parseBreak();
   case TOK_KW_SAFE:
     return parseSafe();
+
+// capabilties
+  case TOK_ENSURE:
+    return parseCapabilities();
+  case TOK_DIRECTIVE:
+    return parseCapabilities();
   default:
     return nullptr;
   }

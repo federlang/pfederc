@@ -64,6 +64,18 @@ namespace pfederc {
   class ArrayEmptyExpr;
   class Capabilities;
 
+  class Capable {
+  protected:
+    std::unique_ptr<Capabilities> caps;
+  public:
+    inline Capable(std::unique_ptr<Capabilities> &&caps) noexcept
+        : caps(std::move(caps)) {}
+    inline ~Capable() {}
+
+    inline const Capabilities &getCapabilities() const noexcept { return *caps; }
+    inline Capabilities &getCapabilities() noexcept { return *caps; }
+  };
+
   class Expr {
     const Lexer &lexer;
     ExprType type;
@@ -84,29 +96,29 @@ namespace pfederc {
 
     virtual std::string toString() const noexcept = 0;
   };
-
-  typedef std::tuple<std::vector<const Token*> /* idcall */,
-    const Token * /* operator */,
-    std::unique_ptr<Expr> /* comparison */> CapabilityEnsure;
+  
+  enum class EnsuranceType {
+    Ensures, 
+    Requires,
+  };
 
   class Capabilities final {
     bool isunused, isinline, isconstant;
-    std::vector<CapabilityEnsure> required;
-    std::vector<CapabilityEnsure> ensures;
+    std::vector<std::unique_ptr<Expr>> required;
+    std::vector<std::unique_ptr<Expr>> ensures;
   public:
-    inline Capabilities(bool isunused, bool isinline, bool isconstant,
-        std::vector<CapabilityEnsure> &&required,
-        std::vector<CapabilityEnsure> &&ensures) noexcept
-        : isunused{isunused}, isinline{isinline}, isconstant{isconstant},
-          required(std::move(required)), ensures(std::move(ensures)) {}
+    Capabilities(bool isunused, bool isinline, bool isconstant,
+        std::vector<std::unique_ptr<Expr>> &&required,
+        std::vector<std::unique_ptr<Expr>> &&ensures) noexcept;
+    Capabilities(const Capabilities &) = delete;
     ~Capabilities();
 
-    bool isUnused() const noexcept { return isunused; }
-    bool isInline() const noexcept { return isinline; }
-    bool isConstant() const noexcept { return isconstant; }
+    inline bool isUnused() const noexcept { return isunused; }
+    inline bool isInline() const noexcept { return isinline; }
+    inline bool isConstant() const noexcept { return isconstant; }
 
-    const auto &getRequired() const noexcept { return required; }
-    const auto &getEnsures() const noexcept { return ensures; }
+    inline const auto &getRequires() const noexcept { return required; }
+    inline const auto &getEnsures() const noexcept { return ensures; }
   };
 
   typedef std::tuple<const Token * /* id */,
@@ -210,7 +222,7 @@ namespace pfederc {
       std::unique_ptr<Expr> /* opt guard */,
       std::unique_ptr<Expr> /* opt guard result */> FuncParameter;
 
-  class FuncExpr final : public Expr {
+  class FuncExpr final : public Expr, public Capable {
     const Token *tokId; //!< function identifier
     std::unique_ptr<TemplateDecls> templs;
     std::vector<std::unique_ptr<FuncParameter>> params;
@@ -229,6 +241,7 @@ namespace pfederc {
      * \param autoDetectReturnType Return value of isAutoReturnType()
      */
     FuncExpr(const Lexer &lexer, const Position &pos,
+      std::unique_ptr<Capabilities> &&caps,
       const Token *tokId,
       std::unique_ptr<TemplateDecls> &&templs,
       std::vector<std::unique_ptr<FuncParameter>> &&params,
@@ -309,7 +322,8 @@ namespace pfederc {
     virtual std::string toString() const noexcept;
   };
 
-  class TraitExpr final : public Expr {
+
+  class TraitExpr final : public Expr, public Capable {
     const Token *tokId; //!< trait identifier
     std::vector<std::unique_ptr<Expr>> impltraits;
     std::unique_ptr<TemplateDecls> templs;
@@ -324,6 +338,7 @@ namespace pfederc {
      * \param functions Return value of getFunctions()
      */
     TraitExpr(const Lexer &lexer, const Position &pos,
+      std::unique_ptr<Capabilities> &&caps,
       const Token *tokId,
       std::unique_ptr<TemplateDecls> &&templs,
       std::vector<std::unique_ptr<Expr>> &&impltraits,
@@ -341,7 +356,7 @@ namespace pfederc {
     virtual std::string toString() const noexcept;
   };
 
-  class ClassExpr final : public Expr {
+  class ClassExpr final : public Expr, public Capable {
     const Token *tokId;
     std::unique_ptr<TemplateDecls> templs;
     std::list<std::unique_ptr<BiOpExpr>> constructAttributes;
@@ -358,6 +373,7 @@ namespace pfederc {
      * \param functions Return value of getFunctions()
      */
     ClassExpr(const Lexer &lexer, const Position &pos,
+      std::unique_ptr<Capabilities> &&caps,
       const Token *tokId,
       std::unique_ptr<TemplateDecls> &&templs,
       std::list<std::unique_ptr<BiOpExpr>> &&constructAttributes,
@@ -381,7 +397,7 @@ namespace pfederc {
     virtual std::string toString() const noexcept;
   };
 
-  class TraitImplExpr final : public Expr {
+  class TraitImplExpr final : public Expr, public Capable {
     const Token *classTokId;
     std::unique_ptr<TemplateDecls> templs;
     std::unique_ptr<Expr> implTrait;
@@ -396,6 +412,7 @@ namespace pfederc {
      * \param functions Return value of getFunctions()
      */
     TraitImplExpr(const Lexer &lexer, const Position &pos,
+        std::unique_ptr<Capabilities> &&caps,
         const Token *classTokId, std::unique_ptr<TemplateDecls> &&templs,
         std::unique_ptr<Expr> &&implTrait,
         std::list<std::unique_ptr<FuncExpr>> &&functions) noexcept;
@@ -442,7 +459,7 @@ namespace pfederc {
     virtual std::string toString() const noexcept;
   };
 
-  class TypeExpr final : public Expr {
+  class TypeExpr final : public Expr, public Capable {
     const Token *tokId;
     std::unique_ptr<Expr> expr;
   public:
@@ -453,6 +470,7 @@ namespace pfederc {
      * \param expr Return value of getExpression()
      */
     TypeExpr(const Lexer &lexer, const Position &pos,
+        std::unique_ptr<Capabilities> &&caps,
         const Token *tokId, std::unique_ptr<Expr> &&expr) noexcept;
     TypeExpr(const TypeExpr &) = delete;
     virtual ~TypeExpr();

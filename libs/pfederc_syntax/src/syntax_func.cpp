@@ -163,7 +163,7 @@ std::unique_ptr<Expr> Parser::parseFuncReturnType() noexcept {
   return returnExpr;
 }
 
-std::unique_ptr<Expr> Parser::parseFunction() noexcept {
+std::unique_ptr<Expr> Parser::parseFunction(std::unique_ptr<Capabilities> &&caps) noexcept {
   sanityExpect(TOK_KW_FN);
 
   bool err = false;
@@ -229,7 +229,7 @@ std::unique_ptr<Expr> Parser::parseFunction() noexcept {
     if (err)
       return nullptr;
 
-    return std::make_unique<FuncExpr>(lexer, tok->getPosition(),
+    return std::make_unique<FuncExpr>(lexer, tok->getPosition(), std::move(caps),
       tok, std::move(templ), std::move(parameters),
       nullptr,
       std::make_unique<BodyExpr>(lexer, returnExprPos->getPosition(),
@@ -257,6 +257,7 @@ std::unique_ptr<Expr> Parser::parseFunction() noexcept {
 
     // function declaration
     return std::make_unique<FuncExpr>(lexer, tok->getPosition(),
+      std::move(caps),
       tok, std::move(templ), std::move(parameters),
       std::move(returnExpr), nullptr, false);
   }
@@ -288,7 +289,7 @@ std::unique_ptr<Expr> Parser::parseFunction() noexcept {
   if (err)
     return nullptr;
 
-  return std::make_unique<FuncExpr>(lexer, tok->getPosition(),
+  return std::make_unique<FuncExpr>(lexer, tok->getPosition(), std::move(caps),
     tok, std::move(templ), std::move(parameters),
     std::move(returnExpr), std::move(body), autoDetect);
 }

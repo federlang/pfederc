@@ -1,7 +1,7 @@
 #include "pfederc/syntax.hpp"
 using namespace pfederc;
 
-std::unique_ptr<Expr> Parser::parseTrait() noexcept {
+std::unique_ptr<Expr> Parser::parseTrait(std::unique_ptr<Capabilities> &&caps) noexcept {
   sanityExpect(TOK_KW_TRAIT);
 
   bool err = false; // hard errors
@@ -43,7 +43,8 @@ std::unique_ptr<Expr> Parser::parseTrait() noexcept {
   if (err)
     return nullptr;
 
-  return std::make_unique<TraitExpr>(lexer, pos, tokId, std::move(templ),
+  return std::make_unique<TraitExpr>(lexer, pos, std::move(caps),
+      tokId, std::move(templ),
       std::move(impltraits), std::move(functions));
 }
 

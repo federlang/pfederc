@@ -32,6 +32,9 @@ namespace pfederc {
     TOK_EOL,       //!< end-of-line
     TOK_EOF,       //!< end-of-file
 
+    TOK_DIRECTIVE, //!< '#'
+    TOK_ENSURE,    //!< '#!'
+
     TOK_ID,
     TOK_INT8,
     TOK_INT16,

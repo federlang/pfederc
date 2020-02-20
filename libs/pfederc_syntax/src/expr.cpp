@@ -22,6 +22,30 @@ static std::string _templateToString(const TemplateDecls &tmpls) {
   return result;
 }
 
+static std::string _capsToString(const Capabilities &caps) noexcept {
+  std::string result;
+  if (caps.isUnused())
+    result += "#Unused\n";
+  if (caps.isInline())
+    result += "#Inline\n";
+  if (caps.isConstant())
+    result += "#Constant\n";
+
+  for (auto &require : caps.getRequires()) {
+    result += "#!requires ";
+    result += require->toString();
+    result += '\n';
+  }
+
+  for (auto &ensure : caps.getEnsures()) {
+    result += "#!ensures ";
+    result += ensure->toString();
+    result += '\n';
+  }
+
+  return result;
+}
+
 // Expr
 Expr::Expr(const Lexer &lexer, ExprType type, const Position &pos) noexcept
     : lexer{lexer}, type{type}, pos(pos) {
@@ -32,6 +56,12 @@ Expr::~Expr() {
 }
 
 // Capabilities
+Capabilities::Capabilities(bool isunused, bool isinline, bool isconstant,
+    std::vector<std::unique_ptr<Expr>> &&required,
+    std::vector<std::unique_ptr<Expr>> &&ensures) noexcept
+    : isunused{isunused}, isinline{isinline}, isconstant{isconstant},
+      required(std::move(required)), ensures(std::move(ensures)) {}
+
 Capabilities::~Capabilities() {
 }
 
@@ -111,13 +141,14 @@ std::string ProgNameExpr::toString() const noexcept {
 
 // FuncExpr
 FuncExpr::FuncExpr(const Lexer &lexer, const Position &pos,
+    std::unique_ptr<Capabilities> &&caps,
     const Token *tokId,
     std::unique_ptr<TemplateDecls> &&templs,
     std::vector<std::unique_ptr<FuncParameter>> &&params,
     std::unique_ptr<Expr> &&returnExpr,
     std::unique_ptr<BodyExpr> &&body,
     bool autoDetectReturnType) noexcept
-    : Expr(lexer, EXPR_FUNC, pos), tokId{tokId},
+    : Expr(lexer, EXPR_FUNC, pos), Capable(std::move(caps)), tokId{tokId},
       templs(std::move(templs)), params(std::move(params)),
       returnExpr(std::move(returnExpr)), body(std::move(body)),
       autoDetectReturnType{autoDetectReturnType} {
@@ -127,10 +158,13 @@ FuncExpr::~FuncExpr() {
 }
 
 std::string FuncExpr::toString() const noexcept {
-  std::string result = "func";
-  if (templs) {
+  std::string result;
+  if (caps)
+    result += _capsToString(*caps);
+
+  result += "func";
+  if (templs)
     result += _templateToString(*templs);
-  }
 
   result += ' ';
   result += getIdentifier().toString(getLexer());
@@ -228,11 +262,12 @@ std::string LambdaExpr::toString() const noexcept {
 
 // TraitExpr
 TraitExpr::TraitExpr(const Lexer &lexer, const Position &pos,
+    std::unique_ptr<Capabilities> &&caps,
     const Token *tokId,
     std::unique_ptr<TemplateDecls> &&templs,
     std::vector<std::unique_ptr<Expr>> &&impltraits,
     std::list<std::unique_ptr<FuncExpr>> &&functions) noexcept
-    : Expr(lexer, EXPR_TRAIT, pos), tokId{tokId},
+    : Expr(lexer, EXPR_TRAIT, pos), Capable(std::move(caps)), tokId{tokId},
       templs(std::move(templs)),
       impltraits(std::move(impltraits)), functions(std::move(functions)) {
 }
@@ -241,7 +276,11 @@ TraitExpr::~TraitExpr() {
 }
 
 std::string TraitExpr::toString() const noexcept {
-  std::string result("trait");
+  std::string result;
+  if (caps)
+    result += _capsToString(*caps);
+
+  result += "trait";
   if (templs) {
     result += _templateToString(*templs);
   }
@@ -276,12 +315,13 @@ std::string TraitExpr::toString() const noexcept {
 
 // ClassExpr
 ClassExpr::ClassExpr(const Lexer &lexer, const Position &pos,
+    std::unique_ptr<Capabilities> &&caps,
     const Token *tokId,
     std::unique_ptr<TemplateDecls> &&templs,
     std::list<std::unique_ptr<BiOpExpr>> &&constructAttributes,
     std::list<std::unique_ptr<BiOpExpr>> &&attributes,
     std::list<std::unique_ptr<FuncExpr>> &&functions) noexcept
-    : Expr(lexer, EXPR_CLASS, pos), tokId{tokId},
+    : Expr(lexer, EXPR_CLASS, pos), Capable(std::move(caps)), tokId{tokId},
       templs(std::move(templs)),
       constructAttributes(std::move(constructAttributes)),
       attributes(std::move(attributes)),
@@ -292,7 +332,11 @@ ClassExpr::~ClassExpr() {
 }
 
 std::string ClassExpr::toString() const noexcept {
-  std::string result = "class";
+  std::string result;
+  if (caps)
+    result += _capsToString(*caps);
+
+  result += "class";
   if (templs) {
     result += _templateToString(*templs);
   }
@@ -331,11 +375,12 @@ std::string ClassExpr::toString() const noexcept {
 
 // TraitImplExpr
 TraitImplExpr::TraitImplExpr(const Lexer &lexer, const Position &pos,
+    std::unique_ptr<Capabilities> &&caps,
     const Token *classTokId,
     std::unique_ptr<TemplateDecls> &&templs,
     std::unique_ptr<Expr> &&implTrait,
     std::list<std::unique_ptr<FuncExpr>> &&functions) noexcept
-    : Expr(lexer, EXPR_TRAITIMPL, pos), classTokId{classTokId},
+    : Expr(lexer, EXPR_TRAITIMPL, pos), Capable(std::move(caps)), classTokId{classTokId},
       templs(std::move(templs)),
       implTrait(std::move(implTrait)), functions(std::move(functions)) {
 }
@@ -344,7 +389,11 @@ TraitImplExpr::~TraitImplExpr() {
 }
 
 std::string TraitImplExpr::toString() const noexcept {
-  std::string result = "class trait";
+  std::string result;
+  if (caps)
+    result += _capsToString(*caps);
+
+  result += "class trait";
   if (templs)
     result += _templateToString(*templs);
 
@@ -414,15 +463,21 @@ std::string EnumExpr::toString() const noexcept {
 
 // TypeExpr
 TypeExpr::TypeExpr(const Lexer &lexer, const Position &pos,
+    std::unique_ptr<Capabilities> &&caps,
     const Token *tokId, std::unique_ptr<Expr> &&expr) noexcept
-  : Expr(lexer, EXPR_TYPE, pos), tokId{tokId}, expr(std::move(expr)) {
+  : Expr(lexer, EXPR_TYPE, pos), tokId{tokId}, Capable(std::move(caps)),
+    expr(std::move(expr)) {
 }
 
 TypeExpr::~TypeExpr() {
 }
 
 std::string TypeExpr::toString() const noexcept {
-  return "type " + expr->toString() + ' ' + tokId->toString(expr->getLexer());
+  std::string result;
+  if (caps)
+    result += _capsToString(*caps);
+  result += "type " + expr->toString() + ' ' + tokId->toString(expr->getLexer());
+  return result;
 }
 
 // ModExpr

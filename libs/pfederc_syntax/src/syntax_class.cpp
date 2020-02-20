@@ -1,11 +1,11 @@
 #include "pfederc/syntax.hpp"
 using namespace pfederc;
 
-std::unique_ptr<Expr> Parser::parseClass() noexcept {
+std::unique_ptr<Expr> Parser::parseClass(std::unique_ptr<Capabilities> &&caps) noexcept {
   sanityExpect(TOK_KW_CLASS);
   // maybe it's a class trait
   if (*lexer.getCurrentToken() == TOK_KW_TRAIT)
-    return parseClassTrait();
+    return parseClassTrait(std::move(caps));
 
   bool err = false;
 
@@ -39,7 +39,7 @@ std::unique_ptr<Expr> Parser::parseClass() noexcept {
   std::list<std::unique_ptr<FuncExpr>> functions;
 	parseClassBody(tokId, err, attrs, functions);
 
-  return std::make_unique<ClassExpr>(lexer, tokId->getPosition(),
+  return std::make_unique<ClassExpr>(lexer, tokId->getPosition(), std::move(caps),
     tokId, std::move(templ), std::move(constructAttributes),
     std::move(attrs), std::move(functions));
 }

@@ -1,7 +1,7 @@
 #include "pfederc/syntax.hpp"
 using namespace pfederc;
 
-std::unique_ptr<Expr> Parser::parseType() noexcept {
+std::unique_ptr<Expr> Parser::parseType(std::unique_ptr<Capabilities> &&caps) noexcept {
   Position pos(lexer.getCurrentToken()->getPosition());
   sanityExpect(TOK_KW_TYPE);
 
@@ -28,7 +28,7 @@ std::unique_ptr<Expr> Parser::parseType() noexcept {
 
   pos = pos + biopexpr.getPosition();
 
-  return std::make_unique<TypeExpr>(lexer, pos,
+  return std::make_unique<TypeExpr>(lexer, pos, std::move(caps),
       dynamic_cast<const TokenExpr&>(biopexpr.getRight()).getTokenPtr(),
       biopexpr.getLeftPtr());
 }
