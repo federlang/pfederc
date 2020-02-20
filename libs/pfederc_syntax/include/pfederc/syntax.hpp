@@ -47,6 +47,10 @@ namespace pfederc {
     STX_ERR_EXPECTED_STMT_ELSE,
     STX_ERR_EXPECTED_EOL_IF,
     STX_ERR_EXPECTED_EOL_ENSURE,
+
+    STX_ERR_EXPECTED_ID_NUM_CHAR_BOOL,
+    STX_ERR_EXPECTED_ID_ANY,
+    STX_ERR_EXPECTED_OP_IMPL,
     
     STX_ERR_INVALID_CAPS_ENSURE,
     STX_ERR_INVALID_CAPS_DIRECTIVE,
@@ -142,6 +146,8 @@ namespace pfederc {
     std::unique_ptr<Expr> parseUse() noexcept;
     std::unique_ptr<Expr> parseFor(bool isdo = false) noexcept;
     std::unique_ptr<Expr> parseMatch() noexcept;
+    void parseMatchCases(bool &err, std::vector<MatchPattern> &cases) noexcept;
+    MatchPattern parseMatchCase(bool &err) noexcept;
     std::unique_ptr<Expr> parseIf(bool isensure = false) noexcept;
     IfCase parseIfStart(bool isensure) noexcept;
     std::unique_ptr<Expr> parseContinue() noexcept;

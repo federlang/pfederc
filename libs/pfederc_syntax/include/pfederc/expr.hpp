@@ -598,11 +598,12 @@ namespace pfederc {
     virtual std::string toString() const noexcept;
   };
 
-  typedef std::tuple<const std::vector<Token *> /* constructors */,
-      const std::vector<const Token * /* variables */>,
-      std::unique_ptr<BodyExpr>> MatchPattern;
+  typedef std::tuple<const Token * /* constructor */,
+        std::vector<const Token *> /* variables */,
+        std::unique_ptr<BodyExpr>> MatchPattern;
 
   class MatchExpr final : public Expr {
+    std::unique_ptr<Expr> expr;
     std::vector<MatchPattern> cases;
     std::unique_ptr<BodyExpr> anyCase;
   public:
@@ -613,10 +614,14 @@ namespace pfederc {
      * \param anyCase Return value of getAnCase()
      */
     MatchExpr(const Lexer &lexer, const Position &pos,
+        std::unique_ptr<Expr> &&expr,
         std::vector<MatchPattern> &&cases,
         std::unique_ptr<BodyExpr> &&anyCase) noexcept;
     MatchExpr(const MatchExpr &) = delete;
     virtual ~MatchExpr();
+
+    inline const auto &getExpression() const noexcept { return *expr; }
+    inline auto &getExpression() noexcept { return *expr; }
 
     inline const auto &getCases() const noexcept
     { return cases; }

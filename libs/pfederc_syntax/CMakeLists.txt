@@ -15,6 +15,7 @@ add_library(pfederc_syntax
   "${pfederc_syntax_SOURCE_DIR}/src/syntax_if.cpp"
 	"${pfederc_syntax_SOURCE_DIR}/src/syntax_lambda.cpp"
   "${pfederc_syntax_SOURCE_DIR}/src/syntax_loop.cpp"
+  "${pfederc_syntax_SOURCE_DIR}/src/syntax_match.cpp"
 	"${pfederc_syntax_SOURCE_DIR}/src/syntax_module.cpp"
 	"${pfederc_syntax_SOURCE_DIR}/src/syntax_template.cpp"
   "${pfederc_syntax_SOURCE_DIR}/src/syntax_trait.cpp"

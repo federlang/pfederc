@@ -608,9 +608,10 @@ std::string LoopExpr::toString() const noexcept {
 
 // MatchExpr
 MatchExpr::MatchExpr(const Lexer &lexer, const Position &pos,
+    std::unique_ptr<Expr> &&expr,
     std::vector<MatchPattern> &&cases,
     std::unique_ptr<BodyExpr> &&anyCase) noexcept
-    : Expr(lexer, EXPR_MATCH, pos),
+    : Expr(lexer, EXPR_MATCH, pos), expr(std::move(expr)),
       cases(std::move(cases)),
       anyCase(std::move(anyCase)) {
 }
@@ -619,9 +620,42 @@ MatchExpr::~MatchExpr() {
 }
 
 std::string MatchExpr::toString() const noexcept {
-  // TODO
-  return "";
+  std::string result = "match ";
+  result += getExpression().toString();
+  result += '\n';
+  for (auto &matchcase : cases) {
+    result += std::get<0>(matchcase)->toString(getLexer());
+    if (!std::get<1>(matchcase).empty()) {
+      result += '(';
+      bool first = true;
+      for (auto &var : std::get<1>(matchcase)) {
+        if (!first)
+          result += ", ";
+        else
+          first = false;
+
+        result += var->toString(getLexer());
+      }
+      result += ')';
+    }
+
+    result += " => ";
+
+    result += std::get<2>(matchcase)->toString();
+    result += ";\n";
+  }
+
+  if (anyCase) {
+    result += "_ => ";
+    result += anyCase->toString();
+    result += ";\n";
+  }
+
+  result += ';';
+
+  return result;
 }
+
 
 // BiOpExpr
 BiOpExpr::BiOpExpr(const Lexer &lexer, const Position &pos,

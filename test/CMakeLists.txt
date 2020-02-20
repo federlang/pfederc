@@ -663,6 +663,34 @@ fail_test(ast_ensure55 ast "ensure x == y")
 fail_test(ast_ensure56 ast "ensure True\nelse ensure\n\;")
 fail_test(ast_ensure57 ast "ensure True\nelse False\n\;")
 
+# match
+# good
+match_test(ast_match00 ast "match True\nTrue => \;\n\;"
+  "^match True\nTrue => \;\n\;\n$")
+match_test(ast_match01 ast "match True\nTrue => hello()\;\n\;"
+  "^match True\nTrue => \\\\(hello\\\\)\n\;\n\;\n$")
+match_test(ast_match02 ast "match True\nTrue => \;\nFalse => \;\n\;"
+  "^match True\nTrue => \;\nFalse => \;\n\;\n$")
+match_test(ast_match03 ast "match True\nTrue => \;\nFalse => \;\n_ => \;\n\;"
+  "^match True\nTrue => \;\nFalse => \;\n_ => \;\n\;\n$")
+match_test(ast_match04 ast "match myvar\nVarValue => \;\n\;"
+  "^match myvar\nVarValue => \;\n\;\n$")
+match_test(ast_match05 ast "match myvar\n100 => \;\n\;"
+  "^match myvar\n100 => \;\n\;\n$")
+match_test(ast_match06 ast "match myvar\n'c' => \;\n\;"
+  "^match myvar\n'c' => \;\n\;\n$")
+match_test(ast_match07 ast "match myvar\nCase0(x) => \;\nCase1(x, y) => \;\n\;"
+ "^match myvar\nCase0\\\\(x\\\\) => \;\nCase1\\\\(x, y\\\\) => \;\n\;\n$")
+# bad
+fail_test(ast_match50 ast "match")
+fail_test(ast_match51 ast "match\nTrue => \;\n\;")
+fail_test(ast_match52 ast "match myvar\nTrue =>")
+fail_test(ast_match53 ast "match myvar\nTrue => \;\n")
+fail_test(ast_match54 ast "match myvar\nTrue => \n\;")
+fail_test(ast_match55 ast "match myvar\nTrue => hello()\n")
+fail_test(ast_match56 ast "match myvar\nTrue => hello()")
+fail_test(ast_match57 ast "match myvar\nCase0(x) => \;\nCase1(x, y) => \;\n_(x) => \;\n\;")
+
 # memory tests
 valgrind_test(ast_mem00 $<TARGET_FILE:astmem> "a + b")
 valgrind_test(ast_mem01 $<TARGET_FILE:astmem> "a + b + c * d * e / hello")
