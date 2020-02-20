@@ -174,14 +174,6 @@ std::unique_ptr<Expr> Parser::parseUse() noexcept {
   return std::make_unique<UseExpr>(lexer, pos, std::move(exprs));
 }
 
-std::unique_ptr<Expr> Parser::parseFor(bool isdo) noexcept {
-  if (isdo)
-    sanityExpect(TOK_KW_DO);
-  else
-    sanityExpect(TOK_KW_FOR);
-   // TODO
-}
-
 std::unique_ptr<Expr> Parser::parseMatch() noexcept {
   sanityExpect(TOK_KW_MATCH);
    // TODO

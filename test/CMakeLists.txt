@@ -573,6 +573,44 @@ fail_test(ast_caps57 ast "#!requires x\n")
 fail_test(ast_caps58 ast "#Inline")
 fail_test(ast_caps59 ast "#!requires x")
 
+# for loop
+# good
+match_test(ast_for00 ast "for True\n\;"
+	"^for True\n\;\n$")
+match_test(ast_for01 ast "for i < 100\; ++i\n\;"
+	"^for \\\\(< i 100\\\\)\; \\\\(\\\\+\\\\+ i\\\\)\n\;\n$")
+match_test(ast_for02 ast "for i := 0\; i < 100\; ++i\n\;"
+	"^for \\\\(:= i 0\\\\)\; \\\\(< i 100\\\\)\; \\\\(\\\\+\\\\+ i\\\\)\n\;\n$")
+match_test(ast_for03 ast "for True\nhello()\n\;"
+	"^for True\n\\\\(hello\\\\)\n\;\n$")
+match_test(ast_for04 ast "for True\n\n\nhello()\n\n\;"
+	"^for True\n\\\\(hello\\\\)\n\;\n$")
+# bad
+fail_test(ast_for50 ast "for\n\;")
+fail_test(ast_for51 ast "for")
+fail_test(ast_for52 ast "for\nhello()\n")
+fail_test(ast_for53 ast "for\nhello()")
+
+# do loop
+# good
+match_test(ast_do00 ast "do\n\; for True"
+	"^do\n\; for True\n$")
+match_test(ast_do01 ast "do\n\; for i < 100\; ++i"
+	"^do\n\; for \\\\(< i 100\\\\)\; \\\\(\\\\+\\\\+ i\\\\)\n$")
+match_test(ast_do02 ast "do i := 0\n\; for i < 100\; ++i"
+	"^do \\\\(:= i 0\\\\)\n\; for \\\\(< i 100\\\\)\; \\\\(\\\\+\\\\+ i\\\\)\n$")
+match_test(ast_do03 ast "do\nhello()\n\; for True"
+	"^do\n\\\\(hello\\\\)\n\; for True\n$")
+match_test(ast_do04 ast "do\n\n\nhello()\n\n\n\; for True"
+	"^do\n\\\\(hello\\\\)\n\; for True\n$")
+# bad
+fail_test(ast_do50 ast "do\n\; for")
+fail_test(ast_do51 ast "do")
+fail_test(ast_do52 ast "do\n")
+fail_test(ast_do53 ast "do\n\;")
+fail_test(ast_do54 ast "do\nfor True")
+fail_test(ast_do55 ast "do i := 0\n\; for")
+
 # memory tests
 valgrind_test(ast_mem00 $<TARGET_FILE:astmem> "a + b")
 valgrind_test(ast_mem01 $<TARGET_FILE:astmem> "a + b + c * d * e / hello")

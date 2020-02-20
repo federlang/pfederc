@@ -321,14 +321,16 @@ std::unique_ptr<BodyExpr> Parser::parseFunctionBody() noexcept {
       exprs.push_back(std::move(expr));
     }
   }
+
   std::unique_ptr<Expr> returnExpr;
   if (*lexer.getCurrentToken() == TOK_KW_RET) {
     pos = pos + lexer.getCurrentToken()->getPosition();
     lexer.next(); // eat return
     returnExpr = parseExpression();
-    if (!returnExpr)
-      return nullptr;
-    pos = pos + returnExpr->getPosition();
+    if (returnExpr)
+      pos = pos + returnExpr->getPosition();
+    else
+      err = true;
   }
 
   while (*lexer.getCurrentToken() == TOK_EOL)

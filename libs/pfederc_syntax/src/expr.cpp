@@ -557,17 +557,51 @@ std::string IfExpr::toString() const noexcept {
 LoopExpr::LoopExpr(const Lexer &lexer, ExprType type, const Position &pos,
     std::unique_ptr<Expr> &&initExpr,
     std::unique_ptr<Expr> &&condExpr,
-    std::unique_ptr<Expr> &&itExpr) noexcept
+    std::unique_ptr<Expr> &&itExpr,
+    std::unique_ptr<BodyExpr> &&bodyExpr) noexcept
     : Expr(lexer, type, pos), initExpr(std::move(initExpr)),
-      condExpr(std::move(condExpr)), itExpr(std::move(itExpr)) {
+      condExpr(std::move(condExpr)), itExpr(std::move(itExpr)),
+      bodyExpr(std::move(bodyExpr)) {
 }
 
 LoopExpr::~LoopExpr() {
 }
 
 std::string LoopExpr::toString() const noexcept {
-  // TODO
-  return "";
+  std::string result;
+  if (getType() == EXPR_LOOP_DO) {
+    result += "do";
+    if (initExpr) {
+      result += ' ';
+      result += initExpr->toString();
+    }
+  } else {
+    result += "for ";
+    if (initExpr) {
+      result += initExpr->toString();
+      result += "; ";
+    }
+    result += condExpr->toString();
+    if (itExpr) {
+      result += "; ";
+      result += itExpr->toString();
+    }
+  }
+
+  result += '\n';
+  result += bodyExpr->toString();
+  result += ';';
+
+  if (getType() == EXPR_LOOP_DO) {
+    result += " for ";
+    result += condExpr->toString();
+    if (itExpr) {
+      result += "; ";
+      result += itExpr->toString();
+    }
+  }
+
+  return result;
 }
 
 // MatchExpr

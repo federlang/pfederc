@@ -557,6 +557,7 @@ namespace pfederc {
 
   class LoopExpr final : public Expr {
     std::unique_ptr<Expr> initExpr, condExpr, itExpr;
+    std::unique_ptr<BodyExpr> bodyExpr;
   public:
     /*!\brief Initializes LoopExpr
      * \param lexer
@@ -569,9 +570,15 @@ namespace pfederc {
     LoopExpr(const Lexer &lexer, ExprType type, const Position &pos,
         std::unique_ptr<Expr> &&initExpr,
         std::unique_ptr<Expr> &&condExpr,
-        std::unique_ptr<Expr> &&itExpr) noexcept;
+        std::unique_ptr<Expr> &&itExpr,
+        std::unique_ptr<BodyExpr> &&bodyExpr) noexcept;
     LoopExpr(const LoopExpr &) = delete;
     virtual ~LoopExpr();
+
+    /*!\return Returns loop body
+     */
+    inline const BodyExpr &getBody() const noexcept
+    { return *bodyExpr; }
 
     /*!\return Returns optional initialization expression
      */
