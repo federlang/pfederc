@@ -25,7 +25,11 @@ namespace pfederc {
      * positions.
      */
     Position operator +(const Position &pos) const noexcept;
+
+    inline bool isFake() const noexcept { return startIndex > endIndex; }
   };
+
+  constexpr Position FAKE_POS = Position(0,1,0);
 
   enum TokenType : uint16_t {
     TOK_ERR,       //!< error
@@ -250,7 +254,7 @@ namespace pfederc {
     bool operator !=(TokenType type) const noexcept;
     bool operator ==(TokenType type) const noexcept;
 
-    std::string toString(const Lexer &lexer) const noexcept;
+    virtual std::string toString(const Lexer &lexer) const noexcept;
   };
 
   class NumberToken : public Token {
@@ -274,6 +278,22 @@ namespace pfederc {
 
     float f32() const noexcept;
     double f64() const noexcept;
+
+    virtual std::string toString(const Lexer &lexer) const noexcept;
+  };
+
+  //! For fake token generation
+  class StringToken : public Token {
+    std::string str;
+  public:
+    /*!\brief Initialize StringToken
+     * \param last ignore. set to nullptr
+     */
+    StringToken(Token *last, TokenType type, const Position &pos,
+                const std::string &str) noexcept;
+    virtual ~StringToken();
+
+    virtual std::string toString(const Lexer &lexer) const noexcept;
   };
 }
 

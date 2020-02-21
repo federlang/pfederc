@@ -351,3 +351,44 @@ float NumberToken::f32() const noexcept {
 double NumberToken::f64() const noexcept {
   return reinterpret_cast<const double&>(num);
 }
+
+std::string NumberToken::toString(const Lexer &lexer) const noexcept {
+  switch(getType()) {
+  case TOK_INT8:
+    return std::to_string(i8()) + 's';
+  case TOK_INT16:
+    return std::to_string(i16()) + 'S';
+  case TOK_INT32:
+    return std::to_string(i32());
+  case TOK_INT64:
+    return std::to_string(i64()) + 'L';
+  case TOK_UINT8:
+    return std::to_string(u8()) + "us";
+  case TOK_UINT16:
+    return std::to_string(u16()) + "uS";
+  case TOK_UINT32:
+    return std::to_string(u32()) + 'u';
+  case TOK_UINT64:
+    return std::to_string(u64()) + "uL";
+  case TOK_FLT32:
+    return std::to_string(f32()) + 'f';
+  case TOK_FLT64:
+    return std::to_string(f64()) + 'F';
+  default:
+    fatal(__FILE__, __LINE__, "Unexpected number token type");
+    return "";
+  }
+}
+
+// StringToken
+StringToken::StringToken(Token *last, TokenType type, const Position &pos,
+            const std::string &str) noexcept
+    : Token(last, type, pos), str(str) {
+}
+
+StringToken::~StringToken() {
+}
+
+std::string StringToken::toString(const Lexer &lexer) const noexcept {
+  return str;
+}

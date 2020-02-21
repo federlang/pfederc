@@ -45,8 +45,12 @@ status_test(tokenidtostr)
 
 build_test(tokenid)
 build_test(tokenidmem)
+build_test(tokenstr)
 build_test(ast)
 build_test(astmem)
+
+#status_test(semantic_children)
+#status_test(semantic_safe_children)
 
 # Identifiers
 # good
@@ -224,6 +228,17 @@ status_test_arg(tokenid_kill01 tokenidmem "[as]123786!@#~")
 status_test_arg(tokenid_kill02 tokenidmem "\\\\")
 status_test_arg(tokenid_kill03 tokenidmem "\n")
 status_test_arg(tokenid_kill04 tokenidmem "         akl\;sdjfa123")
+
+# tokenstr
+
+# string
+match_test(tokenstr_str00 tokenstr "\"hello\""
+  "^\"hello\"\n$")
+match_test(tokenstr_str01 tokenstr "\"hello0123456789\""
+  "^\"hello0123456789\"\n$")
+# char
+match_test(tokenstr_char00 tokenstr "'h'"
+  "^'h'\n$")
 
 # memory tests
 valgrind_test(tokenid_memstr00 $<TARGET_FILE:tokenidmem> "\"hello, world!\"")

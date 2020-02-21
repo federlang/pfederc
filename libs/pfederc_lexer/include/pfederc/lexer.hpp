@@ -36,6 +36,7 @@ namespace pfederc {
     int currentChar; //!< Current character invalid if currentToken == nullptr
     Token *currentToken; //!< Current token. nullptr before first next call.
     std::string lastComment; //!< Important for generating some documentation
+
     // METHODS for next()
     //! Reads nextChar. Sets currentChar to read character.
     int nextChar() noexcept;
