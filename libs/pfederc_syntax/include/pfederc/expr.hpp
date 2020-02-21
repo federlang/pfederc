@@ -43,6 +43,7 @@ namespace pfederc {
   class Expr;
   class ProgramExpr;
   class TokenExpr;
+  class FakeTokenExpr;
   class UseExpr;
   class ProgNameExpr;
   class FuncExpr;
@@ -159,7 +160,7 @@ namespace pfederc {
     virtual std::string toString() const noexcept;
   };
 
-  class TokenExpr final : public Expr {
+  class TokenExpr : public Expr {
     const Token *tok;
   public:
     /*!\brief Initializes TokenExpr
@@ -174,6 +175,17 @@ namespace pfederc {
     inline const Token *getTokenPtr() const noexcept { return tok; }
 
     virtual std::string toString() const noexcept;
+  };
+
+  class FakeTokenExpr final : public TokenExpr {
+    std::unique_ptr<Token> tokunique;
+  public:
+    inline FakeTokenExpr(const Lexer &lexer, std::unique_ptr<Token> &&tok) noexcept
+        : TokenExpr(lexer, tok.get()), tokunique() {
+      tokunique = std::move(tok);
+    }
+
+    inline virtual ~FakeTokenExpr() {}
   };
 
   inline bool isTokenExpr(const Expr &expr, TokenType type) {

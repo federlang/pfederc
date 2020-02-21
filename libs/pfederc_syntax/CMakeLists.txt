@@ -4,6 +4,7 @@ project(pfederc_syntax)
 add_library(pfederc_syntax
 	"${pfederc_syntax_SOURCE_DIR}/src/expr.cpp"
 	"${pfederc_syntax_SOURCE_DIR}/src/syntax.cpp"
+  "${pfederc_syntax_SOURCE_DIR}/src/syntax_optimizer.cpp"
   "${pfederc_syntax_SOURCE_DIR}/src/syntax_array.cpp"
   "${pfederc_syntax_SOURCE_DIR}/src/syntax_binary.cpp"
   "${pfederc_syntax_SOURCE_DIR}/src/syntax_capabilities.cpp"

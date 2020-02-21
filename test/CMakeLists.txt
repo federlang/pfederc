@@ -48,6 +48,8 @@ build_test(tokenidmem)
 build_test(tokenstr)
 build_test(ast)
 build_test(astmem)
+build_test(astopt)
+build_test(astoptmem)
 
 #status_test(semantic_children)
 #status_test(semantic_safe_children)
@@ -731,3 +733,13 @@ valgrind_test(ast_mem09 $<TARGET_FILE:astmem> "func helloworld(x: i32):\nreturn 
 valgrind_test(ast_mem10 $<TARGET_FILE:astmem> "class MyClass(x: i32)\n\;")
 valgrind_test(ast_mem11 $<TARGET_FILE:astmem> "class MyClass(x: i32, y: i32)\n\;")
 valgrind_test(ast_mem12 $<TARGET_FILE:astmem> "class enum func trait class trait type")
+
+# ---------------------------- syntax optimizer ------------------------------
+
+# str str
+match_test(astopt_strstr00 astopt "\"Hello, \" \"World!\""
+  "^\"Hello, World!\"\n1\n$")
+valgrind_test(astopt_mem00 $<TARGET_FILE:astoptmem> "\"Hello, \" \"World!\"")
+match_test(astopt_strstr01 astopt "\"Hello, \" \"World\" \" to you\""
+  "^\"Hello, World to you\"\n2\n$")
+valgrind_test(astopt_mem01 $<TARGET_FILE:astoptmem> "\"Hello, \" \"World!\" \"to you\"")
