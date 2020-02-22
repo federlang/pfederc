@@ -161,16 +161,18 @@ namespace pfederc {
   };
 
   class TokenExpr : public Expr {
-    const Token *tok;
+    Token *tok;
   public:
     /*!\brief Initializes TokenExpr
      * \param lexer
      * \param tok Return value of getToken(), Position of token is lexer input position
      */
-    TokenExpr(const Lexer &lexer, const Token *tok) noexcept;
+    TokenExpr(const Lexer &lexer, Token *tok) noexcept;
     TokenExpr(const TokenExpr &) = delete;
     virtual ~TokenExpr();
 
+    inline Token &getToken() noexcept { return *tok; }
+    inline Token *getTokenPtr() noexcept { return tok; }
     inline const Token &getToken() const noexcept { return *tok; }
     inline const Token *getTokenPtr() const noexcept { return tok; }
 

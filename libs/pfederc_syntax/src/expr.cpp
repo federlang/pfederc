@@ -93,7 +93,7 @@ std::string ProgramExpr::toString() const noexcept {
 }
 
 // TokenExpr
-TokenExpr::TokenExpr(const Lexer &lexer, const Token *tok) noexcept
+TokenExpr::TokenExpr(const Lexer &lexer, Token *tok) noexcept
     : Expr(lexer, EXPR_TOK, tok->getPosition()), tok{tok} {
 }
 

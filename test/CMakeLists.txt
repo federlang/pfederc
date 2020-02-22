@@ -743,3 +743,29 @@ valgrind_test(astopt_mem00 $<TARGET_FILE:astoptmem> "\"Hello, \" \"World!\"")
 match_test(astopt_strstr01 astopt "\"Hello, \" \"World\" \" to you\""
   "^\"Hello, World to you\"\n2\n$")
 valgrind_test(astopt_mem01 $<TARGET_FILE:astoptmem> "\"Hello, \" \"World!\" \"to you\"")
+
+# num op num
+match_test(astopt_numadd00 astopt "10 + 2"
+	"^12\n1\n$")
+valgrind_test(astopt_mem02 $<TARGET_FILE:astoptmem> "10 + 2")
+match_test(astopt_numadd01 astopt "4 + 7 + 2"
+	"^13\n2\n$")
+valgrind_test(astopt_mem03 $<TARGET_FILE:astoptmem> "4 + 7 + 2")
+
+match_test(astopt_numsub00 astopt "10 - 2"
+	"^8\n1\n$")
+match_test(astopt_numsub01 astopt "10 - 2 - 3"
+	"^5\n2\n$")
+
+match_test(astopt_nummod00 astopt "10 % 2"
+	"^0\n1\n$")
+valgrind_test(astopt_mem04 $<TARGET_FILE:astoptmem> "10 % 2")
+match_test(astopt_nummod01 astopt "10 % 7 % 2"
+	"^1\n2\n$")
+valgrind_test(astopt_mem05 $<TARGET_FILE:astoptmem> "10 % 7 % 2")
+
+match_test(astopt_nummul00 astopt "10 * 2"
+	"^20\n1\n$")
+
+match_test(astopt_numdiv00 astopt "10 / 2"
+	"^5\n1\n$")

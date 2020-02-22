@@ -68,7 +68,7 @@ std::unique_ptr<Expr> Parser::parseUnary() noexcept {
 }
 
 std::unique_ptr<Expr> Parser::parsePrimary(std::unique_ptr<Capabilities> &&caps) noexcept {
-  const Token *tok = lexer.getCurrentToken();
+  Token *const tok = lexer.getCurrentToken();
   if (isTokenTypeOperator(tok->getType()))
     return parseUnary();
 

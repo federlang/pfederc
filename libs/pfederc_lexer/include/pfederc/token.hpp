@@ -154,6 +154,22 @@ namespace pfederc {
       return false;
     }
   }
+	
+	inline bool isIntegerType(TokenType type) noexcept {
+		switch(type) {
+    case TOK_INT8:
+    case TOK_INT16:
+    case TOK_INT32:
+    case TOK_INT64:
+    case TOK_UINT8:
+    case TOK_UINT16:
+    case TOK_UINT32:
+    case TOK_UINT64:
+      return true;
+    default:
+      return false;
+		};
+	}
 
   constexpr TokenType TOK_KW_START = TOK_KW_FN;
   constexpr TokenType TOK_KW_END = TOK_KW_FALSE;
@@ -278,6 +294,11 @@ namespace pfederc {
 
     float f32() const noexcept;
     double f64() const noexcept;
+
+		template<class R>
+		R getNumber() const noexcept {
+			return *(reinterpret_cast<const R*>(&num));
+		}
 
     virtual std::string toString(const Lexer &lexer) const noexcept;
   };
