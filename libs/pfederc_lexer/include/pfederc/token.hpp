@@ -274,7 +274,12 @@ namespace pfederc {
   };
 
   class NumberToken : public Token {
-    uint64_t num;
+    union {
+			uint64_t u64;
+			int64_t i64;
+			float f32;
+			double f64;
+		} num;
   public:
     NumberToken(Token *last, TokenType type, const Position &pos, uint64_t num) noexcept;
     NumberToken(Token *last, TokenType type, const Position &pos, int64_t num) noexcept;
@@ -296,12 +301,42 @@ namespace pfederc {
     double f64() const noexcept;
 
 		template<class R>
-		R getNumber() const noexcept {
-			return *(reinterpret_cast<const R*>(&num));
+		inline R getNumber() const noexcept {
+			return static_cast<R>(num.u64);
 		}
 
     virtual std::string toString(const Lexer &lexer) const noexcept;
   };
+
+	template<>
+	inline int8_t NumberToken::getNumber<int8_t>() const noexcept {
+		return i8();
+	}
+
+	template<>
+	inline int16_t NumberToken::getNumber<int16_t>() const noexcept {
+		return i16();
+	}
+
+	template<>
+	inline int32_t NumberToken::getNumber<int32_t>() const noexcept {
+		return i32();
+	}
+
+	template<>
+	inline int64_t NumberToken::getNumber<int64_t>() const noexcept {
+		return i64();
+	}
+
+	template<>
+	inline float NumberToken::getNumber<float>() const noexcept {
+		return f32();
+	}
+
+	template<>
+	inline double NumberToken::getNumber<double>() const noexcept {
+		return f64();
+	}
 
   //! For fake token generation
   class StringToken : public Token {

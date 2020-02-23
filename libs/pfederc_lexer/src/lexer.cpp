@@ -201,6 +201,13 @@ bool pfederc::logLexerErrors(Logger &log, const Lexer &lex) noexcept {
 
 // Token
 std::string Token::toString(const Lexer &lexer) const noexcept {
-  return lexer.getFileContent().substr(getPosition().startIndex,
-    getPosition().endIndex - getPosition().startIndex + 1);
+	switch(getType()) {
+	case TOK_KW_TRUE:
+		return "True";
+	case TOK_KW_FALSE:
+		return "False";
+	default:
+  	return lexer.getFileContent().substr(getPosition().startIndex,
+  	  getPosition().endIndex - getPosition().startIndex + 1);
+	}
 }

@@ -291,22 +291,26 @@ bool Token::operator ==(TokenType type) const noexcept {
 // NumberToken
 NumberToken::NumberToken(Token *last, TokenType type,
     const Position &pos, uint64_t num) noexcept
-    : Token(last, type, pos), num{num} {
+    : Token(last, type, pos) {
+	this->num.u64 = num;
 }
 
 NumberToken::NumberToken(Token *last, TokenType type,
     const Position &pos, int64_t num) noexcept
-    : Token(last, type, pos), num{reinterpret_cast<const uint64_t&>(num)} {
+    : Token(last, type, pos) {
+	this->num.i64 = num;
 }
 
 NumberToken::NumberToken(Token *last, TokenType type,
     const Position &pos, float f32) noexcept
-    : Token(last, type, pos), num{reinterpret_cast<const uint64_t&>(num)} {
+    : Token(last, type, pos) {
+	this->num.f32 = f32;
 }
 
 NumberToken::NumberToken(Token *last, TokenType type,
     const Position &pos, double f64) noexcept
-    : Token(last, type, pos), num{reinterpret_cast<const uint64_t&>(num)} {
+    : Token(last, type, pos) {
+	this->num.f64 = f64;
 }
 
 NumberToken::~NumberToken() {
@@ -325,7 +329,7 @@ int32_t NumberToken::i32() const noexcept {
 }
 
 int64_t NumberToken::i64() const noexcept {
-  return reinterpret_cast<const int64_t&>(num);
+	return num.i64;
 }
 
 uint8_t NumberToken::u8() const noexcept {
@@ -341,15 +345,15 @@ uint32_t NumberToken::u32() const noexcept {
 }
 
 uint64_t NumberToken::u64() const noexcept {
-  return num;
+  return num.u64;
 }
 
 float NumberToken::f32() const noexcept {
-  return reinterpret_cast<const float&>(num);
+	return num.f32;
 }
 
 double NumberToken::f64() const noexcept {
-  return reinterpret_cast<const double&>(num);
+	return num.f64;
 }
 
 std::string NumberToken::toString(const Lexer &lexer) const noexcept {

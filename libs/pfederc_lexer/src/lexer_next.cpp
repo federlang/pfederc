@@ -518,8 +518,8 @@ std::unique_ptr<Token> Lexer::nextTokenFltNum(size_t num) noexcept {
   double po64 = 10.0;
 
   do {
-    f32 += (currentChar - '0') / po32;
-    f64 += (currentChar - '0') / po64;
+    f32 += static_cast<float>(currentChar - '0') / po32;
+    f64 += static_cast<double>(currentChar - '0') / po64;
     po32 *= 10.0f;
     po64 *= 10.0;
   } while (isdigit(nextChar()));

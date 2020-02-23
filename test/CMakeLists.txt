@@ -241,6 +241,9 @@ match_test(tokenstr_str01 tokenstr "\"hello0123456789\""
 # char
 match_test(tokenstr_char00 tokenstr "'h'"
   "^'h'\n$")
+# float
+match_test(tokenstr_flt00 tokenstr "2.0" "^2.0")
+match_test(tokenstr_flt01 tokenstr "2.0f" "^2.0")
 
 # memory tests
 valgrind_test(tokenid_memstr00 $<TARGET_FILE:tokenidmem> "\"hello, world!\"")
@@ -769,3 +772,16 @@ match_test(astopt_nummul00 astopt "10 * 2"
 
 match_test(astopt_numdiv00 astopt "10 / 2"
 	"^5\n1\n$")
+
+match_test(astopt_cmp00 astopt "10 < 2"
+	"^False\n1\n$")
+match_test(astopt_cmp01 astopt "10.0f < 2.0f"
+	"^False\n1\n$")
+match_test(astopt_cmp02 astopt "10.0 < 2.0"
+	"^False\n1\n$")
+match_test(astopt_cmp03 astopt "2 < 4"
+	"^True\n1\n$")
+match_test(astopt_cmp04 astopt "2.0f < 4.0f"
+	"^True\n1\n$")
+match_test(astopt_cmp05 astopt "2.0 < 4.0"
+	"^True\n1\n$")
