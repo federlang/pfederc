@@ -785,3 +785,17 @@ match_test(astopt_cmp04 astopt "2.0f < 4.0f"
 	"^True\n1\n$")
 match_test(astopt_cmp05 astopt "2.0 < 4.0"
 	"^True\n1\n$")
+match_test(astopt_cmp06 astopt "2 == 2"
+	"^True\n1\n$")
+match_test(astopt_cmp07 astopt "2 == 4"
+	"^False\n1\n$")
+match_test(astopt_cmp08 astopt "2 != 2"
+	"^False\n1\n$")
+match_test(astopt_cmp09 astopt "2 != 4"
+	"^True\n1\n$")
+
+match_test(astopt_cmpnum00 astopt "4 == (3 + 1)"
+	"^True\n2\n$")
+match_test(astopt_cmpnum01 astopt "4 == (3 + 2)"
+	"^False\n2\n$")
+
