@@ -32,124 +32,124 @@ inline static LogMessage _logParserError(const Parser &parser, const SyntaxError
   Position pos{err.getPosition()};
   const Level &lvl{err.getLogLevel()};
   switch (err.getErrorCode()) {
-  case STX_ERR_EXPECTED_PRIMARY_EXPR:
+  case SyntaxErrorCode::STX_ERR_EXPECTED_PRIMARY_EXPR:
     return LogMessage(lvl, logCreateErrorMessage(lexer, pos,
       "Expected primary expression"));
-  case STX_ERR_EXPECTED_CLOSING_BRACKET:
+  case SyntaxErrorCode::STX_ERR_EXPECTED_CLOSING_BRACKET:
     return LogMessage(lvl, logCreateErrorMessage(lexer, pos,
       "Expected ')'"));
-  case STX_ERR_EXPECTED_ARR_CLOSING_BRACKET:
+  case SyntaxErrorCode::STX_ERR_EXPECTED_ARR_CLOSING_BRACKET:
     return LogMessage(lvl, logCreateErrorMessage(lexer, pos,
       "Expected ']'"));
-  case STX_ERR_EXPECTED_TEMPL_CLOSING_BRACKET:
+  case SyntaxErrorCode::STX_ERR_EXPECTED_TEMPL_CLOSING_BRACKET:
     return LogMessage(lvl, logCreateErrorMessage(lexer, pos,
       "Expected '}'"));
-  case STX_ERR_EXPECTED_FUNCTION_ID:
+  case SyntaxErrorCode::STX_ERR_EXPECTED_FUNCTION_ID:
     return LogMessage(lvl, logCreateErrorMessage(lexer, pos,
       "Expected identifier"));
-  case STX_ERR_EXPECTED_PARAMETERS:
+  case SyntaxErrorCode::STX_ERR_EXPECTED_PARAMETERS:
     return LogMessage(lvl, logCreateErrorMessage(lexer, pos,
       "Expected function parameters"));
-  case STX_ERR_INVALID_VARDECL_ID:
+  case SyntaxErrorCode::STX_ERR_INVALID_VARDECL_ID:
     return LogMessage(lvl, logCreateErrorMessage(lexer, pos,
       "Expected variable identifier"));
-  case STX_ERR_EXPECTED_VARDECL:
+  case SyntaxErrorCode::STX_ERR_EXPECTED_VARDECL:
     return LogMessage(lvl, logCreateErrorMessage(lexer, pos,
       "Expected variable declaration"));
-  case STX_ERR_INVALID_VARDECL:
+  case SyntaxErrorCode::STX_ERR_INVALID_VARDECL:
     return LogMessage(lvl, logCreateErrorMessage(lexer, pos,
       "Invalid variable declaration"));
-  case STX_ERR_EXPECTED_ID:
+  case SyntaxErrorCode::STX_ERR_EXPECTED_ID:
     return LogMessage(lvl, logCreateErrorMessage(lexer, pos,
       "Expected identifier"));
-  case STX_ERR_EXPECTED_GUARD:
+  case SyntaxErrorCode::STX_ERR_EXPECTED_GUARD:
     return LogMessage(lvl, logCreateErrorMessage(lexer, pos,
       "Expected guard"));
-  case STX_ERR_EXPECTED_FN_DCL_DEF:
+  case SyntaxErrorCode::STX_ERR_EXPECTED_FN_DCL_DEF:
     return LogMessage(lvl, logCreateErrorMessage(lexer, pos,
       "Expected either function declaration or definition"));
-  case STX_ERR_EXPECTED_STMT:
+  case SyntaxErrorCode::STX_ERR_EXPECTED_STMT:
     return LogMessage(lvl, logCreateErrorMessage(lexer, pos,
       "Expected ';'"));
-  case STX_ERR_FUNC_VAR_NO_TEMPL:
+  case SyntaxErrorCode::STX_ERR_FUNC_VAR_NO_TEMPL:
     return LogMessage(lvl, logCreateErrorMessage(lexer, pos,
       "Function variable mustn't have be a template."));
-  case STX_ERR_EXPECTED_EOL:
+  case SyntaxErrorCode::STX_ERR_EXPECTED_EOL:
     return LogMessage(lvl, logCreateErrorMessage(lexer, pos,
       "Expected end-of-line"));
-  case STX_ERR_EXPECTED_EOF:
+  case SyntaxErrorCode::STX_ERR_EXPECTED_EOF:
     return LogMessage(lvl, logCreateErrorMessage(lexer, pos,
       "Expected end-of-file"));
-  case STX_ERR_EXPECTED_EOF_EOL:
+  case SyntaxErrorCode::STX_ERR_EXPECTED_EOF_EOL:
     return LogMessage(lvl, logCreateErrorMessage(lexer, pos,
       "Expected end-of-file or end-of-line"));
-  case STX_ERR_INVALID_EXPR:
+  case SyntaxErrorCode::STX_ERR_INVALID_EXPR:
     return LogMessage(lvl, logCreateErrorMessage(lexer, pos,
       "Invalid expression"));
-  case STX_ERR_PROGNAME:
+  case SyntaxErrorCode::STX_ERR_PROGNAME:
     return LogMessage(lvl, logCreateErrorMessage(lexer, pos,
           "Expected program name"));
-  case STX_ERR_CLASS_SCOPE:
+  case SyntaxErrorCode::STX_ERR_CLASS_SCOPE:
     return LogMessage(lvl, logCreateErrorMessage(lexer, pos,
           "Invalid in class scope"));
-  case STX_ERR_TRAIT_SCOPE:
+  case SyntaxErrorCode::STX_ERR_TRAIT_SCOPE:
     return LogMessage(lvl, logCreateErrorMessage(lexer, pos,
           "Invalid in trait scope"));
-  case STX_ERR_TRAIT_SCOPE_FUNC_TEMPL:
+  case SyntaxErrorCode::STX_ERR_TRAIT_SCOPE_FUNC_TEMPL:
     return LogMessage(lvl, logCreateErrorMessage(lexer, pos,
           "Invalid template function in trait scope"));
-  case STX_ERR_TRAIT_SCOPE_FUNC_BODY:
+  case SyntaxErrorCode::STX_ERR_TRAIT_SCOPE_FUNC_BODY:
     return LogMessage(lvl, logCreateErrorMessage(lexer, pos,
           "No function body in trait scope"));
-  case STX_ERR_TRAITCLASS_SCOPE_FUNC_BODY:
+  case SyntaxErrorCode::STX_ERR_TRAITCLASS_SCOPE_FUNC_BODY:
     return LogMessage(lvl, logCreateErrorMessage(lexer, pos,
           "Expected function body in class trait scope"));
-  case STX_ERR_TRAITCLASS_IMPL:
+  case SyntaxErrorCode::STX_ERR_TRAITCLASS_IMPL:
     return LogMessage(lvl, logCreateErrorMessage(lexer, pos,
           "Expected single reference to trait type"));
-  case STX_ERR_ENUM_SCOPE:
+  case SyntaxErrorCode::STX_ERR_ENUM_SCOPE:
     return LogMessage(lvl, logCreateErrorMessage(lexer, pos,
           "Invalid in enum scope"));
-  case STX_ERR_ENUM_BODY:
+  case SyntaxErrorCode::STX_ERR_ENUM_BODY:
     return LogMessage(lvl, logCreateErrorMessage(lexer, pos,
           "Expected enum body"));
-  case STX_ERR_CLASS_TRAIT_SCOPE:
+  case SyntaxErrorCode::STX_ERR_CLASS_TRAIT_SCOPE:
     return LogMessage(lvl, logCreateErrorMessage(lexer, pos,
           "Invalid in class trait scope"));
-  case STX_ERR_EXPECTED_CONSTRUCTION:
+  case SyntaxErrorCode::STX_ERR_EXPECTED_CONSTRUCTION:
     return LogMessage(lvl, logCreateErrorMessage(lexer, pos,
           "Expected constructor"));
-  case STX_ERR_INVALID_TYPE_EXPR:
+  case SyntaxErrorCode::STX_ERR_INVALID_TYPE_EXPR:
     return LogMessage(lvl, logCreateErrorMessage(lexer, pos,
           "Invalid type expression"));
-  case STX_ERR_EXPECTED_FOR:
+  case SyntaxErrorCode::STX_ERR_EXPECTED_FOR:
     return LogMessage(lvl, logCreateErrorMessage(lexer, pos,
           "Expected 'for'"));
-  case STX_ERR_EXPECTED_STMT_ELSE:
+  case SyntaxErrorCode::STX_ERR_EXPECTED_STMT_ELSE:
     return LogMessage(lvl, logCreateErrorMessage(lexer, pos,
           "Expected ';' or 'else'"));
-  case STX_ERR_EXPECTED_EOL_IF:
+  case SyntaxErrorCode::STX_ERR_EXPECTED_EOL_IF:
     return LogMessage(lvl, logCreateErrorMessage(lexer, pos,
           "Expected either end-of-line or 'if'"));
-  case STX_ERR_EXPECTED_EOL_ENSURE:
+  case SyntaxErrorCode::STX_ERR_EXPECTED_EOL_ENSURE:
     return LogMessage(lvl, logCreateErrorMessage(lexer, pos,
           "Expected either end-of-line or 'ensure'"));
-  case STX_ERR_EXPECTED_ID_NUM_CHAR_BOOL:
+  case SyntaxErrorCode::STX_ERR_EXPECTED_ID_NUM_CHAR_BOOL:
     return LogMessage(lvl, logCreateErrorMessage(lexer, pos,
           "Expected either identifier, number, character or boolean token"));
-  case STX_ERR_EXPECTED_ID_ANY:
+  case SyntaxErrorCode::STX_ERR_EXPECTED_ID_ANY:
     return LogMessage(lvl, logCreateErrorMessage(lexer, pos,
           "Expected either identifier or '_'"));
-  case STX_ERR_EXPECTED_OP_IMPL:
+  case SyntaxErrorCode::STX_ERR_EXPECTED_OP_IMPL:
     return LogMessage(lvl, logCreateErrorMessage(lexer, pos,
           "Expected '=>'"));
-  case STX_ERR_INVALID_CAPS_ENSURE:
+  case SyntaxErrorCode::STX_ERR_INVALID_CAPS_ENSURE:
     return LogMessage(lvl, logCreateErrorMessage(lexer, pos,
           "Invalid ensurance capability"));
-  case STX_ERR_INVALID_CAPS_DIRECTIVE:
+  case SyntaxErrorCode::STX_ERR_INVALID_CAPS_DIRECTIVE:
     return LogMessage(lvl, logCreateErrorMessage(lexer, pos,
           "Invalid directive capability"));
-  case STX_ERR_INVALID_CAPS_FOLLOWUP:
+  case SyntaxErrorCode::STX_ERR_INVALID_CAPS_FOLLOWUP:
     return LogMessage(lvl, logCreateErrorMessage(lexer, pos,
           "Invalid expression following capability list"));
   default:

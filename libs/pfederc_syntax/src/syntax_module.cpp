@@ -2,27 +2,27 @@
 using namespace pfederc;
 
 std::unique_ptr<Expr> Parser::parseModule() noexcept {
-  sanityExpect(TOK_KW_MOD);
+  sanityExpect(TokenType::TOK_KW_MOD);
   
   bool err = false;
 
   const Token *tokId = lexer.getCurrentToken();
-  if (!expect(TOK_ID)) {
+  if (!expect(TokenType::TOK_ID)) {
     generateError(std::make_unique<SyntaxError>(LVL_ERROR,
-      STX_ERR_EXPECTED_ID, lexer.getCurrentToken()->getPosition()));
+      SyntaxErrorCode::STX_ERR_EXPECTED_ID, lexer.getCurrentToken()->getPosition()));
     err = true;
   }
 
-  if (!expect(TOK_EOL)) {
+  if (!expect(TokenType::TOK_EOL)) {
     generateError(std::make_unique<SyntaxError>(LVL_ERROR,
-      STX_ERR_EXPECTED_EOL, lexer.getCurrentToken()->getPosition()));
+      SyntaxErrorCode::STX_ERR_EXPECTED_EOL, lexer.getCurrentToken()->getPosition()));
     // soft error
   }
 
   ModBody body = parseModBody();
-  if (!expect(TOK_STMT)) {
+  if (!expect(TokenType::TOK_STMT)) {
     generateError(std::make_unique<SyntaxError>(LVL_ERROR,
-      STX_ERR_EXPECTED_STMT, lexer.getCurrentToken()->getPosition()));
+      SyntaxErrorCode::STX_ERR_EXPECTED_STMT, lexer.getCurrentToken()->getPosition()));
     // soft error
   }
 
@@ -34,16 +34,16 @@ std::unique_ptr<Expr> Parser::parseModule() noexcept {
 }
 
 static const std::vector<TokenType> _TERMINATE_MOD_TOKEN = {
-  TOK_STMT, TOK_KW_ELSE,
+  TokenType::TOK_STMT, TokenType::TOK_KW_ELSE,
 };
 
 static const std::vector<ExprType> _ALLOWED_EXPR_MOD = {
-  EXPR_MOD, EXPR_FUNC, EXPR_CLASS, EXPR_TRAIT, EXPR_TRAITIMPL, EXPR_ENUM,
+  ExprType::EXPR_MOD, ExprType::EXPR_FUNC, ExprType::EXPR_CLASS, ExprType::EXPR_TRAIT, ExprType::EXPR_TRAITIMPL, ExprType::EXPR_ENUM,
 };
 
 static const std::vector<ExprType> _ALLOWED_EXPR_PROG = {
-  EXPR_MOD, EXPR_FUNC, EXPR_CLASS, EXPR_TRAIT, EXPR_TRAITIMPL, EXPR_ENUM,
-  EXPR_PROGNAME, EXPR_USE,
+  ExprType::EXPR_MOD, ExprType::EXPR_FUNC, ExprType::EXPR_CLASS, ExprType::EXPR_TRAIT, ExprType::EXPR_TRAITIMPL, ExprType::EXPR_ENUM,
+  ExprType::EXPR_PROGNAME, ExprType::EXPR_USE,
 };
 
 ModBody Parser::parseModBody(bool isprog) noexcept {
@@ -53,10 +53,10 @@ ModBody Parser::parseModBody(bool isprog) noexcept {
 
   bool err = false;
 
-  while(*lexer.getCurrentToken() != TOK_EOL) {
-    while (*lexer.getCurrentToken() == TOK_EOL)
+  while(*lexer.getCurrentToken() != TokenType::TOK_EOL) {
+    while (*lexer.getCurrentToken() == TokenType::TOK_EOL)
       lexer.next(); // eat eols
-    if (*lexer.getCurrentToken() == TOK_EOF)
+    if (*lexer.getCurrentToken() == TokenType::TOK_EOF)
       break;
 
     const Token *tok = lexer.getCurrentToken();
@@ -68,18 +68,18 @@ ModBody Parser::parseModBody(bool isprog) noexcept {
       break;
 
     std::unique_ptr<Expr> expr(parseExpression());
-    if ((isprog && *lexer.getCurrentToken() != TOK_EOF)
-        || *lexer.getCurrentToken() != TOK_EOL) {
+    if ((isprog && *lexer.getCurrentToken() != TokenType::TOK_EOF)
+        || *lexer.getCurrentToken() != TokenType::TOK_EOL) {
       if (isprog)
         generateError(std::make_unique<SyntaxError>(LVL_ERROR,
-          STX_ERR_EXPECTED_EOF_EOL, lexer.getCurrentToken()->getPosition()));
+          SyntaxErrorCode::STX_ERR_EXPECTED_EOF_EOL, lexer.getCurrentToken()->getPosition()));
       else
         generateError(std::make_unique<SyntaxError>(LVL_ERROR,
-          STX_ERR_EXPECTED_EOL, lexer.getCurrentToken()->getPosition()));
+          SyntaxErrorCode::STX_ERR_EXPECTED_EOL, lexer.getCurrentToken()->getPosition()));
       err = true;
 
       skipToStmtEol();
-    } else if (*lexer.getCurrentToken() == TOK_EOL) {
+    } else if (*lexer.getCurrentToken() == TokenType::TOK_EOL) {
       lexer.next(); // eat eol
     }
 
@@ -90,28 +90,28 @@ ModBody Parser::parseModBody(bool isprog) noexcept {
         std::any_of(_ALLOWED_EXPR_MOD.begin(), _ALLOWED_EXPR_MOD.end(),
           [&expr](ExprType type) { return expr->getType() == type; })) ||
       // valid global assignments
-        isBiOpExpr(*expr, TOK_OP_ASG_DCL) ||
-        (isBiOpExpr(*expr, TOK_OP_ASG) &&
-        isBiOpExpr(dynamic_cast<BiOpExpr&>(*expr).getLeft(), TOK_OP_DCL));
+        isBiOpExpr(*expr, TokenType::TOK_OP_ASG_DCL) ||
+        (isBiOpExpr(*expr, TokenType::TOK_OP_ASG) &&
+        isBiOpExpr(dynamic_cast<BiOpExpr&>(*expr).getLeft(), TokenType::TOK_OP_DCL));
 
       if (!validexpr) {
         generateError(std::make_unique<SyntaxError>(LVL_ERROR,
-          STX_ERR_INVALID_EXPR, expr->getPosition()));
+          SyntaxErrorCode::STX_ERR_INVALID_EXPR, expr->getPosition()));
         err = true;
         continue;
       }
 
       switch (expr->getType()) {
-      case EXPR_PROGNAME:
+      case ExprType::EXPR_PROGNAME:
         if (progName) {
           generateError(std::make_unique<SyntaxError>(LVL_ERROR,
-            STX_ERR_PROGNAME, expr->getPosition()));
+            SyntaxErrorCode::STX_ERR_PROGNAME, expr->getPosition()));
           err = true;
         } else
           progName = &dynamic_cast<ProgNameExpr&>(*expr).getToken();
 
         break;
-      case EXPR_USE:
+      case ExprType::EXPR_USE:
         imports.push_back(std::move(expr));
         break;
       default:
@@ -121,9 +121,9 @@ ModBody Parser::parseModBody(bool isprog) noexcept {
     }
   }
 
-  if (isprog && *lexer.getCurrentToken() != TOK_EOF) {
+  if (isprog && *lexer.getCurrentToken() != TokenType::TOK_EOF) {
     generateError(std::make_unique<SyntaxError>(LVL_ERROR,
-      STX_ERR_EXPECTED_EOF, lexer.getCurrentToken()->getPosition()));
+      SyntaxErrorCode::STX_ERR_EXPECTED_EOF, lexer.getCurrentToken()->getPosition()));
     err = true;
   }
 

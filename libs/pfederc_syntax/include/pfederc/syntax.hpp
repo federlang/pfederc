@@ -10,7 +10,7 @@ namespace pfederc {
   class Parser;
   class SyntaxError;
 
-  enum SyntaxErrorCode {
+  enum class SyntaxErrorCode {
     STX_ERR_EXPECTED_PRIMARY_EXPR,
     STX_ERR_EXPECTED_CLOSING_BRACKET,
     STX_ERR_EXPECTED_ARR_CLOSING_BRACKET,

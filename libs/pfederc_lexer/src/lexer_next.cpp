@@ -14,7 +14,7 @@ Token& Lexer::next() noexcept {
     lineIndices.push_back(0);
     nextChar();
     currentEndIndex = 0;
-  } else if (*currentToken == TOK_EOF)
+  } else if (*currentToken == TokenType::TOK_EOF)
     return *currentToken;
 
 
@@ -35,7 +35,7 @@ std::unique_ptr<Token> Lexer::generateError(std::unique_ptr<LexerError> &&err) n
   while (currentChar != EOF
       && currentChar != '\n' && currentChar != '\r')
     nextChar();
-  return std::make_unique<Token>(currentToken, TOK_ERR, getCurrentCursor());
+  return std::make_unique<Token>(currentToken, TokenType::TOK_ERR, getCurrentCursor());
 }
 
 int Lexer::nextChar() noexcept {
@@ -83,7 +83,7 @@ std::unique_ptr<Token> Lexer::nextToken() noexcept {
     return nextTokenEOF();
 
   return generateError(std::make_unique<LexerError>(LVL_ERROR,
-      LEX_ERR_GENERAL_INVALID_CHARACTER,
+      LexerErrorCode::LEX_ERR_GENERAL_INVALID_CHARACTER,
       getCurrentCursor()));
 }
 
@@ -92,11 +92,11 @@ std::unique_ptr<Token> Lexer::nextTokenCapability() noexcept {
   if (currentChar == '!') {
     nextChar(); // eat !
     return std::make_unique<Token>(currentToken,
-        TOK_ENSURE, getCurrentCursor());
+        TokenType::TOK_ENSURE, getCurrentCursor());
   }
 
   return std::make_unique<Token>(currentToken,
-      TOK_DIRECTIVE, getCurrentCursor());
+      TokenType::TOK_DIRECTIVE, getCurrentCursor());
 }
 
 std::unique_ptr<Token> Lexer::nextTokenLine() noexcept {
@@ -108,11 +108,11 @@ std::unique_ptr<Token> Lexer::nextTokenLine() noexcept {
     nextChar();
 
   lineIndices.push_back(currentEndIndex);
-  return std::make_unique<Token>(currentToken, TOK_EOL, getCurrentCursor());
+  return std::make_unique<Token>(currentToken, TokenType::TOK_EOL, getCurrentCursor());
 }
 
 std::unique_ptr<Token> Lexer::nextTokenEOF() noexcept {
-  return std::make_unique<Token>(currentToken, TOK_EOF, 
+  return std::make_unique<Token>(currentToken, TokenType::TOK_EOF, 
     Position{getCurrentCursor().line, getFileContent().length() - 1,
       getFileContent().length() - 1});
 }
@@ -125,18 +125,18 @@ std::unique_ptr<Token> Lexer::nextTokenId() noexcept {
     id += currentChar;
     nextChar();
   }
-  // must be followed by alpha character or just valid _ (TOK_ANY)
+  // must be followed by alpha character or just valid _ (TokenType::TOK_ANY)
   if (isdigit(currentChar)) {
     return generateError(std::make_unique<LexerError>(LVL_ERROR,
-      LEX_ERR_ID_NO_DIGIT_AFTER_ANYS, Position{getCurrentCursor().line,
+      LexerErrorCode::LEX_ERR_ID_NO_DIGIT_AFTER_ANYS, Position{getCurrentCursor().line,
         currentEndIndex, currentEndIndex}));
   } else if (!isalpha(currentChar)) {
     // check for any
     if (id == "_")
-      return std::make_unique<Token>(currentToken, TOK_ANY, getCurrentCursor());
+      return std::make_unique<Token>(currentToken, TokenType::TOK_ANY, getCurrentCursor());
     // __+ is not allowed
     return generateError(std::make_unique<LexerError>(LVL_ERROR,
-      LEX_ERR_ID_NOT_JUST_ANYS, getCurrentCursor()));
+      LexerErrorCode::LEX_ERR_ID_NOT_JUST_ANYS, getCurrentCursor()));
   }
 
   while (currentChar == '_' || isalnum(currentChar)) {
@@ -155,9 +155,9 @@ std::unique_ptr<Token> Lexer::nextTokenId() noexcept {
   }
   // check if operator
   if (id == "null")
-    return std::make_unique<Token>(currentToken, TOK_OP_NULL, getCurrentCursor());
+    return std::make_unique<Token>(currentToken, TokenType::TOK_OP_NULL, getCurrentCursor());
 
-  return std::make_unique<Token>(currentToken, TOK_ID, getCurrentCursor());
+  return std::make_unique<Token>(currentToken, TokenType::TOK_ID, getCurrentCursor());
 }
 
 inline static bool _hasOperatorStr(const std::string &op, TokenType &type) noexcept {
@@ -180,7 +180,7 @@ inline static bool _hasOperatorStr(const std::string &op, TokenType &type) noexc
 
 std::unique_ptr<Token> Lexer::nextTokenOperator() noexcept {
   std::string op;
-  TokenType operatorType = TOK_ERR;
+  TokenType operatorType = TokenType::TOK_ERR;
   while (_hasOperatorStr(op + (char) currentChar, operatorType)) {
     op += (char) currentChar;
     nextChar();
@@ -190,7 +190,7 @@ std::unique_ptr<Token> Lexer::nextTokenOperator() noexcept {
     return nullptr;
 
   // if match check if comment (starting with '/')
-  if (operatorType == TOK_OP_DIV) {
+  if (operatorType == TokenType::TOK_OP_DIV) {
     if (currentChar == '*') // region comment
       return nextRegionComment();
     else if (currentChar == '/') // one line comment
@@ -221,7 +221,7 @@ std::unique_ptr<Token> Lexer::nextRegionCommentDoc() noexcept {
     nextChar();
   }
 
-  return generateError(std::make_unique<LexerError>(LVL_ERROR, LEX_ERR_REGION_COMMENT_END,
+  return generateError(std::make_unique<LexerError>(LVL_ERROR, LexerErrorCode::LEX_ERR_REGION_COMMENT_END,
     getCurrentCursor()));
 }
 
@@ -244,7 +244,7 @@ std::unique_ptr<Token> Lexer::nextRegionComment() noexcept {
     nextChar();
   }
 
-  return generateError(std::make_unique<LexerError>(LVL_ERROR, LEX_ERR_REGION_COMMENT_END,
+  return generateError(std::make_unique<LexerError>(LVL_ERROR, LexerErrorCode::LEX_ERR_REGION_COMMENT_END,
     getCurrentCursor()));
 }
 
@@ -290,19 +290,19 @@ std::unique_ptr<Token> Lexer::nextTokenStringEscapeCode() noexcept {
     nextChar(); // eat x
     if (!std::isxdigit(currentChar)) {
       return generateError(std::make_unique<LexerError>(LVL_ERROR,
-        LEX_ERR_STR_HEXADECIMAL_CHAR, Position{getCurrentCursor().line,
+        LexerErrorCode::LEX_ERR_STR_HEXADECIMAL_CHAR, Position{getCurrentCursor().line,
           currentEndIndex, currentEndIndex}));
     }
     nextChar(); // eat hex
     if (!std::isxdigit(currentChar)) {
       return generateError(std::make_unique<LexerError>(LVL_ERROR,
-        LEX_ERR_STR_HEXADECIMAL_CHAR, Position{getCurrentCursor().line,
+        LexerErrorCode::LEX_ERR_STR_HEXADECIMAL_CHAR, Position{getCurrentCursor().line,
           currentEndIndex, currentEndIndex}));
     }
     return nullptr;
   default:
     return generateError(std::make_unique<LexerError>(LVL_ERROR,
-      LEX_ERR_STR_INVALID_ESCAPE_CODE, getCurrentCursor()));
+      LexerErrorCode::LEX_ERR_STR_INVALID_ESCAPE_CODE, getCurrentCursor()));
   }
 }
 
@@ -322,12 +322,12 @@ std::unique_ptr<Token> Lexer::nextTokenString() noexcept {
 
   if (currentChar != '\"')
     return generateError(std::make_unique<LexerError>(LVL_ERROR,
-      LEX_ERR_STR_INVALID_END, Position{getCurrentCursor().line,
+      LexerErrorCode::LEX_ERR_STR_INVALID_END, Position{getCurrentCursor().line,
         currentEndIndex, currentEndIndex}));
 
   nextChar(); // eat "
 
-  return std::make_unique<Token>(currentToken, TOK_STR, getCurrentCursor());
+  return std::make_unique<Token>(currentToken, TokenType::TOK_STR, getCurrentCursor());
 }
 
 std::unique_ptr<Token> Lexer::nextTokenChar() noexcept {
@@ -342,12 +342,12 @@ std::unique_ptr<Token> Lexer::nextTokenChar() noexcept {
   nextChar();
   if (currentChar != '\'')
     return generateError(std::make_unique<LexerError>(LVL_ERROR,
-      LEX_ERR_CHAR_INVALID_END, Position{getCurrentCursor().line,
+      LexerErrorCode::LEX_ERR_CHAR_INVALID_END, Position{getCurrentCursor().line,
         currentEndIndex, currentEndIndex}));
 
   nextChar(); // eat '
 
-  return std::make_unique<Token>(currentToken, TOK_CHAR, getCurrentCursor());
+  return std::make_unique<Token>(currentToken, TokenType::TOK_CHAR, getCurrentCursor());
 }
 
 std::unique_ptr<Token> Lexer::nextTokenNum() noexcept {
@@ -363,7 +363,7 @@ std::unique_ptr<Token> Lexer::nextTokenNum() noexcept {
     default:
       if (isdigit(currentChar)) {
         return generateError(std::make_unique<LexerError>(LVL_ERROR,
-          LEX_ERR_NUM_LEADING_ZERO, Position{getCurrentCursor().line,
+          LexerErrorCode::LEX_ERR_NUM_LEADING_ZERO, Position{getCurrentCursor().line,
             currentStartIndex, currentStartIndex}));
       } else if (currentChar == '.') {
         return nextTokenFltNum(0);
@@ -435,7 +435,7 @@ std::unique_ptr<Token> Lexer::nextTokenDecNum() noexcept {
 std::unique_ptr<Token> Lexer::nextTokenNumType(size_t num) noexcept {
   if (isdigit(currentChar))
     return generateError(std::make_unique<LexerError>(LVL_ERROR,
-      LEX_ERR_NUM_UNEXPECTED_CHAR_DIGIT, Position{getCurrentCursor().line,
+      LexerErrorCode::LEX_ERR_NUM_UNEXPECTED_CHAR_DIGIT, Position{getCurrentCursor().line,
         currentEndIndex, currentEndIndex}));
 
   std::unique_ptr<Token> tok(nullptr);
@@ -444,39 +444,39 @@ std::unique_ptr<Token> Lexer::nextTokenNumType(size_t num) noexcept {
     switch (nextChar()) {
       case 's':
         nextChar();
-        tok = std::make_unique<NumberToken>(currentToken, TOK_UINT8,
+        tok = std::make_unique<NumberToken>(currentToken, TokenType::TOK_UINT8,
           getCurrentCursor(), num);
         break;
       case 'S':
         nextChar();
-        tok = std::make_unique<NumberToken>(currentToken, TOK_UINT16,
+        tok = std::make_unique<NumberToken>(currentToken, TokenType::TOK_UINT16,
           getCurrentCursor(), num);
         break;
       case 'l':
         nextChar();
-        tok = std::make_unique<NumberToken>(currentToken, TOK_UINT32,
+        tok = std::make_unique<NumberToken>(currentToken, TokenType::TOK_UINT32,
           getCurrentCursor(), num);
         break;
       case 'L':
         nextChar();
-        tok = std::make_unique<NumberToken>(currentToken, TOK_UINT64,
+        tok = std::make_unique<NumberToken>(currentToken, TokenType::TOK_UINT64,
           getCurrentCursor(), num);
         break;
       default:
         if (!isalnum(currentChar))
-          tok = std::make_unique<NumberToken>(currentToken, TOK_UINT32,
+          tok = std::make_unique<NumberToken>(currentToken, TokenType::TOK_UINT32,
             getCurrentCursor(), num);
         break;
     }
     break;
   case 's':
     nextChar();
-    tok = std::make_unique<NumberToken>(currentToken, TOK_INT8,
+    tok = std::make_unique<NumberToken>(currentToken, TokenType::TOK_INT8,
       getCurrentCursor(), num);
     break;
   case 'S':
     nextChar();
-    tok = std::make_unique<NumberToken>(currentToken, TOK_INT16,
+    tok = std::make_unique<NumberToken>(currentToken, TokenType::TOK_INT16,
       getCurrentCursor(), num);
     break;
   case 'l':
@@ -484,7 +484,7 @@ std::unique_ptr<Token> Lexer::nextTokenNumType(size_t num) noexcept {
     break;
   case 'L':
     nextChar();
-    tok = std::make_unique<NumberToken>(currentToken, TOK_INT64,
+    tok = std::make_unique<NumberToken>(currentToken, TokenType::TOK_INT64,
       getCurrentCursor(), num);
     break;
   default:
@@ -493,11 +493,11 @@ std::unique_ptr<Token> Lexer::nextTokenNumType(size_t num) noexcept {
 
   if (isalnum(currentChar))
     return generateError(std::make_unique<LexerError>(LVL_ERROR,
-      LEX_ERR_NUM_UNEXPECTED_CHAR, Position{getCurrentCursor().line,
+      LexerErrorCode::LEX_ERR_NUM_UNEXPECTED_CHAR, Position{getCurrentCursor().line,
         currentEndIndex, currentEndIndex}));
 
   if (!tok)
-    return std::make_unique<NumberToken>(currentToken, TOK_INT32,
+    return std::make_unique<NumberToken>(currentToken, TokenType::TOK_INT32,
       getCurrentCursor(), num);
 
   return tok;
@@ -511,7 +511,7 @@ std::unique_ptr<Token> Lexer::nextTokenFltNum(size_t num) noexcept {
   
   if (!isdigit(currentChar))
     return generateError(std::make_unique<LexerError>(LVL_ERROR,
-      LEX_ERR_NUM_UNEXPECTED_CHAR, Position{getCurrentCursor().line,
+      LexerErrorCode::LEX_ERR_NUM_UNEXPECTED_CHAR, Position{getCurrentCursor().line,
         currentEndIndex, currentEndIndex}));
 
   float po32 = 10.0f;
@@ -528,7 +528,7 @@ std::unique_ptr<Token> Lexer::nextTokenFltNum(size_t num) noexcept {
   switch (currentChar) {
   case 'f':
     nextChar(); // eat f
-    tok = std::make_unique<NumberToken>(currentToken, TOK_FLT32, getCurrentCursor(), f32);
+    tok = std::make_unique<NumberToken>(currentToken, TokenType::TOK_FLT32, getCurrentCursor(), f32);
     break;
   case 'F':
     nextChar(); // eat F
@@ -539,13 +539,13 @@ std::unique_ptr<Token> Lexer::nextTokenFltNum(size_t num) noexcept {
 
   if (isalnum(currentChar))
     return generateError(std::make_unique<LexerError>(LVL_ERROR,
-      LEX_ERR_NUM_UNEXPECTED_CHAR, Position{getCurrentCursor().line,
+      LexerErrorCode::LEX_ERR_NUM_UNEXPECTED_CHAR, Position{getCurrentCursor().line,
         currentEndIndex, currentEndIndex}));
 
   if (tok)
     return tok;
 
-  return std::make_unique<NumberToken>(currentToken, TOK_FLT64, getCurrentCursor(), f64);
+  return std::make_unique<NumberToken>(currentToken, TokenType::TOK_FLT64, getCurrentCursor(), f64);
 }
 
 std::unique_ptr<Token> Lexer::nextTokenBracket() noexcept {
@@ -553,11 +553,11 @@ std::unique_ptr<Token> Lexer::nextTokenBracket() noexcept {
   nextChar(); // eat bracket
   switch (c) {
   case ')':
-    return std::make_unique<Token>(currentToken, TOK_BRACKET_CLOSE, getCurrentCursor());
+    return std::make_unique<Token>(currentToken, TokenType::TOK_BRACKET_CLOSE, getCurrentCursor());
   case ']':
-    return std::make_unique<Token>(currentToken, TOK_ARR_BRACKET_CLOSE, getCurrentCursor());
+    return std::make_unique<Token>(currentToken, TokenType::TOK_ARR_BRACKET_CLOSE, getCurrentCursor());
   case '}':
-    return std::make_unique<Token>(currentToken, TOK_TEMPL_BRACKET_CLOSE, getCurrentCursor());
+    return std::make_unique<Token>(currentToken, TokenType::TOK_TEMPL_BRACKET_CLOSE, getCurrentCursor());
   default:
     fatal(__FILE__, __LINE__, "Unexpected branch reached");
     return nullptr;

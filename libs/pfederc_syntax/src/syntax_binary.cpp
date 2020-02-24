@@ -2,15 +2,15 @@
 using namespace pfederc;
 
 inline static bool couldBeOperator(TokenType type) noexcept {
-  return type != TOK_EOL && type != TOK_EOF && type != TOK_STMT
-    && type != TOK_BRACKET_CLOSE
-    && type != TOK_ARR_BRACKET_CLOSE
-    && type != TOK_TEMPL_BRACKET_CLOSE;
+  return type != TokenType::TOK_EOL && type != TokenType::TOK_EOF && type != TokenType::TOK_STMT
+    && type != TokenType::TOK_BRACKET_CLOSE
+    && type != TokenType::TOK_ARR_BRACKET_CLOSE
+    && type != TokenType::TOK_TEMPL_BRACKET_CLOSE;
 }
 
 inline TokenType _getOperatorType(const Token &tok) {
   return isTokenTypeOperator(tok.getType()) ?
-    tok.getType() : TOK_OP_NONE;
+    tok.getType() : TokenType::TOK_OP_NONE;
 }
 
 inline static bool _binary_continue_condition(const Token &lookahead,
@@ -44,17 +44,17 @@ std::unique_ptr<Expr> Parser::parseBinary(std::unique_ptr<Expr> lhs,
   while (_binary_continue_condition(*lookahead, minPrecedence, prec)) {
     const Token *op = lexer.getCurrentToken();
     TokenType optype = _getOperatorType(*op);
-    if (optype != TOK_OP_NONE)
+    if (optype != TokenType::TOK_OP_NONE)
       lexer.next(); // advance to next unprocessed token
     
     // ignore newline tekons
-    while (*lexer.getCurrentToken() == TOK_EOL)
+    while (*lexer.getCurrentToken() == TokenType::TOK_EOL)
       lexer.next();
 
     std::unique_ptr<Expr> rhs;
     if (TOKEN_BRACKETS.find(optype) != TOKEN_BRACKETS.end()) {
-      if (optype == TOK_OP_BRACKET_OPEN
-          && *lexer.getCurrentToken() == TOK_BRACKET_CLOSE) {
+      if (optype == TokenType::TOK_OP_BRACKET_OPEN
+          && *lexer.getCurrentToken() == TokenType::TOK_BRACKET_CLOSE) {
         const Token *const closingBracket = lexer.getCurrentToken();
         // empty function call
         lexer.next(); // eat )
@@ -84,7 +84,7 @@ std::unique_ptr<Expr> Parser::parseBinary(std::unique_ptr<Expr> lhs,
       rhs = parsePrimary();
       if (!rhs) {
         generateError(std::make_unique<SyntaxError>(LVL_ERROR,
-          STX_ERR_EXPECTED_PRIMARY_EXPR, op->getPosition()));
+          SyntaxErrorCode::STX_ERR_EXPECTED_PRIMARY_EXPR, op->getPosition()));
           
         return nullptr;
       }

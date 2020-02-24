@@ -15,38 +15,38 @@ std::tuple<std::unique_ptr<Expr>, bool /* changed */> pfederc::optimize(
     std::unique_ptr<Expr> &&expr, size_t &reducedexpressions) noexcept {
   Expr *pexpr = expr.release();
   switch (pexpr->getType()) {
-  case EXPR_PROG:
+  case ExprType::EXPR_PROG:
     return optimizeProgramExpr(dynamic_cast<ProgramExpr*>(pexpr), reducedexpressions);
-  case EXPR_FUNC:
+  case ExprType::EXPR_FUNC:
     return optimizeFuncExpr(dynamic_cast<FuncExpr*>(pexpr), reducedexpressions);
-  case EXPR_LAMBDA:
+  case ExprType::EXPR_LAMBDA:
     return optimizeLambdaExpr(dynamic_cast<LambdaExpr*>(pexpr), reducedexpressions);
-  case EXPR_CLASS:
+  case ExprType::EXPR_CLASS:
     return optimizeClassExpr(dynamic_cast<ClassExpr*>(pexpr), reducedexpressions);
-  case EXPR_TRAITIMPL:
+  case ExprType::EXPR_TRAITIMPL:
     return optimizeTraitImplExpr(dynamic_cast<TraitImplExpr*>(pexpr), reducedexpressions);
-  case EXPR_MOD:
+  case ExprType::EXPR_MOD:
     return optimizeModExpr(dynamic_cast<ModExpr*>(pexpr), reducedexpressions);
-  case EXPR_SAFE:
+  case ExprType::EXPR_SAFE:
     return optimizeSafeExpr(dynamic_cast<SafeExpr*>(pexpr), reducedexpressions);
-  case EXPR_IF:
+  case ExprType::EXPR_IF:
     return optimizeIfExpr(dynamic_cast<IfExpr*>(pexpr), reducedexpressions);
-  case EXPR_LOOP_FOR:
-  case EXPR_LOOP_DO:
+  case ExprType::EXPR_LOOP_FOR:
+  case ExprType::EXPR_LOOP_DO:
     return optimizeLoopExpr(dynamic_cast<LoopExpr*>(pexpr), reducedexpressions);
-  case EXPR_MATCH:
+  case ExprType::EXPR_MATCH:
     return optimizeMatchExpr(dynamic_cast<MatchExpr*>(pexpr), reducedexpressions);
-  case EXPR_BIOP:
+  case ExprType::EXPR_BIOP:
     return optimizeBiOpExpr(dynamic_cast<BiOpExpr*>(pexpr), reducedexpressions);
-  case EXPR_UNOP:
+  case ExprType::EXPR_UNOP:
     return optimizeUnOpExpr(dynamic_cast<UnOpExpr*>(pexpr), reducedexpressions);
-  case EXPR_BODY:
+  case ExprType::EXPR_BODY:
     return optimizeBodyExpr(dynamic_cast<BodyExpr*>(pexpr), reducedexpressions);
-  case EXPR_ARRCPY:
+  case ExprType::EXPR_ARRCPY:
     return optimizeArrayCpyExpr(dynamic_cast<ArrayCpyExpr*>(pexpr), reducedexpressions);
-  case EXPR_ARRLIT:
+  case ExprType::EXPR_ARRLIT:
     return optimizeArrayLitExpr(dynamic_cast<ArrayLitExpr*>(pexpr), reducedexpressions);
-  case EXPR_ARREMPTY:
+  case ExprType::EXPR_ARREMPTY:
     return optimizeArrayEmptyExpr(dynamic_cast<ArrayEmptyExpr*>(pexpr), reducedexpressions);
   default:
     return std::tuple<std::unique_ptr<Expr>, bool>(
@@ -127,13 +127,13 @@ std::tuple<std::unique_ptr<Expr>, bool /* changed */> pfederc::optimizeMatchExpr
 template<class R, class T>
 static R _computeNumberOperation(TokenType type, T x, T y) noexcept {
 	switch (type) {
-	case TOK_OP_ADD:
+	case TokenType::TOK_OP_ADD:
 		return static_cast<R>(x + y);
-  case TOK_OP_SUB:
+  case TokenType::TOK_OP_SUB:
 		return static_cast<R>(x - y);
-  case TOK_OP_MUL:
+  case TokenType::TOK_OP_MUL:
 		return static_cast<R>(x * y);
-  case TOK_OP_DIV:
+  case TokenType::TOK_OP_DIV:
 		return static_cast<R>(x / y);
 	default:
 		fatal(__FILE__, __LINE__, "Unknown operation");
@@ -144,15 +144,15 @@ static R _computeNumberOperation(TokenType type, T x, T y) noexcept {
 template<class R, class T>
 static R _computeIntegerOperation(TokenType type, T x, T y) noexcept {
 	switch (type) {
-	case TOK_OP_ADD:
+	case TokenType::TOK_OP_ADD:
 		return static_cast<R>(x + y);
-  case TOK_OP_SUB:
+  case TokenType::TOK_OP_SUB:
 		return static_cast<R>(x - y);
-  case TOK_OP_MUL:
+  case TokenType::TOK_OP_MUL:
 		return static_cast<R>(x * y);
-  case TOK_OP_DIV:
+  case TokenType::TOK_OP_DIV:
 		return static_cast<R>(x / y);
-  case TOK_OP_MOD:
+  case TokenType::TOK_OP_MOD:
 		return static_cast<R>(x % y);
 	default:
 		fatal(__FILE__, __LINE__, "Unknown operation");
@@ -163,17 +163,17 @@ static R _computeIntegerOperation(TokenType type, T x, T y) noexcept {
 template<typename R>
 static R _computeNumberBoolOperation(TokenType type, const NumberToken &lhs, const NumberToken &rhs) {
 	switch (type) {
-	case TOK_OP_LT:
+	case TokenType::TOK_OP_LT:
 		return lhs.getNumber<R>() < rhs.getNumber<R>();
-	case TOK_OP_GT:
+	case TokenType::TOK_OP_GT:
 		return lhs.getNumber<R>() > rhs.getNumber<R>();
-	case TOK_OP_LEQ:
+	case TokenType::TOK_OP_LEQ:
 		return lhs.getNumber<R>() <= rhs.getNumber<R>();
-	case TOK_OP_GEQ:
+	case TokenType::TOK_OP_GEQ:
 		return lhs.getNumber<R>() >= rhs.getNumber<R>();
-	case TOK_OP_EQ:
+	case TokenType::TOK_OP_EQ:
 		return lhs.getNumber<R>() == rhs.getNumber<R>();
-	case TOK_OP_NQ:
+	case TokenType::TOK_OP_NQ:
 		return lhs.getNumber<R>() != rhs.getNumber<R>();
 	default:
 		fatal(__FILE__, __LINE__, "Unknown operation");
@@ -190,15 +190,15 @@ std::tuple<std::unique_ptr<Expr>, bool /* changed */> pfederc::optimizeBiOpExpr(
 
   // Expression: str str
   // Target: str
-  if (expr->getOperatorType() == TOK_OP_NONE
-      && isTokenExpr(*lhs, TOK_STR) && isTokenExpr(*rhs, TOK_STR)) {
+  if (expr->getOperatorType() == TokenType::TOK_OP_NONE
+      && isTokenExpr(*lhs, TokenType::TOK_STR) && isTokenExpr(*rhs, TokenType::TOK_STR)) {
     const std::string strlhs = lhs->toString(), strrhs = rhs->toString();
     const std::string merged =
       strlhs.substr(0, strlhs.length() - 1) + strrhs.substr(1);
     std::unique_ptr<Expr> newexpr = std::make_unique<FakeTokenExpr>(
         expr->getLexer(), std::make_unique<StringToken>(
           dynamic_cast<TokenExpr&>(*lhs).getToken().getLast(),
-          TOK_STR,
+          TokenType::TOK_STR,
           expr->getPosition(), merged));
     delete expr;
 
@@ -208,74 +208,74 @@ std::tuple<std::unique_ptr<Expr>, bool /* changed */> pfederc::optimizeBiOpExpr(
   }
 
 	// num `op` num
-	if (lhs->getType() == EXPR_TOK && rhs->getType() == EXPR_TOK
+	if (lhs->getType() == ExprType::EXPR_TOK && rhs->getType() == ExprType::EXPR_TOK
 			&& isNumberType(dynamic_cast<TokenExpr&>(*lhs).getToken().getType())
 			&& dynamic_cast<TokenExpr&>(*lhs).getToken().getType() == dynamic_cast<TokenExpr&>(*rhs).getToken().getType()
-			&& (expr->getOperatorType() == TOK_OP_ADD
-				|| expr->getOperatorType() == TOK_OP_SUB
-				|| expr->getOperatorType() == TOK_OP_MUL
-				|| expr->getOperatorType() == TOK_OP_DIV)) {
+			&& (expr->getOperatorType() == TokenType::TOK_OP_ADD
+				|| expr->getOperatorType() == TokenType::TOK_OP_SUB
+				|| expr->getOperatorType() == TokenType::TOK_OP_MUL
+				|| expr->getOperatorType() == TokenType::TOK_OP_DIV)) {
 		NumberToken &lhsTok = dynamic_cast<NumberToken&>(dynamic_cast<TokenExpr&>(*lhs).getToken());
 		NumberToken &rhsTok = dynamic_cast<NumberToken&>(dynamic_cast<TokenExpr&>(*rhs).getToken());
 
 		std::unique_ptr<NumberToken> tok(nullptr);
 
 		switch (lhsTok.getType()) {
-    case TOK_INT8:
+    case TokenType::TOK_INT8:
 			tok = std::make_unique<NumberToken>(lhsTok.getLast(),
 					lhsTok.getType(), expr->getPosition(),
 					_computeNumberOperation<int64_t, int8_t>(expr->getOperatorType(),
 						lhsTok.i8(), rhsTok.i8()));
 			break;
-    case TOK_INT16:
+    case TokenType::TOK_INT16:
 			tok = std::make_unique<NumberToken>(lhsTok.getLast(),
 					lhsTok.getType(), expr->getPosition(),
 					_computeNumberOperation<int64_t, int16_t>(expr->getOperatorType(),
 						lhsTok.i16(), rhsTok.i16()));
 			break;
-    case TOK_INT32:
+    case TokenType::TOK_INT32:
 			tok = std::make_unique<NumberToken>(lhsTok.getLast(),
 					lhsTok.getType(), expr->getPosition(),
 					_computeNumberOperation<int64_t, int32_t>(expr->getOperatorType(),
 						lhsTok.i32(), rhsTok.i32()));
 			break;
-    case TOK_INT64:
+    case TokenType::TOK_INT64:
 			tok = std::make_unique<NumberToken>(lhsTok.getLast(),
 					lhsTok.getType(), expr->getPosition(),
 					_computeNumberOperation<int64_t, int64_t>(expr->getOperatorType(),
 						lhsTok.i64(), rhsTok.i64()));
 			break;
-    case TOK_UINT8:
+    case TokenType::TOK_UINT8:
 			tok = std::make_unique<NumberToken>(lhsTok.getLast(),
 					lhsTok.getType(), expr->getPosition(),
 					_computeNumberOperation<uint64_t, uint8_t>(expr->getOperatorType(),
 						lhsTok.u8(), rhsTok.u8()));
 			break;
-    case TOK_UINT16:
+    case TokenType::TOK_UINT16:
 			tok = std::make_unique<NumberToken>(lhsTok.getLast(),
 					lhsTok.getType(), expr->getPosition(),
 					_computeNumberOperation<uint64_t, uint16_t>(expr->getOperatorType(),
 						lhsTok.u16(), rhsTok.u16()));
 			break;
-    case TOK_UINT32:
+    case TokenType::TOK_UINT32:
 			tok = std::make_unique<NumberToken>(lhsTok.getLast(),
 					lhsTok.getType(), expr->getPosition(),
 					_computeNumberOperation<uint64_t, uint32_t>(expr->getOperatorType(),
 						lhsTok.u32(), rhsTok.u32()));
 			break;
-    case TOK_UINT64:
+    case TokenType::TOK_UINT64:
 			tok = std::make_unique<NumberToken>(lhsTok.getLast(),
 					lhsTok.getType(), expr->getPosition(),
 					_computeNumberOperation<uint64_t, uint64_t>(expr->getOperatorType(),
 						lhsTok.u64(), rhsTok.u64()));
 			break;
-    case TOK_FLT32:
+    case TokenType::TOK_FLT32:
 			tok = std::make_unique<NumberToken>(lhsTok.getLast(),
 					lhsTok.getType(), expr->getPosition(),
 					_computeNumberOperation<float, float>(expr->getOperatorType(),
 						lhsTok.f32(), rhsTok.f32()));
 			break;
-    case TOK_FLT64:
+    case TokenType::TOK_FLT64:
 			tok = std::make_unique<NumberToken>(lhsTok.getLast(),
 					lhsTok.getType(), expr->getPosition(),
 					_computeNumberOperation<double, double>(expr->getOperatorType(),
@@ -296,59 +296,59 @@ std::tuple<std::unique_ptr<Expr>, bool /* changed */> pfederc::optimizeBiOpExpr(
 	}
 
 	// num % num
-	if (lhs->getType() == EXPR_TOK && rhs->getType() == EXPR_TOK
+	if (lhs->getType() == ExprType::EXPR_TOK && rhs->getType() == ExprType::EXPR_TOK
 			&& isNumberType(dynamic_cast<TokenExpr&>(*lhs).getToken().getType())
 			&& dynamic_cast<TokenExpr&>(*lhs).getToken().getType() == dynamic_cast<TokenExpr&>(*rhs).getToken().getType()
-			&& (expr->getOperatorType() == TOK_OP_MOD)) {
+			&& (expr->getOperatorType() == TokenType::TOK_OP_MOD)) {
 		NumberToken &lhsTok = dynamic_cast<NumberToken&>(dynamic_cast<TokenExpr&>(*lhs).getToken());
 		NumberToken &rhsTok = dynamic_cast<NumberToken&>(dynamic_cast<TokenExpr&>(*rhs).getToken());
 
 		std::unique_ptr<NumberToken> tok(nullptr);
 
 		switch (lhsTok.getType()) {
-    case TOK_INT8:
+    case TokenType::TOK_INT8:
 			tok = std::make_unique<NumberToken>(lhsTok.getLast(),
 					lhsTok.getType(), expr->getPosition(),
 					_computeIntegerOperation<int64_t, int8_t>(expr->getOperatorType(),
 						lhsTok.i8(), rhsTok.i8()));
 			break;
-    case TOK_INT16:
+    case TokenType::TOK_INT16:
 			tok = std::make_unique<NumberToken>(lhsTok.getLast(),
 					lhsTok.getType(), expr->getPosition(),
 					_computeIntegerOperation<int64_t, int16_t>(expr->getOperatorType(),
 						lhsTok.i16(), rhsTok.i16()));
 			break;
-    case TOK_INT32:
+    case TokenType::TOK_INT32:
 			tok = std::make_unique<NumberToken>(lhsTok.getLast(),
 					lhsTok.getType(), expr->getPosition(),
 					_computeIntegerOperation<int64_t, int32_t>(expr->getOperatorType(),
 						lhsTok.i32(), rhsTok.i32()));
 			break;
-    case TOK_INT64:
+    case TokenType::TOK_INT64:
 			tok = std::make_unique<NumberToken>(lhsTok.getLast(),
 					lhsTok.getType(), expr->getPosition(),
 					_computeIntegerOperation<int64_t, int64_t>(expr->getOperatorType(),
 						lhsTok.i64(), rhsTok.i64()));
 			break;
-    case TOK_UINT8:
+    case TokenType::TOK_UINT8:
 			tok = std::make_unique<NumberToken>(lhsTok.getLast(),
 					lhsTok.getType(), expr->getPosition(),
 					_computeIntegerOperation<uint64_t, uint8_t>(expr->getOperatorType(),
 						lhsTok.u8(), rhsTok.u8()));
 			break;
-    case TOK_UINT16:
+    case TokenType::TOK_UINT16:
 			tok = std::make_unique<NumberToken>(lhsTok.getLast(),
 					lhsTok.getType(), expr->getPosition(),
 					_computeIntegerOperation<uint64_t, uint16_t>(expr->getOperatorType(),
 						lhsTok.u16(), rhsTok.u16()));
 			break;
-    case TOK_UINT32:
+    case TokenType::TOK_UINT32:
 			tok = std::make_unique<NumberToken>(lhsTok.getLast(),
 					lhsTok.getType(), expr->getPosition(),
 					_computeIntegerOperation<uint64_t, uint32_t>(expr->getOperatorType(),
 						lhsTok.u32(), rhsTok.u32()));
 			break;
-    case TOK_UINT64:
+    case TokenType::TOK_UINT64:
 			tok = std::make_unique<NumberToken>(lhsTok.getLast(),
 					lhsTok.getType(), expr->getPosition(),
 					_computeIntegerOperation<uint64_t, uint64_t>(expr->getOperatorType(),
@@ -369,77 +369,77 @@ std::tuple<std::unique_ptr<Expr>, bool /* changed */> pfederc::optimizeBiOpExpr(
 	}
 
 	// typeof(num `op` num) == bool
-	if (lhs->getType() == EXPR_TOK && rhs->getType() == EXPR_TOK
+	if (lhs->getType() == ExprType::EXPR_TOK && rhs->getType() == ExprType::EXPR_TOK
 			&& isNumberType(dynamic_cast<TokenExpr&>(*lhs).getToken().getType())
 			&& dynamic_cast<TokenExpr&>(*lhs).getToken().getType() == dynamic_cast<TokenExpr&>(*rhs).getToken().getType()
-			&& (expr->getOperatorType() == TOK_OP_LT
-				|| expr->getOperatorType() == TOK_OP_GT
-				|| expr->getOperatorType() == TOK_OP_LEQ
-				|| expr->getOperatorType() == TOK_OP_GEQ
-				|| expr->getOperatorType() == TOK_OP_EQ
-				|| expr->getOperatorType() == TOK_OP_NQ)) {
+			&& (expr->getOperatorType() == TokenType::TOK_OP_LT
+				|| expr->getOperatorType() == TokenType::TOK_OP_GT
+				|| expr->getOperatorType() == TokenType::TOK_OP_LEQ
+				|| expr->getOperatorType() == TokenType::TOK_OP_GEQ
+				|| expr->getOperatorType() == TokenType::TOK_OP_EQ
+				|| expr->getOperatorType() == TokenType::TOK_OP_NQ)) {
 		NumberToken &lhsTok = dynamic_cast<NumberToken&>(dynamic_cast<TokenExpr&>(*lhs).getToken());
 		NumberToken &rhsTok = dynamic_cast<NumberToken&>(dynamic_cast<TokenExpr&>(*rhs).getToken());
 
 		std::unique_ptr<Token> tok(nullptr);
 		switch (lhsTok.getType()) {
-			case TOK_INT8:
+			case TokenType::TOK_INT8:
 				tok = std::make_unique<Token>(lhsTok.getLast(),
-						_computeNumberBoolOperation<int8_t>(expr->getOperatorType(), lhsTok, rhsTok) ? TOK_KW_TRUE : TOK_KW_FALSE,
+						_computeNumberBoolOperation<int8_t>(expr->getOperatorType(), lhsTok, rhsTok) ? TokenType::TOK_KW_TRUE : TokenType::TOK_KW_FALSE,
 							expr->getPosition());
 				break;
-			case TOK_INT16:
+			case TokenType::TOK_INT16:
 				tok = std::make_unique<Token>(lhsTok.getLast(),
 						_computeNumberBoolOperation<int16_t>(expr->getOperatorType(),
-							lhsTok, rhsTok) ? TOK_KW_TRUE : TOK_KW_FALSE,
+							lhsTok, rhsTok) ? TokenType::TOK_KW_TRUE : TokenType::TOK_KW_FALSE,
 							expr->getPosition());
 				break;
-			case TOK_INT32:
+			case TokenType::TOK_INT32:
 				tok = std::make_unique<Token>(lhsTok.getLast(),
 						_computeNumberBoolOperation<int32_t>(expr->getOperatorType(),
-							lhsTok, rhsTok) ? TOK_KW_TRUE : TOK_KW_FALSE,
+							lhsTok, rhsTok) ? TokenType::TOK_KW_TRUE : TokenType::TOK_KW_FALSE,
 							expr->getPosition());
 				break;
-			case TOK_INT64:
+			case TokenType::TOK_INT64:
 				tok = std::make_unique<Token>(lhsTok.getLast(),
 						_computeNumberBoolOperation<int64_t>(expr->getOperatorType(),
-							lhsTok, rhsTok) ? TOK_KW_TRUE : TOK_KW_FALSE,
+							lhsTok, rhsTok) ? TokenType::TOK_KW_TRUE : TokenType::TOK_KW_FALSE,
 							expr->getPosition());
 				break;
-			case TOK_UINT8:
+			case TokenType::TOK_UINT8:
 				tok = std::make_unique<Token>(lhsTok.getLast(),
 						_computeNumberBoolOperation<uint8_t>(expr->getOperatorType(),
-							lhsTok, rhsTok) ? TOK_KW_TRUE : TOK_KW_FALSE,
+							lhsTok, rhsTok) ? TokenType::TOK_KW_TRUE : TokenType::TOK_KW_FALSE,
 							expr->getPosition());
 				break;
-			case TOK_UINT16:
+			case TokenType::TOK_UINT16:
 				tok = std::make_unique<Token>(lhsTok.getLast(),
 						_computeNumberBoolOperation<uint16_t>(expr->getOperatorType(),
-							lhsTok, rhsTok) ? TOK_KW_TRUE : TOK_KW_FALSE,
+							lhsTok, rhsTok) ? TokenType::TOK_KW_TRUE : TokenType::TOK_KW_FALSE,
 							expr->getPosition());
 				break;
-			case TOK_UINT32:
+			case TokenType::TOK_UINT32:
 				tok = std::make_unique<Token>(lhsTok.getLast(),
 						_computeNumberBoolOperation<uint32_t>(expr->getOperatorType(),
-							lhsTok, rhsTok) ? TOK_KW_TRUE : TOK_KW_FALSE,
+							lhsTok, rhsTok) ? TokenType::TOK_KW_TRUE : TokenType::TOK_KW_FALSE,
 							expr->getPosition());
 				break;
-			case TOK_UINT64:
+			case TokenType::TOK_UINT64:
 				tok = std::make_unique<Token>(lhsTok.getLast(),
 						_computeNumberBoolOperation<uint64_t>(expr->getOperatorType(),
-							lhsTok, rhsTok) ? TOK_KW_TRUE : TOK_KW_FALSE,
+							lhsTok, rhsTok) ? TokenType::TOK_KW_TRUE : TokenType::TOK_KW_FALSE,
 							expr->getPosition());
 				break;
-			case TOK_FLT32:
+			case TokenType::TOK_FLT32:
 				tok = std::make_unique<Token>(lhsTok.getLast(),
 						_computeNumberBoolOperation<float>(expr->getOperatorType(),
-							lhsTok, rhsTok) ? TOK_KW_TRUE : TOK_KW_FALSE,
+							lhsTok, rhsTok) ? TokenType::TOK_KW_TRUE : TokenType::TOK_KW_FALSE,
 							expr->getPosition());
 				break;
-			case TOK_FLT64:
+			case TokenType::TOK_FLT64:
 				tok = std::make_unique<Token>(lhsTok.getLast(),
 						_computeNumberBoolOperation<double>(expr->getOperatorType(),
-							lhsTok, rhsTok) ? TOK_KW_TRUE : TOK_KW_FALSE,
+							lhsTok, rhsTok) ? TokenType::TOK_KW_TRUE : TokenType::TOK_KW_FALSE,
 							expr->getPosition());
 				break;
 		}

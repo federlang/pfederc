@@ -5,13 +5,13 @@ std::unique_ptr<FuncParameter> Parser::fromExprDeclToFunctionParam(
     std::unique_ptr<Expr> &&expr, std::unique_ptr<Expr> &&guard,
     std::unique_ptr<Expr> &&guardResult) noexcept {
   // '&'id ':' expr | id ':' expr | '&' expr | expr
-  if (isBiOpExpr(*expr, TOK_OP_DCL)) {
+  if (isBiOpExpr(*expr, TokenType::TOK_OP_DCL)) {
     // '&'id ':' expr | id ':' expr
     BiOpExpr &biopdcl = dynamic_cast<BiOpExpr&>(*expr);
 
     std::unique_ptr<Expr> idexpr;
     bool ismutable;
-    if (isUnOpExpr(biopdcl.getLeft(), TOK_OP_BAND)) {
+    if (isUnOpExpr(biopdcl.getLeft(), TokenType::TOK_OP_BAND)) {
       std::unique_ptr<UnOpExpr> unopexpr =
           std::unique_ptr<UnOpExpr>(dynamic_cast<UnOpExpr*>(biopdcl.getLeftPtr().release()));
       ismutable = true;
@@ -21,15 +21,15 @@ std::unique_ptr<FuncParameter> Parser::fromExprDeclToFunctionParam(
       ismutable = false;
     }
 
-    if (!isTokenExpr(*idexpr, TOK_ID)) {
+    if (!isTokenExpr(*idexpr, TokenType::TOK_ID)) {
       generateError(std::make_unique<SyntaxError>(LVL_ERROR,
-        STX_ERR_INVALID_VARDECL_ID, idexpr->getPosition()));
+        SyntaxErrorCode::STX_ERR_INVALID_VARDECL_ID, idexpr->getPosition()));
       return nullptr;
     }
 
-    if (isUnOpExpr(biopdcl.getRight(), TOK_OP_BAND)) {
+    if (isUnOpExpr(biopdcl.getRight(), TokenType::TOK_OP_BAND)) {
       generateError(std::make_unique<SyntaxError>(LVL_ERROR,
-        STX_ERR_INVALID_VARDECL, biopdcl.getRight().getPosition()));
+        SyntaxErrorCode::STX_ERR_INVALID_VARDECL, biopdcl.getRight().getPosition()));
       return nullptr;
     }
 
@@ -42,7 +42,7 @@ std::unique_ptr<FuncParameter> Parser::fromExprDeclToFunctionParam(
   // '&' expr | expr
   std::unique_ptr<Expr> typeexpr;
   bool ismutable;
-  if (isUnOpExpr(*expr, TOK_OP_MUT)) {
+  if (isUnOpExpr(*expr, TokenType::TOK_OP_MUT)) {
     std::unique_ptr<UnOpExpr> unopexpr =
       std::unique_ptr<UnOpExpr>(dynamic_cast<UnOpExpr*>(expr.release()));
     typeexpr = unopexpr->getExpressionPtr();
@@ -66,18 +66,18 @@ std::unique_ptr<FuncParameter> Parser::fromExprGuardToFunctionParam(
 
 std::unique_ptr<FuncParameter> Parser::fromExprToFunctionParam(
     std::unique_ptr<Expr> &&expr) noexcept {
-  if (isBiOpExpr(*expr, TOK_OP_ASG)) {
+  if (isBiOpExpr(*expr, TokenType::TOK_OP_ASG)) {
     BiOpExpr &biopexpr = dynamic_cast<BiOpExpr&>(*expr);
     // guard result
-    if (!isBiOpExpr(biopexpr.getLeft(), TOK_OP_BOR)) {
+    if (!isBiOpExpr(biopexpr.getLeft(), TokenType::TOK_OP_BOR)) {
       generateError(std::make_unique<SyntaxError>(LVL_ERROR,
-        STX_ERR_EXPECTED_GUARD, biopexpr.getLeft().getPosition()));
+        SyntaxErrorCode::STX_ERR_EXPECTED_GUARD, biopexpr.getLeft().getPosition()));
       return nullptr;
     }
 
     return fromExprGuardToFunctionParam(
       biopexpr.getLeftPtr(), biopexpr.getRightPtr());
-  } else if (isBiOpExpr(*expr, TOK_OP_BOR)) {
+  } else if (isBiOpExpr(*expr, TokenType::TOK_OP_BOR)) {
     // guard (requires)
     return fromExprGuardToFunctionParam(std::move(expr), nullptr);
   }
@@ -86,11 +86,11 @@ std::unique_ptr<FuncParameter> Parser::fromExprToFunctionParam(
 }
 
 std::vector<std::unique_ptr<FuncParameter>> Parser::parseFuncParameters() noexcept {
-  sanityExpect(TOK_OP_BRACKET_OPEN);
+  sanityExpect(TokenType::TOK_OP_BRACKET_OPEN);
 
-  if (*lexer.getCurrentToken() == TOK_BRACKET_CLOSE) {
+  if (*lexer.getCurrentToken() == TokenType::TOK_BRACKET_CLOSE) {
     generateError(std::make_unique<SyntaxError>(LVL_ERROR,
-      STX_ERR_EXPECTED_PARAMETERS, lexer.getCurrentToken()->getPosition()));
+      SyntaxErrorCode::STX_ERR_EXPECTED_PARAMETERS, lexer.getCurrentToken()->getPosition()));
     return std::vector<std::unique_ptr<FuncParameter>>();
   }
 
@@ -98,7 +98,7 @@ std::vector<std::unique_ptr<FuncParameter>> Parser::parseFuncParameters() noexce
   std::vector<std::unique_ptr<FuncParameter>> parameters;
 
   std::unique_ptr<Expr> expr(parseExpression());
-  while (isBiOpExpr(*expr, TOK_OP_COMMA)) {
+  while (isBiOpExpr(*expr, TokenType::TOK_OP_COMMA)) {
     BiOpExpr &biopexpr = dynamic_cast<BiOpExpr&>(*expr);
     auto funcparam = fromExprToFunctionParam(biopexpr.getRightPtr());
     if (!funcparam) {
@@ -117,10 +117,10 @@ std::vector<std::unique_ptr<FuncParameter>> Parser::parseFuncParameters() noexce
   else
     parameters.insert(parameters.begin(), std::move(funcparam));
 
-  if (!expect(TOK_BRACKET_CLOSE)) {
+  if (!expect(TokenType::TOK_BRACKET_CLOSE)) {
     err = true;
     generateError(std::make_unique<SyntaxError>(LVL_ERROR,
-      STX_ERR_EXPECTED_CLOSING_BRACKET,
+      SyntaxErrorCode::STX_ERR_EXPECTED_CLOSING_BRACKET,
       lexer.getCurrentToken()->getPosition()));
   }
 
@@ -132,19 +132,19 @@ std::vector<std::unique_ptr<FuncParameter>> Parser::parseFuncParameters() noexce
 
 std::unique_ptr<Expr> Parser::parseFuncType() noexcept {
   const Token *tokBegin = lexer.getCurrentToken();
-  sanityExpect(TOK_KW_TYPE);
+  sanityExpect(TokenType::TOK_KW_TYPE);
 
   bool err = false;
 
   std::vector<std::unique_ptr<FuncParameter>> parameters;
-  if (*lexer.getCurrentToken() == TOK_OP_BRACKET_OPEN) {
+  if (*lexer.getCurrentToken() == TokenType::TOK_OP_BRACKET_OPEN) {
     parameters = parseFuncParameters();
     if (parameters.empty())
       err = true;
   }
 
   std::unique_ptr<Expr> returnExpr;
-  if (*lexer.getCurrentToken() == TOK_OP_DCL) {
+  if (*lexer.getCurrentToken() == TokenType::TOK_OP_DCL) {
     lexer.next();
     returnExpr = parseExpression(16);
     if (!returnExpr)
@@ -164,27 +164,27 @@ std::unique_ptr<Expr> Parser::parseFuncReturnType() noexcept {
 }
 
 std::unique_ptr<Expr> Parser::parseFunction(std::unique_ptr<Capabilities> &&caps) noexcept {
-  sanityExpect(TOK_KW_FN);
+  sanityExpect(TokenType::TOK_KW_FN);
 
   bool err = false;
 
   std::unique_ptr<TemplateDecls> templ;
-  if (*lexer.getCurrentToken() == TOK_OP_TEMPL_BRACKET_OPEN) {
+  if (*lexer.getCurrentToken() == TokenType::TOK_OP_TEMPL_BRACKET_OPEN) {
     templ = parseTemplateDecl();
     if (!templ)
       err = true;
-    else if (!expect(TOK_TEMPL_BRACKET_CLOSE) && !err) {
+    else if (!expect(TokenType::TOK_TEMPL_BRACKET_CLOSE) && !err) {
       err = true;
       generateError(std::make_unique<SyntaxError>(LVL_ERROR,
-        STX_ERR_EXPECTED_TEMPL_CLOSING_BRACKET,
+        SyntaxErrorCode::STX_ERR_EXPECTED_TEMPL_CLOSING_BRACKET,
         lexer.getCurrentToken()->getPosition()));
     }
   }
 
-  if (*lexer.getCurrentToken() == TOK_KW_TYPE) {
+  if (*lexer.getCurrentToken() == TokenType::TOK_KW_TYPE) {
     if (!templ->empty()) {
       generateError(std::make_unique<SyntaxError>(LVL_ERROR,
-        STX_ERR_FUNC_VAR_NO_TEMPL, std::get<1>(templ->at(0))->getPosition()));
+        SyntaxErrorCode::STX_ERR_FUNC_VAR_NO_TEMPL, std::get<1>(templ->at(0))->getPosition()));
       err = true;
     }
 
@@ -197,30 +197,30 @@ std::unique_ptr<Expr> Parser::parseFunction(std::unique_ptr<Capabilities> &&caps
 
   // function decl./def.
   const Token *tok = lexer.getCurrentToken();
-  if (!expect(TOK_ID) && !err) {
+  if (!expect(TokenType::TOK_ID) && !err) {
     err = true;
     generateError(std::make_unique<SyntaxError>(LVL_ERROR,
-      STX_ERR_EXPECTED_FUNCTION_ID, lexer.getCurrentToken()->getPosition()));
+      SyntaxErrorCode::STX_ERR_EXPECTED_FUNCTION_ID, lexer.getCurrentToken()->getPosition()));
   }
 
   std::vector<std::unique_ptr<FuncParameter>> parameters;
-  if (*lexer.getCurrentToken() == TOK_OP_BRACKET_OPEN) {
+  if (*lexer.getCurrentToken() == TokenType::TOK_OP_BRACKET_OPEN) {
     parameters = parseFuncParameters();
     if (parameters.empty())
       err = true;
   }
   // assign to expression
-  if (*lexer.getCurrentToken() == TOK_OP_ASG) {
+  if (*lexer.getCurrentToken() == TokenType::TOK_OP_ASG) {
     lexer.next(); // eat =
 
     std::unique_ptr<Expr> returnExprPos(parseExpression());
     if (!returnExprPos)
       err = true;
 
-    if (*lexer.getCurrentToken() != TOK_EOF
-        && *lexer.getCurrentToken() != TOK_EOL) {
+    if (*lexer.getCurrentToken() != TokenType::TOK_EOF
+        && *lexer.getCurrentToken() != TokenType::TOK_EOL) {
       generateError(std::make_unique<SyntaxError>(LVL_ERROR,
-        STX_ERR_EXPECTED_EOL, lexer.getCurrentToken()->getPosition()));
+        SyntaxErrorCode::STX_ERR_EXPECTED_EOL, lexer.getCurrentToken()->getPosition()));
       err = true;
     }
 
@@ -238,9 +238,9 @@ std::unique_ptr<Expr> Parser::parseFunction(std::unique_ptr<Capabilities> &&caps
 
   std::unique_ptr<Expr> returnExpr;
   bool autoDetect = false;
-  if (*lexer.getCurrentToken() == TOK_OP_DCL) {
+  if (*lexer.getCurrentToken() == TokenType::TOK_OP_DCL) {
     lexer.next();
-    if (*lexer.getCurrentToken() == TOK_EOL) {
+    if (*lexer.getCurrentToken() == TokenType::TOK_EOL) {
       autoDetect = true;
     } else {
       // return type
@@ -250,7 +250,7 @@ std::unique_ptr<Expr> Parser::parseFunction(std::unique_ptr<Capabilities> &&caps
     }
   }
   // declaration
-  if (!autoDetect && *lexer.getCurrentToken() == TOK_STMT) {
+  if (!autoDetect && *lexer.getCurrentToken() == TokenType::TOK_STMT) {
     lexer.next(); // eat ;
     if (err)
       return nullptr;
@@ -263,26 +263,26 @@ std::unique_ptr<Expr> Parser::parseFunction(std::unique_ptr<Capabilities> &&caps
   }
 
   // body
-  if (!expect(TOK_EOL)) {
+  if (!expect(TokenType::TOK_EOL)) {
     generateError(std::make_unique<SyntaxError>(LVL_ERROR,
-      STX_ERR_EXPECTED_FN_DCL_DEF, lexer.getCurrentToken()->getPosition()));
+      SyntaxErrorCode::STX_ERR_EXPECTED_FN_DCL_DEF, lexer.getCurrentToken()->getPosition()));
     return nullptr;
   }
 
   std::unique_ptr<BodyExpr> body(parseFunctionBody());
   if (!body) {
-    if (!expect(TOK_STMT)) {
+    if (!expect(TokenType::TOK_STMT)) {
       generateError(std::make_unique<SyntaxError>(LVL_ERROR,
-        STX_ERR_EXPECTED_STMT, lexer.getCurrentToken()->getPosition()));
+        SyntaxErrorCode::STX_ERR_EXPECTED_STMT, lexer.getCurrentToken()->getPosition()));
       return nullptr;
     }
 
     return nullptr;
   }
 
-  if (!expect(TOK_STMT)) {
+  if (!expect(TokenType::TOK_STMT)) {
     generateError(std::make_unique<SyntaxError>(LVL_ERROR,
-      STX_ERR_EXPECTED_STMT, lexer.getCurrentToken()->getPosition()));
+      SyntaxErrorCode::STX_ERR_EXPECTED_STMT, lexer.getCurrentToken()->getPosition()));
     return nullptr;
   } 
 
@@ -298,19 +298,19 @@ std::unique_ptr<BodyExpr> Parser::parseFunctionBody() noexcept {
   Position pos(lexer.getCurrentToken()->getPosition());
   bool err = false;
   Exprs exprs;
-  while (*lexer.getCurrentToken() != TOK_KW_RET
-      && *lexer.getCurrentToken() != TOK_STMT
-      && *lexer.getCurrentToken() != TOK_EOF
-      && *lexer.getCurrentToken() != TOK_KW_ELSE) {
-    if (*lexer.getCurrentToken() == TOK_EOL) {
+  while (*lexer.getCurrentToken() != TokenType::TOK_KW_RET
+      && *lexer.getCurrentToken() != TokenType::TOK_STMT
+      && *lexer.getCurrentToken() != TokenType::TOK_EOF
+      && *lexer.getCurrentToken() != TokenType::TOK_KW_ELSE) {
+    if (*lexer.getCurrentToken() == TokenType::TOK_EOL) {
       lexer.next();
       continue;
     }
 
     std::unique_ptr<Expr> expr(parseExpression());
-    if (*lexer.getCurrentToken() != TOK_STMT && !expect(TOK_EOL)) {
+    if (*lexer.getCurrentToken() != TokenType::TOK_STMT && !expect(TokenType::TOK_EOL)) {
       generateError(std::make_unique<SyntaxError>(LVL_ERROR,
-        STX_ERR_EXPECTED_EOL, lexer.getCurrentToken()->getPosition()));
+        SyntaxErrorCode::STX_ERR_EXPECTED_EOL, lexer.getCurrentToken()->getPosition()));
       skipToStmtEol();
       err = true;
     }
@@ -325,17 +325,17 @@ std::unique_ptr<BodyExpr> Parser::parseFunctionBody() noexcept {
 
   std::unique_ptr<Expr> returnExpr;
   ReturnControlType rct{ReturnControlType::NONE};
-  if (*lexer.getCurrentToken() == TOK_KW_RET
-      || *lexer.getCurrentToken() == TOK_KW_CTN
-      || *lexer.getCurrentToken() == TOK_KW_BRK) {
+  if (*lexer.getCurrentToken() == TokenType::TOK_KW_RET
+      || *lexer.getCurrentToken() == TokenType::TOK_KW_CTN
+      || *lexer.getCurrentToken() == TokenType::TOK_KW_BRK) {
     switch (lexer.getCurrentToken()->getType()) {
-    case TOK_KW_RET:
+    case TokenType::TOK_KW_RET:
       rct = ReturnControlType::RETURN;
       break;
-    case TOK_KW_CTN:
+    case TokenType::TOK_KW_CTN:
       rct = ReturnControlType::CONTINUE;
       break;
-    case TOK_KW_BRK:
+    case TokenType::TOK_KW_BRK:
       rct = ReturnControlType::BREAK;
       break;
     default:
@@ -347,9 +347,9 @@ std::unique_ptr<BodyExpr> Parser::parseFunctionBody() noexcept {
     lexer.next(); // eat return,ctn,brk
 
     if (rct == ReturnControlType::RETURN
-        || (*lexer.getCurrentToken() != TOK_EOF
-            && *lexer.getCurrentToken() != TOK_EOL
-            && *lexer.getCurrentToken() != TOK_STMT)) {
+        || (*lexer.getCurrentToken() != TokenType::TOK_EOF
+            && *lexer.getCurrentToken() != TokenType::TOK_EOL
+            && *lexer.getCurrentToken() != TokenType::TOK_STMT)) {
       returnExpr = parseExpression();
       if (returnExpr)
         pos = pos + returnExpr->getPosition();

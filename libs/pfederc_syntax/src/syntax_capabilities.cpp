@@ -6,37 +6,37 @@ std::unique_ptr<Expr> Parser::parseCapabilities() noexcept {
   std::vector<std::unique_ptr<Expr>> requires;
   std::vector<std::unique_ptr<Expr>> ensures;
 
-  while ((*lexer.getCurrentToken() == TOK_ENSURE
-      || *lexer.getCurrentToken() == TOK_DIRECTIVE)
-      && *lexer.getCurrentToken() != TOK_EOF) {
+  while ((*lexer.getCurrentToken() == TokenType::TOK_ENSURE
+      || *lexer.getCurrentToken() == TokenType::TOK_DIRECTIVE)
+      && *lexer.getCurrentToken() != TokenType::TOK_EOF) {
 
-    if (*lexer.getCurrentToken() == TOK_ENSURE)
+    if (*lexer.getCurrentToken() == TokenType::TOK_ENSURE)
       parseCapabilityEnsure(requires, ensures);
     else
       parseCapabilityDirective(isunused, isinline, isconstant);
 
-    if (!expect(TOK_EOL)) {
+    if (!expect(TokenType::TOK_EOL)) {
       generateError(std::make_unique<SyntaxError>(LVL_ERROR,
-          STX_ERR_EXPECTED_EOL, lexer.getCurrentToken()->getPosition()));
+          SyntaxErrorCode::STX_ERR_EXPECTED_EOL, lexer.getCurrentToken()->getPosition()));
       skipToEol();
     }
 
     // skip new lines
-    while (*lexer.getCurrentToken() == TOK_EOL)
+    while (*lexer.getCurrentToken() == TokenType::TOK_EOL)
       lexer.next();
   }
 
   switch (lexer.getCurrentToken()->getType()) {
-  case TOK_KW_CLASS:
-  case TOK_KW_FN:
-  case TOK_KW_TRAIT:
-  case TOK_KW_TYPE:
+  case TokenType::TOK_KW_CLASS:
+  case TokenType::TOK_KW_FN:
+  case TokenType::TOK_KW_TRAIT:
+  case TokenType::TOK_KW_TYPE:
     return parsePrimary(std::make_unique<Capabilities>(
           isunused, isinline, isconstant,
           std::move(requires), std::move(ensures)));
   default:
     generateError(std::make_unique<SyntaxError>(LVL_ERROR,
-          STX_ERR_INVALID_CAPS_FOLLOWUP,
+          SyntaxErrorCode::STX_ERR_INVALID_CAPS_FOLLOWUP,
           lexer.getCurrentToken()->getPosition()));
     return nullptr;
   }
@@ -47,7 +47,7 @@ static constexpr uint8_t _CAPS_ENSURE_ENSURES = 1;
 static constexpr uint8_t _CAPS_ENSURE_REQUIRES = 2;
 
 static uint8_t _getCapsEnsure(const Token *const tokCmd, const Lexer &lexer) {
-  if (*tokCmd != TOK_ID)
+  if (*tokCmd != TokenType::TOK_ID)
     return _CAPS_ENSURE_INVALID;
 
   std::string str = tokCmd->toString(lexer);
@@ -62,7 +62,7 @@ static uint8_t _getCapsEnsure(const Token *const tokCmd, const Lexer &lexer) {
 void Parser::parseCapabilityEnsure(std::vector<std::unique_ptr<Expr>> &requires,
     std::vector<std::unique_ptr<Expr>> &ensures) noexcept {
   Position pos(lexer.getCurrentToken()->getPosition());
-  sanityExpect(TOK_ENSURE);
+  sanityExpect(TokenType::TOK_ENSURE);
 
   bool err = false;
 
@@ -70,11 +70,11 @@ void Parser::parseCapabilityEnsure(std::vector<std::unique_ptr<Expr>> &requires,
   uint8_t capstype = _CAPS_ENSURE_INVALID;
   if ((capstype = _getCapsEnsure(tokCmd, getLexer())) == _CAPS_ENSURE_INVALID) {
     generateError(std::make_unique<SyntaxError>(LVL_ERROR,
-          STX_ERR_INVALID_CAPS_ENSURE, lexer.getCurrentToken()->getPosition()));
+          SyntaxErrorCode::STX_ERR_INVALID_CAPS_ENSURE, lexer.getCurrentToken()->getPosition()));
     switch (lexer.getCurrentToken()->getType()) {
-    case TOK_EOF:
-    case TOK_EOL:
-    case TOK_STMT:
+    case TokenType::TOK_EOF:
+    case TokenType::TOK_EOL:
+    case TokenType::TOK_STMT:
       break;
     default:
       lexer.next();
@@ -100,12 +100,12 @@ void Parser::parseCapabilityEnsure(std::vector<std::unique_ptr<Expr>> &requires,
 }
 
 void Parser::parseCapabilityDirective(bool &isunused, bool &isinline, bool &isconstant) noexcept {
-  sanityExpect(TOK_DIRECTIVE);
+  sanityExpect(TokenType::TOK_DIRECTIVE);
 
   const Token *const tokId = lexer.getCurrentToken();
-  if (!expect(TOK_ID)) {
+  if (!expect(TokenType::TOK_ID)) {
     generateError(std::make_unique<SyntaxError>(LVL_ERROR,
-          STX_ERR_INVALID_CAPS_DIRECTIVE,
+          SyntaxErrorCode::STX_ERR_INVALID_CAPS_DIRECTIVE,
           lexer.getCurrentToken()->getPosition()));
     return;
   }
@@ -119,7 +119,7 @@ void Parser::parseCapabilityDirective(bool &isunused, bool &isinline, bool &isco
     isconstant = true;
   } else {
     generateError(std::make_unique<SyntaxError>(LVL_ERROR,
-          STX_ERR_INVALID_CAPS_DIRECTIVE,
+          SyntaxErrorCode::STX_ERR_INVALID_CAPS_DIRECTIVE,
           lexer.getCurrentToken()->getPosition()));
   }
 }

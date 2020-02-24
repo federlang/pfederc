@@ -70,7 +70,7 @@ ProgramExpr::ProgramExpr(const Lexer &lexer, const Position &pos,
     const Token *progName,
     Exprs &&imports,
     Exprs &&defs) noexcept
-    : Expr(lexer, EXPR_PROG, pos),
+    : Expr(lexer, ExprType::EXPR_PROG, pos),
       imports(std::move(imports)),
       defs(std::move(defs)) {
 }
@@ -94,7 +94,7 @@ std::string ProgramExpr::toString() const noexcept {
 
 // TokenExpr
 TokenExpr::TokenExpr(const Lexer &lexer, Token *tok) noexcept
-    : Expr(lexer, EXPR_TOK, tok->getPosition()), tok{tok} {
+    : Expr(lexer, ExprType::EXPR_TOK, tok->getPosition()), tok{tok} {
 }
 
 TokenExpr::~TokenExpr() {
@@ -108,7 +108,7 @@ std::string TokenExpr::toString() const noexcept {
 // UseExpr
 UseExpr::UseExpr(const Lexer &lexer, const Position &pos,
     Exprs &&exprs) noexcept
-    : Expr(lexer, EXPR_USE, pos), exprs(std::move(exprs)) {
+    : Expr(lexer, ExprType::EXPR_USE, pos), exprs(std::move(exprs)) {
 }
 
 UseExpr::~UseExpr() {
@@ -129,7 +129,7 @@ std::string UseExpr::toString() const noexcept {
 
 // ProgNameExpr
 ProgNameExpr::ProgNameExpr(const Lexer &lexer, const Token *tok) noexcept
-    : Expr(lexer, EXPR_PROGNAME, tok->getPosition()), tok{tok} {
+    : Expr(lexer, ExprType::EXPR_PROGNAME, tok->getPosition()), tok{tok} {
 }
 
 ProgNameExpr::~ProgNameExpr() {
@@ -148,7 +148,7 @@ FuncExpr::FuncExpr(const Lexer &lexer, const Position &pos,
     std::unique_ptr<Expr> &&returnExpr,
     std::unique_ptr<BodyExpr> &&body,
     bool autoDetectReturnType) noexcept
-    : Expr(lexer, EXPR_FUNC, pos), Capable(std::move(caps)), tokId{tokId},
+    : Expr(lexer, ExprType::EXPR_FUNC, pos), Capable(std::move(caps)), tokId{tokId},
       templs(std::move(templs)), params(std::move(params)),
       returnExpr(std::move(returnExpr)), body(std::move(body)),
       autoDetectReturnType{autoDetectReturnType} {
@@ -218,7 +218,7 @@ std::string FuncExpr::toString() const noexcept {
 FuncTypeExpr::FuncTypeExpr(const Lexer &lexer, const Position &pos,
     std::vector<std::unique_ptr<FuncParameter>>  &&params,
     std::unique_ptr<Expr> &&returnExpr) noexcept
-    : Expr(lexer, EXPR_FUNCTYPE, pos),
+    : Expr(lexer, ExprType::EXPR_FUNCTYPE, pos),
       params(std::move(params)), returnExpr(std::move(returnExpr)) {
 }
 
@@ -234,7 +234,7 @@ std::string FuncTypeExpr::toString() const noexcept {
 LambdaExpr::LambdaExpr(const Lexer &lexer, const Position &pos,
     Exprs &&params,
     std::unique_ptr<BodyExpr> &&body) noexcept
-    : Expr(lexer, EXPR_LAMBDA, pos),
+    : Expr(lexer, ExprType::EXPR_LAMBDA, pos),
       params(std::move(params)), body(std::move(body)) {
 }
 
@@ -267,7 +267,7 @@ TraitExpr::TraitExpr(const Lexer &lexer, const Position &pos,
     std::unique_ptr<TemplateDecls> &&templs,
     std::vector<std::unique_ptr<Expr>> &&impltraits,
     std::list<std::unique_ptr<FuncExpr>> &&functions) noexcept
-    : Expr(lexer, EXPR_TRAIT, pos), Capable(std::move(caps)), tokId{tokId},
+    : Expr(lexer, ExprType::EXPR_TRAIT, pos), Capable(std::move(caps)), tokId{tokId},
       templs(std::move(templs)),
       impltraits(std::move(impltraits)), functions(std::move(functions)) {
 }
@@ -321,7 +321,7 @@ ClassExpr::ClassExpr(const Lexer &lexer, const Position &pos,
     std::list<std::unique_ptr<BiOpExpr>> &&constructAttributes,
     std::list<std::unique_ptr<BiOpExpr>> &&attributes,
     std::list<std::unique_ptr<FuncExpr>> &&functions) noexcept
-    : Expr(lexer, EXPR_CLASS, pos), Capable(std::move(caps)), tokId{tokId},
+    : Expr(lexer, ExprType::EXPR_CLASS, pos), Capable(std::move(caps)), tokId{tokId},
       templs(std::move(templs)),
       constructAttributes(std::move(constructAttributes)),
       attributes(std::move(attributes)),
@@ -380,7 +380,7 @@ TraitImplExpr::TraitImplExpr(const Lexer &lexer, const Position &pos,
     std::unique_ptr<TemplateDecls> &&templs,
     std::unique_ptr<Expr> &&implTrait,
     std::list<std::unique_ptr<FuncExpr>> &&functions) noexcept
-    : Expr(lexer, EXPR_TRAITIMPL, pos), Capable(std::move(caps)), classTokId{classTokId},
+    : Expr(lexer, ExprType::EXPR_TRAITIMPL, pos), Capable(std::move(caps)), classTokId{classTokId},
       templs(std::move(templs)),
       implTrait(std::move(implTrait)), functions(std::move(functions)) {
 }
@@ -419,7 +419,7 @@ EnumExpr::EnumExpr(const Lexer &lexer, const Position &pos,
     const Token *tokId,
     std::unique_ptr<TemplateDecls> &&templs,
     std::vector<EnumConstructor> &&constructors) noexcept
-    : Expr(lexer, EXPR_ENUM, pos), tokId{tokId},
+    : Expr(lexer, ExprType::EXPR_ENUM, pos), tokId{tokId},
       templs(std::move(templs)), constructors(std::move(constructors)) {
 }
 
@@ -465,7 +465,7 @@ std::string EnumExpr::toString() const noexcept {
 TypeExpr::TypeExpr(const Lexer &lexer, const Position &pos,
     std::unique_ptr<Capabilities> &&caps,
     const Token *tokId, std::unique_ptr<Expr> &&expr) noexcept
-  : Expr(lexer, EXPR_TYPE, pos), tokId{tokId}, Capable(std::move(caps)),
+  : Expr(lexer, ExprType::EXPR_TYPE, pos), tokId{tokId}, Capable(std::move(caps)),
     expr(std::move(expr)) {
 }
 
@@ -483,7 +483,7 @@ std::string TypeExpr::toString() const noexcept {
 // ModExpr
 ModExpr::ModExpr(const Lexer &lexer, const Position &pos,
     const Token *tokId, Exprs &&exprs) noexcept
-    : Expr(lexer, EXPR_MOD, pos), tokId{tokId}, exprs(std::move(exprs)) {
+    : Expr(lexer, ExprType::EXPR_MOD, pos), tokId{tokId}, exprs(std::move(exprs)) {
 }
 
 ModExpr::~ModExpr() {
@@ -502,7 +502,7 @@ std::string ModExpr::toString() const noexcept {
 // SafeExpr
 SafeExpr::SafeExpr(const Lexer &lexer, const Position &pos,
     std::unique_ptr<Expr> &&expr) noexcept
-    : Expr(lexer, EXPR_SAFE, pos), expr(std::move(expr)) {
+    : Expr(lexer, ExprType::EXPR_SAFE, pos), expr(std::move(expr)) {
 }
 
 SafeExpr::~SafeExpr() {
@@ -516,7 +516,7 @@ std::string SafeExpr::toString() const noexcept {
 IfExpr::IfExpr(const Lexer &lexer, const Position &pos,
     std::vector<IfCase> &&ifCases,
     std::unique_ptr<BodyExpr> &&elseExpr, bool isensure) noexcept
-    : Expr(lexer, EXPR_IF, pos), ifCases(std::move(ifCases)),
+    : Expr(lexer, ExprType::EXPR_IF, pos), ifCases(std::move(ifCases)),
       elseExpr(std::move(elseExpr)), isensure{isensure} {
 }
 
@@ -571,7 +571,7 @@ LoopExpr::~LoopExpr() {
 
 std::string LoopExpr::toString() const noexcept {
   std::string result;
-  if (getType() == EXPR_LOOP_DO) {
+  if (getType() == ExprType::EXPR_LOOP_DO) {
     result += "do";
     if (initExpr) {
       result += ' ';
@@ -594,7 +594,7 @@ std::string LoopExpr::toString() const noexcept {
   result += bodyExpr->toString();
   result += ';';
 
-  if (getType() == EXPR_LOOP_DO) {
+  if (getType() == ExprType::EXPR_LOOP_DO) {
     result += " for ";
     result += condExpr->toString();
     if (itExpr) {
@@ -611,7 +611,7 @@ MatchExpr::MatchExpr(const Lexer &lexer, const Position &pos,
     std::unique_ptr<Expr> &&expr,
     std::vector<MatchPattern> &&cases,
     std::unique_ptr<BodyExpr> &&anyCase) noexcept
-    : Expr(lexer, EXPR_MATCH, pos), expr(std::move(expr)),
+    : Expr(lexer, ExprType::EXPR_MATCH, pos), expr(std::move(expr)),
       cases(std::move(cases)),
       anyCase(std::move(anyCase)) {
 }
@@ -662,7 +662,7 @@ BiOpExpr::BiOpExpr(const Lexer &lexer, const Position &pos,
      const Token *tokOp,
      TokenType opType,
      std::unique_ptr<Expr> &&lhs, std::unique_ptr<Expr> &&rhs) noexcept
-     : Expr(lexer, EXPR_BIOP, pos), tokOp{tokOp}, opType{opType},
+     : Expr(lexer, ExprType::EXPR_BIOP, pos), tokOp{tokOp}, opType{opType},
        lhs(std::move(lhs)), rhs(std::move(rhs)) {
 }
 
@@ -671,18 +671,18 @@ BiOpExpr::~BiOpExpr() {
 
 std::string BiOpExpr::toString() const noexcept {
   switch (getOperatorType()) {
-  case TOK_OP_BRACKET_OPEN:
-  case TOK_OP_ARR_BRACKET_OPEN:
-  case TOK_OP_TEMPL_BRACKET_OPEN: {
+  case TokenType::TOK_OP_BRACKET_OPEN:
+  case TokenType::TOK_OP_ARR_BRACKET_OPEN:
+  case TokenType::TOK_OP_TEMPL_BRACKET_OPEN: {
     std::string result;
     switch (getOperatorType()) {
-      case TOK_OP_BRACKET_OPEN:
+      case TokenType::TOK_OP_BRACKET_OPEN:
         result += '(';
         break;
-      case TOK_OP_ARR_BRACKET_OPEN:
+      case TokenType::TOK_OP_ARR_BRACKET_OPEN:
         result += '[';
         break;
-      case TOK_OP_TEMPL_BRACKET_OPEN:
+      case TokenType::TOK_OP_TEMPL_BRACKET_OPEN:
         result += '{';
         break;
       default:
@@ -693,7 +693,7 @@ std::string BiOpExpr::toString() const noexcept {
     result += ' ';
     std::string args;
     const Expr * expr = &getRight();
-    while (isBiOpExpr(*expr, TOK_OP_COMMA)) {
+    while (isBiOpExpr(*expr, TokenType::TOK_OP_COMMA)) {
       const BiOpExpr * biopexpr = dynamic_cast<const BiOpExpr*>(expr);
       args = ' ' + biopexpr->getRight().toString() + args;
       expr = &biopexpr->getLeft();
@@ -702,13 +702,13 @@ std::string BiOpExpr::toString() const noexcept {
     args = expr->toString() + args;
     result += args;
     switch (getOperatorType()) {
-      case TOK_OP_BRACKET_OPEN:
+      case TokenType::TOK_OP_BRACKET_OPEN:
         result += ')';
         break;
-      case TOK_OP_ARR_BRACKET_OPEN:
+      case TokenType::TOK_OP_ARR_BRACKET_OPEN:
         result += ']';
         break;
-      case TOK_OP_TEMPL_BRACKET_OPEN:
+      case TokenType::TOK_OP_TEMPL_BRACKET_OPEN:
         result += '}';
         break;
       default:
@@ -718,7 +718,7 @@ std::string BiOpExpr::toString() const noexcept {
 
     return result;
   }
-  case TOK_OP_NONE:
+  case TokenType::TOK_OP_NONE:
     return "( " + getLeft().toString() + ' ' + getRight().toString() + ')';
   default:
     return '(' + getOperatorToken().toString(getLexer()) + ' ' +
@@ -729,14 +729,14 @@ std::string BiOpExpr::toString() const noexcept {
 // UnOpExpr
 UnOpExpr::UnOpExpr(const Lexer &lexer, const Position &pos,
      const Token *tokOp, std::unique_ptr<Expr> &&expr) noexcept
-     : Expr(lexer, EXPR_UNOP, pos), tokOp{tokOp}, expr(std::move(expr)) {
+     : Expr(lexer, ExprType::EXPR_UNOP, pos), tokOp{tokOp}, expr(std::move(expr)) {
 }
 
 UnOpExpr::~UnOpExpr() {
 }
 
 std::string UnOpExpr::toString() const noexcept {
-  if (getOperatorType() == TOK_OP_BRACKET_OPEN) {
+  if (getOperatorType() == TokenType::TOK_OP_BRACKET_OPEN) {
     return '(' + getExpression().toString() + ')';
   }
 
@@ -748,7 +748,7 @@ std::string UnOpExpr::toString() const noexcept {
 BodyExpr::BodyExpr(const Lexer &lex, const Position &pos,
      Exprs &&exprs, std::unique_ptr<Expr> &&retExpr,
      ReturnControlType rct) noexcept
-     : Expr(lex, EXPR_BODY, pos), exprs(std::move(exprs)),
+     : Expr(lex, ExprType::EXPR_BODY, pos), exprs(std::move(exprs)),
        retExpr(std::move(retExpr)), rct{rct} {
 }
 
@@ -791,7 +791,7 @@ std::string BodyExpr::toString() const noexcept {
 ArrayCpyExpr::ArrayCpyExpr(const Lexer &lexer, const Position &pos,
      std::unique_ptr<Expr> &&valuExpr,
      std::unique_ptr<Expr> &&lengthExpr) noexcept
-     : Expr(lexer, EXPR_ARRCPY, pos), valueExpr(std::move(valuExpr)),
+     : Expr(lexer, ExprType::EXPR_ARRCPY, pos), valueExpr(std::move(valuExpr)),
        lengthExpr(std::move(lengthExpr)) {
 }
 
@@ -805,7 +805,7 @@ std::string ArrayCpyExpr::toString() const noexcept {
 // ArrayLitExpr
 ArrayLitExpr::ArrayLitExpr(const Lexer &lexer, const Position &pos,
      std::list<std::unique_ptr<Expr>> &&exprs) noexcept
-     : Expr(lexer, EXPR_ARRLIT, pos),
+     : Expr(lexer, ExprType::EXPR_ARRLIT, pos),
        exprs(std::move(exprs)) {
 }
 
@@ -829,7 +829,7 @@ std::string ArrayLitExpr::toString() const noexcept {
 // ArrayEmptyExpr
 ArrayEmptyExpr::ArrayEmptyExpr(const Lexer &lexer, const Position &pos,
      std::unique_ptr<Expr> &&typeExpr) noexcept
-     : Expr(lexer, EXPR_ARREMPTY, pos), typeExpr(std::move(typeExpr)) {
+     : Expr(lexer, ExprType::EXPR_ARREMPTY, pos), typeExpr(std::move(typeExpr)) {
 }
 
 ArrayEmptyExpr::~ArrayEmptyExpr() {

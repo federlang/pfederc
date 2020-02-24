@@ -2,19 +2,19 @@
 using namespace pfederc;
 
 std::unique_ptr<Expr> Parser::parseLambda() noexcept {
-  sanityExpect(TOK_KW_LAMBDA);
+  sanityExpect(TokenType::TOK_KW_LAMBDA);
 
   bool err = false;
 
   Exprs params;
-  if (*lexer.getCurrentToken() == TOK_OP_BRACKET_OPEN) {
+  if (*lexer.getCurrentToken() == TokenType::TOK_OP_BRACKET_OPEN) {
     lexer.next();
 
     std::unique_ptr<Expr> paramexpr(parseExpression());
     if (!paramexpr) {
       err = true;
     } else {
-      while (isBiOpExpr(*paramexpr, TOK_OP_COMMA)) {
+      while (isBiOpExpr(*paramexpr, TokenType::TOK_OP_COMMA)) {
         BiOpExpr& biopexpr = dynamic_cast<BiOpExpr&>(*paramexpr);
         params.insert(params.begin(), biopexpr.getRightPtr());
         paramexpr = biopexpr.getLeftPtr();
@@ -23,21 +23,21 @@ std::unique_ptr<Expr> Parser::parseLambda() noexcept {
       params.insert(params.begin(), std::move(paramexpr));
     }
 
-    if (!expect(TOK_BRACKET_CLOSE)) {
+    if (!expect(TokenType::TOK_BRACKET_CLOSE)) {
       generateError(std::make_unique<SyntaxError>(LVL_ERROR,
-        STX_ERR_EXPECTED_CLOSING_BRACKET, lexer.getCurrentToken()->getPosition()));
+        SyntaxErrorCode::STX_ERR_EXPECTED_CLOSING_BRACKET, lexer.getCurrentToken()->getPosition()));
       err = true;
     }
   }
 
-  if (*lexer.getCurrentToken() == TOK_OP_ASG) {
+  if (*lexer.getCurrentToken() == TokenType::TOK_OP_ASG) {
     // *=* *expr*
     lexer.next(); // eat =
 
     std::unique_ptr<Expr> expr(parseExpression());
     if (!expr) {
       generateError(std::make_unique<SyntaxError>(LVL_ERROR,
-        STX_ERR_EXPECTED_EXPR, lexer.getCurrentToken()->getPosition()));
+        SyntaxErrorCode::STX_ERR_EXPECTED_EXPR, lexer.getCurrentToken()->getPosition()));
       return nullptr;
     }
 
@@ -52,9 +52,9 @@ std::unique_ptr<Expr> Parser::parseLambda() noexcept {
         Exprs(), std::move(expr), ReturnControlType::RETURN));
   }
   // *newline* *body* *;*
-  if (!expect(TOK_EOL)) {
+  if (!expect(TokenType::TOK_EOL)) {
     generateError(std::make_unique<SyntaxError>(LVL_ERROR,
-      STX_ERR_EXPECTED_EOL, lexer.getCurrentToken()->getPosition()));
+      SyntaxErrorCode::STX_ERR_EXPECTED_EOL, lexer.getCurrentToken()->getPosition()));
     err = true;
   }
 
@@ -62,9 +62,9 @@ std::unique_ptr<Expr> Parser::parseLambda() noexcept {
   if (!body)
     err = true;
 
-  if (!expect(TOK_STMT)) {
+  if (!expect(TokenType::TOK_STMT)) {
     generateError(std::make_unique<SyntaxError>(LVL_ERROR,
-      STX_ERR_EXPECTED_STMT, lexer.getCurrentToken()->getPosition()));
+      SyntaxErrorCode::STX_ERR_EXPECTED_STMT, lexer.getCurrentToken()->getPosition()));
     err = true;
   }
 

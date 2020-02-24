@@ -2,9 +2,9 @@
 using namespace pfederc;
 
 std::unique_ptr<TemplateDecl> Parser::fromDeclExprToTemplateDecl(BiOpExpr &bioprhs) noexcept {
-  if (!isTokenExpr(bioprhs.getLeft(), TOK_ID)) {
+  if (!isTokenExpr(bioprhs.getLeft(), TokenType::TOK_ID)) {
     generateError(std::make_unique<SyntaxError>(LVL_ERROR,
-      STX_ERR_INVALID_VARDECL_ID, bioprhs.getPosition()));
+      SyntaxErrorCode::STX_ERR_INVALID_VARDECL_ID, bioprhs.getPosition()));
     return nullptr;
   }
   
@@ -14,19 +14,19 @@ std::unique_ptr<TemplateDecl> Parser::fromDeclExprToTemplateDecl(BiOpExpr &biopr
 }
 
 std::unique_ptr<TemplateDecls> Parser::parseTemplateDecl() noexcept {
-  sanityExpect(TOK_OP_TEMPL_BRACKET_OPEN);
+  sanityExpect(TokenType::TOK_OP_TEMPL_BRACKET_OPEN);
 
   bool err = false;
 
   std::unique_ptr<Expr> expr(parseExpression());
   std::unique_ptr<TemplateDecls> result(new TemplateDecls());
 
-  while (expr && isBiOpExpr(*expr, TOK_OP_COMMA)) {
+  while (expr && isBiOpExpr(*expr, TokenType::TOK_OP_COMMA)) {
     BiOpExpr &biopexpr = dynamic_cast<BiOpExpr&>(*expr);
     std::unique_ptr<Expr> rhs(biopexpr.getRightPtr());
-    if (!isBiOpExpr(*rhs, TOK_OP_DCL)) {
+    if (!isBiOpExpr(*rhs, TokenType::TOK_OP_DCL)) {
       generateError(std::make_unique<SyntaxError>(LVL_ERROR,
-        STX_ERR_EXPECTED_VARDECL, rhs->getPosition()));
+        SyntaxErrorCode::STX_ERR_EXPECTED_VARDECL, rhs->getPosition()));
 
       // next iterator step
       expr = biopexpr.getLeftPtr();
@@ -45,9 +45,9 @@ std::unique_ptr<TemplateDecls> Parser::parseTemplateDecl() noexcept {
     expr = biopexpr.getLeftPtr();
   }
 
-  if (expr && !isBiOpExpr(*expr, TOK_OP_DCL)) {
+  if (expr && !isBiOpExpr(*expr, TokenType::TOK_OP_DCL)) {
     generateError(std::make_unique<SyntaxError>(LVL_ERROR,
-      STX_ERR_EXPECTED_VARDECL, expr->getPosition()));
+      SyntaxErrorCode::STX_ERR_EXPECTED_VARDECL, expr->getPosition()));
     return nullptr;
   }
   
@@ -61,9 +61,9 @@ std::unique_ptr<TemplateDecls> Parser::parseTemplateDecl() noexcept {
       result->push_back(TemplateDecl(std::get<0>(*templdecl), std::get<1>(*templdecl).release()));
   }
 
-  if (!expect(TOK_TEMPL_BRACKET_CLOSE)) {
+  if (!expect(TokenType::TOK_TEMPL_BRACKET_CLOSE)) {
     generateError(std::make_unique<SyntaxError>(LVL_ERROR,
-          STX_ERR_EXPECTED_TEMPL_CLOSING_BRACKET,
+          SyntaxErrorCode::STX_ERR_EXPECTED_TEMPL_CLOSING_BRACKET,
           lexer.getCurrentToken()->getPosition()));
     err = true;
   }
@@ -75,7 +75,7 @@ std::unique_ptr<TemplateDecls> Parser::parseTemplateDecl() noexcept {
 }
 
 std::unique_ptr<Expr> Parser::parseTemplate() noexcept {
-  sanityExpect(TOK_OP_TEMPL_BRACKET_OPEN);
+  sanityExpect(TokenType::TOK_OP_TEMPL_BRACKET_OPEN);
 
   // TODO
 }

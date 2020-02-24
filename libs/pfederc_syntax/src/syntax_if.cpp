@@ -11,8 +11,8 @@ std::unique_ptr<Expr> Parser::parseIf(bool isensure) noexcept {
     cases.push_back(std::move(startifcase));
 
   std::unique_ptr<BodyExpr> elseBody;
-  while (expect(TOK_KW_ELSE)) {
-    if (*lexer.getCurrentToken() == TOK_EOL) {
+  while (expect(TokenType::TOK_KW_ELSE)) {
+    if (*lexer.getCurrentToken() == TokenType::TOK_EOL) {
       lexer.next(); // eat eol
       elseBody = parseFunctionBody();
       break;
@@ -23,9 +23,9 @@ std::unique_ptr<Expr> Parser::parseIf(bool isensure) noexcept {
       cases.push_back(std::move(ifcase));
   }
 
-  if (!expect(TOK_STMT)) {
+  if (!expect(TokenType::TOK_STMT)) {
     generateError(std::make_unique<SyntaxError>(LVL_ERROR,
-      STX_ERR_EXPECTED_STMT, lexer.getCurrentToken()->getPosition()));
+      SyntaxErrorCode::STX_ERR_EXPECTED_STMT, lexer.getCurrentToken()->getPosition()));
   }
 
   if (err)
@@ -38,22 +38,22 @@ std::unique_ptr<Expr> Parser::parseIf(bool isensure) noexcept {
 IfCase Parser::parseIfStart(bool isensure) noexcept {
   bool err = false;
   // parse 'ensure' or 'if'
-  if (isensure && !expect(TOK_KW_ENSURE)) {
+  if (isensure && !expect(TokenType::TOK_KW_ENSURE)) {
     err = true;
     generateError(std::make_unique<SyntaxError>(LVL_ERROR,
-          STX_ERR_EXPECTED_EOL_ENSURE,
+          SyntaxErrorCode::STX_ERR_EXPECTED_EOL_ENSURE,
           lexer.getCurrentToken()->getPosition()));
-  } else if (!isensure && !expect(TOK_KW_IF)) {
+  } else if (!isensure && !expect(TokenType::TOK_KW_IF)) {
     err = true;
     generateError(std::make_unique<SyntaxError>(LVL_ERROR,
-          STX_ERR_EXPECTED_EOL_IF,
+          SyntaxErrorCode::STX_ERR_EXPECTED_EOL_IF,
           lexer.getCurrentToken()->getPosition()));
   }
   // parse condition
   std::unique_ptr<Expr> cond(parseExpression());
-  if (!expect(TOK_EOL)) {
+  if (!expect(TokenType::TOK_EOL)) {
     generateError(std::make_unique<SyntaxError>(LVL_ERROR,
-          STX_ERR_EXPECTED_EOL, lexer.getCurrentToken()->getPosition()));
+          SyntaxErrorCode::STX_ERR_EXPECTED_EOL, lexer.getCurrentToken()->getPosition()));
     skipToEol();
   }
   // parse body

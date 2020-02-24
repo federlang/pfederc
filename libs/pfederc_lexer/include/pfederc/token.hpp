@@ -31,7 +31,7 @@ namespace pfederc {
 
   constexpr Position FAKE_POS = Position(0,1,0);
 
-  enum TokenType : uint16_t {
+  enum class TokenType : uint16_t {
     TOK_ERR,       //!< error
     TOK_EOL,       //!< end-of-line
     TOK_EOF,       //!< end-of-file
@@ -139,16 +139,16 @@ namespace pfederc {
 
   inline bool isNumberType(TokenType type) noexcept {
     switch(type) {
-    case TOK_INT8:
-    case TOK_INT16:
-    case TOK_INT32:
-    case TOK_INT64:
-    case TOK_UINT8:
-    case TOK_UINT16:
-    case TOK_UINT32:
-    case TOK_UINT64:
-    case TOK_FLT32:
-    case TOK_FLT64:
+    case TokenType::TOK_INT8:
+    case TokenType::TOK_INT16:
+    case TokenType::TOK_INT32:
+    case TokenType::TOK_INT64:
+    case TokenType::TOK_UINT8:
+    case TokenType::TOK_UINT16:
+    case TokenType::TOK_UINT32:
+    case TokenType::TOK_UINT64:
+    case TokenType::TOK_FLT32:
+    case TokenType::TOK_FLT64:
       return true;
     default:
       return false;
@@ -157,28 +157,28 @@ namespace pfederc {
 	
 	inline bool isIntegerType(TokenType type) noexcept {
 		switch(type) {
-    case TOK_INT8:
-    case TOK_INT16:
-    case TOK_INT32:
-    case TOK_INT64:
-    case TOK_UINT8:
-    case TOK_UINT16:
-    case TOK_UINT32:
-    case TOK_UINT64:
+    case TokenType::TOK_INT8:
+    case TokenType::TOK_INT16:
+    case TokenType::TOK_INT32:
+    case TokenType::TOK_INT64:
+    case TokenType::TOK_UINT8:
+    case TokenType::TOK_UINT16:
+    case TokenType::TOK_UINT32:
+    case TokenType::TOK_UINT64:
       return true;
     default:
       return false;
 		};
 	}
 
-  constexpr TokenType TOK_KW_START = TOK_KW_FN;
-  constexpr TokenType TOK_KW_END = TOK_KW_FALSE;
+  constexpr TokenType TOK_KW_START = TokenType::TOK_KW_FN;
+  constexpr TokenType TOK_KW_END = TokenType::TOK_KW_FALSE;
   /*!\return Returns true if type is a keyword, otherwise false.
    */
   bool isTokenTypeKeyword(TokenType type) noexcept;
 
-  constexpr TokenType TOK_OP_START = TOK_OP_COMMA;
-  constexpr TokenType TOK_OP_END = TOK_OP_DMEM;
+  constexpr TokenType TOK_OP_START = TokenType::TOK_OP_COMMA;
+  constexpr TokenType TOK_OP_END = TokenType::TOK_OP_DMEM;
   /*!\return Returns true if type is an operator, otherwise false.
    */
   bool isTokenTypeOperator(TokenType type) noexcept;

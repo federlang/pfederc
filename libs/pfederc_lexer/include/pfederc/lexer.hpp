@@ -9,7 +9,7 @@ namespace pfederc {
   class Lexer;
   class LexerError;
 
-  enum LexerErrorCode {
+  enum class LexerErrorCode {
     LEX_ERR_GENERAL_INVALID_CHARACTER,
     LEX_ERR_ID_NO_DIGIT_AFTER_ANYS,
     LEX_ERR_ID_NOT_JUST_ANYS,

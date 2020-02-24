@@ -18,5 +18,5 @@ int main(int argsc, char * argsv[]) {
   std::cout << tok.toString(lex) << std::endl;
   Logger log;
   logLexerErrors(log, lex);
-  return tok != TOK_ERR ? 0 : 1;
+  return tok != TokenType::TOK_ERR ? 0 : 1;
 }

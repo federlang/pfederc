@@ -3,34 +3,34 @@ using namespace pfederc;
 
 std::unique_ptr<Expr> Parser::parseEnum() noexcept {
   Position pos(lexer.getCurrentToken()->getPosition());
-  sanityExpect(TOK_KW_ENUM);
+  sanityExpect(TokenType::TOK_KW_ENUM);
 
   bool err = false; // hard errors
 
   std::unique_ptr<TemplateDecls> templ;
-  if (*lexer.getCurrentToken() == TOK_OP_TEMPL_BRACKET_OPEN) {
+  if (*lexer.getCurrentToken() == TokenType::TOK_OP_TEMPL_BRACKET_OPEN) {
     templ = parseTemplateDecl();
     // maybe soft error
   }
 
   const Token *const tokId = lexer.getCurrentToken();
-  if (!expect(TOK_ID)) {
+  if (!expect(TokenType::TOK_ID)) {
     generateError(std::make_unique<SyntaxError>(LVL_ERROR,
-      STX_ERR_EXPECTED_ID, tokId->getPosition()));
+      SyntaxErrorCode::STX_ERR_EXPECTED_ID, tokId->getPosition()));
     err = true;
   }
 
-  if (!expect(TOK_EOL)) {
+  if (!expect(TokenType::TOK_EOL)) {
     generateError(std::make_unique<SyntaxError>(LVL_ERROR,
-      STX_ERR_EXPECTED_EOL, lexer.getCurrentToken()->getPosition()));
+      SyntaxErrorCode::STX_ERR_EXPECTED_EOL, lexer.getCurrentToken()->getPosition()));
   }
 
   std::vector<EnumConstructor> constructors;
   parseEnumBody(err, constructors);
 
-  if (!expect(TOK_STMT)) {
+  if (!expect(TokenType::TOK_STMT)) {
     generateError(std::make_unique<SyntaxError>(LVL_ERROR,
-      STX_ERR_EXPECTED_STMT, lexer.getCurrentToken()->getPosition(),
+      SyntaxErrorCode::STX_ERR_EXPECTED_STMT, lexer.getCurrentToken()->getPosition(),
       std::vector<Position> { tokId->getPosition() }));
     err = true;
   }
@@ -44,38 +44,38 @@ std::unique_ptr<Expr> Parser::parseEnum() noexcept {
 
 void Parser::parseEnumBody(bool &err,
     std::vector<EnumConstructor> &constructors) noexcept {
-  while (*lexer.getCurrentToken() != TOK_STMT
-      && *lexer.getCurrentToken() != TOK_EOF) {
-    if (*lexer.getCurrentToken() == TOK_EOL) {
+  while (*lexer.getCurrentToken() != TokenType::TOK_STMT
+      && *lexer.getCurrentToken() != TokenType::TOK_EOF) {
+    if (*lexer.getCurrentToken() == TokenType::TOK_EOL) {
       lexer.next(); // skip eol
       continue;
     }
 
     const Token *const tokConstructorId = lexer.getCurrentToken();
-    if (!expect(TOK_ID)) {
+    if (!expect(TokenType::TOK_ID)) {
       generateError(std::make_unique<SyntaxError>(LVL_ERROR,
-        STX_ERR_EXPECTED_ID, tokConstructorId->getPosition()));
+        SyntaxErrorCode::STX_ERR_EXPECTED_ID, tokConstructorId->getPosition()));
       err = true;
       skipToStmtEol();
       continue;
     }
 
     std::vector<std::unique_ptr<Expr>> args;
-    if (*lexer.getCurrentToken() == TOK_OP_BRACKET_OPEN) {
+    if (*lexer.getCurrentToken() == TokenType::TOK_OP_BRACKET_OPEN) {
       lexer.next(); // eat (
 
       parseTraitImpl(err, args);
-      if (!expect(TOK_BRACKET_CLOSE)) {
+      if (!expect(TokenType::TOK_BRACKET_CLOSE)) {
         generateError(std::make_unique<SyntaxError>(LVL_ERROR,
-          STX_ERR_EXPECTED_CLOSING_BRACKET, lexer.getCurrentToken()->getPosition()));
+          SyntaxErrorCode::STX_ERR_EXPECTED_CLOSING_BRACKET, lexer.getCurrentToken()->getPosition()));
       }
     }
 
     constructors.push_back(EnumConstructor(tokConstructorId, std::move(args)));
 
-    if (!expect(TOK_EOL)) {
+    if (!expect(TokenType::TOK_EOL)) {
       generateError(std::make_unique<SyntaxError>(LVL_ERROR,
-        STX_ERR_EXPECTED_EOL, lexer.getCurrentToken()->getPosition()));
+        SyntaxErrorCode::STX_ERR_EXPECTED_EOL, lexer.getCurrentToken()->getPosition()));
       skipToStmtEol();
     }
   }

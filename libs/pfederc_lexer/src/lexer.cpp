@@ -148,39 +148,39 @@ inline static LogMessage _logLexerErrorStrInvalidEnd(const Lexer &lexer, const L
 LogMessage pfederc::logLexerError(const Lexer &lexer, const LexerError &err) noexcept {
   const Position &pos = err.getPosition();
   switch (err.getErrorCode()) {
-  case LEX_ERR_GENERAL_INVALID_CHARACTER:
+  case LexerErrorCode::LEX_ERR_GENERAL_INVALID_CHARACTER:
     return LogMessage(err.getLogLevel(),
       logCreateErrorMessage(lexer, pos, "Invalid character"));  
-  case LEX_ERR_ID_NO_DIGIT_AFTER_ANYS:
+  case LexerErrorCode::LEX_ERR_ID_NO_DIGIT_AFTER_ANYS:
     return LogMessage(err.getLogLevel(),
       logCreateErrorMessage(lexer, pos, "Leading _ must not be followed by digit"));  
-  case LEX_ERR_ID_NOT_JUST_ANYS:
+  case LexerErrorCode::LEX_ERR_ID_NOT_JUST_ANYS:
     return LogMessage(err.getLogLevel(),
       logCreateErrorMessage(lexer, pos, "Identifier must not consist of just _"));  
-  case LEX_ERR_STR_INVALID_ESCAPE_CODE:
+  case LexerErrorCode::LEX_ERR_STR_INVALID_ESCAPE_CODE:
     return LogMessage(err.getLogLevel(),
       logCreateErrorMessage(lexer, pos, "Invalid escape sequence"));  
-  case LEX_ERR_CHAR_INVALID_END:
+  case LexerErrorCode::LEX_ERR_CHAR_INVALID_END:
     return LogMessage(err.getLogLevel(),
       logCreateErrorMessage(lexer, pos, "Expected '"),
       { _logLexerErrorCharInvalidEnd(lexer, err) });  
-  case LEX_ERR_STR_INVALID_END:
+  case LexerErrorCode::LEX_ERR_STR_INVALID_END:
     return LogMessage(err.getLogLevel(),
       logCreateErrorMessage(lexer, pos, "Expected \""),
       { _logLexerErrorStrInvalidEnd(lexer, err) });  
-  case LEX_ERR_STR_HEXADECIMAL_CHAR:
+  case LexerErrorCode::LEX_ERR_STR_HEXADECIMAL_CHAR:
     return LogMessage(err.getLogLevel(),
       logCreateErrorMessage(lexer, pos, "Expected hexadecimal character"));
-  case LEX_ERR_NUM_LEADING_ZERO:
+  case LexerErrorCode::LEX_ERR_NUM_LEADING_ZERO:
     return LogMessage(err.getLogLevel(),
       logCreateErrorMessage(lexer, pos, "Zero must not be the first character of decimal number"),
       { _logLexerErrorLeadingZero(lexer, err) });  
-  case LEX_ERR_NUM_UNEXPECTED_CHAR_DIGIT:
+  case LexerErrorCode::LEX_ERR_NUM_UNEXPECTED_CHAR_DIGIT:
     return LogMessage(err.getLogLevel(),
       logCreateErrorMessage(lexer, pos, "Unexpected digit"));  
-  case LEX_ERR_NUM_UNEXPECTED_CHAR:
+  case LexerErrorCode::LEX_ERR_NUM_UNEXPECTED_CHAR:
     return LogMessage(err.getLogLevel(), logCreateErrorMessage(lexer, pos, "Unexpected character"));  
-  case LEX_ERR_REGION_COMMENT_END:
+  case LexerErrorCode::LEX_ERR_REGION_COMMENT_END:
     return LogMessage(err.getLogLevel(), logCreateErrorMessage(lexer, pos, "Expected '*/'"));
   default:
     return LogMessage(err.getLogLevel(), logCreateErrorMessage(lexer, pos, "Unknown error"));
@@ -202,9 +202,9 @@ bool pfederc::logLexerErrors(Logger &log, const Lexer &lex) noexcept {
 // Token
 std::string Token::toString(const Lexer &lexer) const noexcept {
 	switch(getType()) {
-	case TOK_KW_TRUE:
+	case TokenType::TOK_KW_TRUE:
 		return "True";
-	case TOK_KW_FALSE:
+	case TokenType::TOK_KW_FALSE:
 		return "False";
 	default:
   	return lexer.getFileContent().substr(getPosition().startIndex,

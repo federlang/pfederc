@@ -6,7 +6,7 @@
 #include "pfederc/errors.hpp"
 
 namespace pfederc {
-  enum ExprType {
+  enum class ExprType {
     EXPR_TOK,
 
     EXPR_PROGNAME,
@@ -191,7 +191,7 @@ namespace pfederc {
   };
 
   inline bool isTokenExpr(const Expr &expr, TokenType type) {
-    return expr.getType() == EXPR_TOK &&
+    return expr.getType() == ExprType::EXPR_TOK &&
       dynamic_cast<const TokenExpr&>(expr).getToken() == type;
   }
 
@@ -575,7 +575,7 @@ namespace pfederc {
   public:
     /*!\brief Initializes LoopExpr
      * \param lexer
-     * \param type Either EXPR_LOOP_DO or EXPR_LOOP_FOR
+     * \param type Either ExprType::EXPR_LOOP_DO or ExprType::EXPR_LOOP_FOR
      * \param pos Position in lexer input
      * \param initExpr Return value of getInitialization()
      * \param condExpr Return value of getCondition()
@@ -685,7 +685,7 @@ namespace pfederc {
    * operator 'type', otherwise false is returned.
    */
   inline bool isBiOpExpr(const Expr &expr, TokenType type) noexcept {
-    return expr.getType() == EXPR_BIOP &&
+    return expr.getType() == ExprType::EXPR_BIOP &&
       dynamic_cast<const BiOpExpr&>(expr).getOperatorType() == type;
   }
 
@@ -716,7 +716,7 @@ namespace pfederc {
   };
 
   inline bool isUnOpExpr(const Expr &expr, TokenType type) noexcept {
-    return expr.getType() == EXPR_UNOP &&
+    return expr.getType() == ExprType::EXPR_UNOP &&
       dynamic_cast<const UnOpExpr&>(expr).getOperatorType() == type;
   }
 
@@ -821,7 +821,7 @@ namespace pfederc {
   class ErrorExpr final : public Expr {
   public:
     inline ErrorExpr(const Lexer &lexer, const Position &pos) noexcept
-        : Expr(lexer, EXPR_ERR, pos) {}
+        : Expr(lexer, ExprType::EXPR_ERR, pos) {}
     ErrorExpr(const ErrorExpr &) = delete;
     inline virtual ~ErrorExpr() {}
 
@@ -829,4 +829,4 @@ namespace pfederc {
   };
 }
 
-#endif /* PFEDERC_SYNTAX_EXPR_HPP */
+#endif /* PFEDERC_SYNTAX_ExprType::EXPR_HPP */
