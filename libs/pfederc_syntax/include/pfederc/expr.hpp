@@ -339,8 +339,8 @@ namespace pfederc {
 
   class TraitExpr final : public Expr, public Capable {
     const Token *tokId; //!< trait identifier
-    std::vector<std::unique_ptr<Expr>> impltraits;
     std::unique_ptr<TemplateDecls> templs;
+    std::vector<std::unique_ptr<Expr>> impltraits;
     std::list<std::unique_ptr<FuncExpr>> functions;
   public:
     /*!\brief Initializes TraitExpr

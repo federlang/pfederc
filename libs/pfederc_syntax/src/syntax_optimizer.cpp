@@ -442,6 +442,8 @@ std::tuple<std::unique_ptr<Expr>, bool /* changed */> pfederc::optimizeBiOpExpr(
 							lhsTok, rhsTok) ? TokenType::TOK_KW_TRUE : TokenType::TOK_KW_FALSE,
 							expr->getPosition());
 				break;
+			default:
+				fatal(__FILE__, __LINE__, "Unexpected branch reached");
 		}
 
 		std::unique_ptr<Expr> newexpr = std::make_unique<FakeTokenExpr>(

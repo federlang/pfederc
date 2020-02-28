@@ -61,24 +61,26 @@ bool Semantic::isTypeTupleObjects() const noexcept {
   if (!hasAllSemanticType(type, ST_TUPLE | ST_VAR | ST_OBJ))
     return false;
 
-  for (auto &objs : multipleSemantics.at(SemanticMultipleType::OBJS)) {
-    if (!hasAllSemanticType(type, ST_OBJ))
-      return false;
-  }
+	bool result = true;
+	forEachSemantics(SemanticMultipleType::OBJS, [&result](Semantic *obj) {
+    	if (result && !hasAllSemanticType(obj->getType(), ST_OBJ))
+				result = false;
+	});
 
-  return true;
+  return result;
 }
 
 bool Semantic::isTypeTupleVariables() const noexcept {
   if (!hasAllSemanticType(type, ST_TUPLE | ST_VAR | ST_OBJ))
     return false;
 
-  for (auto &objs : multipleSemantics.at(SemanticMultipleType::OBJS)) {
-    if (!hasAllSemanticType(type, ST_OBJ | ST_VAR))
-      return false;
-  }
+	bool result = true;
+	forEachSemantics(SemanticMultipleType::OBJS, [&result](Semantic *obj) {
+		if (result && !hasAllSemanticType(obj->getType(), ST_OBJ | ST_VAR))
+			result = false;
+  });
 
-  return true;
+  return result;
 }
 
 bool Semantic::isTypeRegularObject() const noexcept {
@@ -144,7 +146,7 @@ SafeSemantic::~SafeSemantic() {
 
 const Semantic *SafeSemantic::findChild(const std::string &name, bool enablechildren) const noexcept {
   std::lock_guard<std::mutex> lck(mtxChildren);
-  return SafeSemantic::findChild(name, enablechildren);
+  return Semantic::findChild(name, enablechildren);
 }
 
 bool SafeSemantic::addChild(const std::string &name, Semantic *semantic) noexcept {

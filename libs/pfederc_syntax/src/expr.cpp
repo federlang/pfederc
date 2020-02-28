@@ -302,7 +302,6 @@ std::string TraitExpr::toString() const noexcept {
   }
 
   result += '\n';
-  bool first = false;
   for (auto &func : functions) {
     result += func->toString();
     result += '\n';
@@ -465,8 +464,8 @@ std::string EnumExpr::toString() const noexcept {
 TypeExpr::TypeExpr(const Lexer &lexer, const Position &pos,
     std::unique_ptr<Capabilities> &&caps,
     const Token *tokId, std::unique_ptr<Expr> &&expr) noexcept
-  : Expr(lexer, ExprType::EXPR_TYPE, pos), tokId{tokId}, Capable(std::move(caps)),
-    expr(std::move(expr)) {
+  : Expr(lexer, ExprType::EXPR_TYPE, pos), Capable(std::move(caps)),
+    tokId{tokId}, expr(std::move(expr)) {
 }
 
 TypeExpr::~TypeExpr() {

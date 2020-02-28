@@ -36,15 +36,12 @@ std::unique_ptr<Expr> Parser::parseIf(bool isensure) noexcept {
 }
 
 IfCase Parser::parseIfStart(bool isensure) noexcept {
-  bool err = false;
   // parse 'ensure' or 'if'
   if (isensure && !expect(TokenType::TOK_KW_ENSURE)) {
-    err = true;
     generateError(std::make_unique<SyntaxError>(LVL_ERROR,
           SyntaxErrorCode::STX_ERR_EXPECTED_EOL_ENSURE,
           lexer.getCurrentToken()->getPosition()));
   } else if (!isensure && !expect(TokenType::TOK_KW_IF)) {
-    err = true;
     generateError(std::make_unique<SyntaxError>(LVL_ERROR,
           SyntaxErrorCode::STX_ERR_EXPECTED_EOL_IF,
           lexer.getCurrentToken()->getPosition()));

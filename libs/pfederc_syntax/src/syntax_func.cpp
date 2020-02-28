@@ -151,6 +151,9 @@ std::unique_ptr<Expr> Parser::parseFuncType() noexcept {
       return nullptr;
   }
 
+	if (err)
+		return nullptr;
+
   return std::make_unique<FuncTypeExpr>(lexer,
     tokBegin->getPosition(), std::move(parameters), std::move(returnExpr));
 }
