@@ -65,10 +65,10 @@ namespace pfederc {
     Expr *expr;
     Semantic *parent;
     std::unordered_map<SemanticInfoStringType, std::string> infoStrings;
-    std::unordered_map<SemanticSingleType, Semantic*> singleSemantics;
-    std::unordered_map<SemanticMultipleType, std::list<Semantic*>> multipleSemantics;
   protected:
     std::unordered_map<std::string, Semantic*> children;
+    std::unordered_map<SemanticSingleType, Semantic*> singleSemantics;
+    std::unordered_map<SemanticMultipleType, std::list<Semantic*>> multipleSemantics;
   public:
     /*!\brief Initializes Semantic
      * \param type The semantics type. Returned by getType().
@@ -78,7 +78,9 @@ namespace pfederc {
      * \param infoStrings Used by getInfoString()
      */
     Semantic(uint32_t type, Expr *expr, Semantic *parent,
-        std::unordered_map<SemanticInfoStringType, std::string> &&infoStrings = {}) noexcept;
+        std::unordered_map<SemanticInfoStringType, std::string> &&infoStrings = {},
+				std::unordered_map<SemanticSingleType, Semantic*> &&singleSemantics = {},
+				std::unordered_map<SemanticMultipleType, std::list<Semantic*>> &&multipleSemantics = {}) noexcept;
     Semantic(const Semantic &) = delete;
     virtual ~Semantic();
 
@@ -127,17 +129,21 @@ namespace pfederc {
      */
     inline const Semantic *getParent() const noexcept { return parent; }
 
-    inline Semantic *getSemantic(SemanticSingleType type) noexcept
-    { return singleSemantics[type]; }
+		virtual void setSemantic(SemanticSingleType type, Semantic *semantic) noexcept;
 
-    inline const Semantic *getSemantic(SemanticSingleType type) const noexcept
-    { return singleSemantics.at(type); }
+    virtual Semantic *getSemantic(SemanticSingleType type) noexcept;
 
-    inline std::list<Semantic*> &getSemantics(SemanticMultipleType type) noexcept
-    { return multipleSemantics[type]; }
+    virtual const Semantic *getSemantic(SemanticSingleType type) const noexcept;
 
-    inline const std::list<Semantic*> &getSemantics(SemanticMultipleType type) const noexcept
-    { return multipleSemantics.at(type); }
+		/*!\brief Adds semantic to list type
+		 * \return Return true on success, otherwise false.
+		 */
+		virtual bool addSemantics(SemanticMultipleType type, Semantic *semantic) noexcept;
+
+		/*!\brief Executeds fn for each element in list with 'type'
+		 */
+		virtual void forEachSemantics(SemanticMultipleType type,
+				const std::function<void(Semantic *semantic)> &fn) const noexcept;
 
     /*!\brief Searches for child called name, additionally searches
      * through children if 'enablechildren' is true.
@@ -170,8 +176,12 @@ namespace pfederc {
   /*!\brief Semantic with thread safety
    */
   class SafeSemantic : public Semantic {
-    mutable std::mutex mtxChildren;
+    mutable std::mutex mtxChildren, mtxSingle, mtxMultiple;
   public:
+    SafeSemantic(uint32_t type, Expr *expr, Semantic *parent,
+        std::unordered_map<SemanticInfoStringType, std::string> &&infoStrings = {},
+				std::unordered_map<SemanticSingleType, Semantic*> &&singleSemantics = {},
+				std::unordered_map<SemanticMultipleType, std::list<Semantic*>> &&multipleSemantics = {}) noexcept;
     SafeSemantic(const Semantic &) = delete;
     virtual ~SafeSemantic();
 
@@ -200,7 +210,63 @@ namespace pfederc {
      * Thread safe.
      */
     virtual Semantic *getChild(const std::string &name) noexcept;
+
+		virtual void setSemantic(SemanticSingleType type, Semantic *semantic) noexcept;
+		
+		/*!\brief Adds semantic to semantics of 'type'
+		 * \param type To which list the semantic should be added. List must
+		 * have been added by at construction
+		 * \param semantic
+		 * \return Returns true, if semantic already part of list
+		 */
+		virtual bool addSemantics(SemanticMultipleType type, Semantic *semantic) noexcept;
+
+		/*!\brief Executeds fn for each element in list with 'type'
+		 */
+		virtual void forEachSemantics(SemanticMultipleType type,
+				const std::function<void(Semantic *semantic)> &fn) const noexcept;
   };
+
+	class TypeAnalyzer final {
+		const size_t maxthreads;
+
+		std::mutex mtxSemantics;
+		std::unordered_map<std::string /* mangle */, std::unique_ptr<Semantic>> semantics;
+
+		Semantic* buildSemantic(Expr *parent, Expr *program) noexcept;
+	public:
+		/*!\brief Initializes TypeAnalyzer
+		 * \param maxthreads How many simultanous threads should be opened.
+		 * Returned by getMaxThreads().
+		 */
+		TypeAnalyzer(const size_t maxthreads) noexcept;
+		~TypeAnalyzer();
+
+		size_t getMaxThreads() const noexcept { return maxthreads; }
+
+		/*!\brief Adds mangle+semantic to semantics
+		 * \param mangle
+		 * \param semantics
+		 * \return Returns true on success, otherwise false
+		 *
+		 * Thread-safe
+		 */
+		bool addSemantic(const std::string &mangle, std::unique_ptr<Semantic> &&semantic) noexcept;
+
+		/*!\return Returns nullptr on failure (mangle not found),
+		 * otherwise not nullptr/valid semantic
+		 * \param mangle !mangle.empty()
+		 *
+		 * Thread-safe
+		 */
+		Semantic *getSemantic(const std::string &mangle) noexcept;
+
+		/*!\brief
+		 * \param expressions Top-level expressions. Every expression must
+		 * be either a module. The string is the module name, Expr is the program.
+		 */
+		Semantic* buildSemantics(std::list<std::tuple<std::string, Expr*>> &expressions) noexcept;
+	};
 }
 
 #endif /* PFEDERC_SEMANTICS_SEMANTICS_HPP */

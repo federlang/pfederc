@@ -3,6 +3,15 @@ using namespace pfederc;
 
 // Semantic
 
+Semantic::Semantic(uint32_t type, Expr *expr, Semantic *parent,
+    std::unordered_map<SemanticInfoStringType, std::string> &&infoStrings,
+		std::unordered_map<SemanticSingleType, Semantic*> &&singleSemantics,
+		std::unordered_map<SemanticMultipleType, std::list<Semantic*>> &&multipleSemantics) noexcept
+	: type{type}, expr{expr}, parent{parent}, infoStrings(std::move(infoStrings)),
+	  singleSemantics(std::move(singleSemantics)),
+		multipleSemantics(std::move(multipleSemantics)) {
+}
+
 Semantic::~Semantic() {
 }
 
@@ -88,7 +97,47 @@ bool Semantic::isTypeInternalObject() const noexcept {
       ST_INTERNAL);
 }
 
+void Semantic::setSemantic(SemanticSingleType type, Semantic *semantic) noexcept {
+	if (singleSemantics.find(type) != singleSemantics.end())
+		singleSemantics[type] = semantic;
+	else
+		singleSemantics.insert(std::pair<SemanticSingleType, Semantic*>(type, semantic));
+}
+
+Semantic *Semantic::getSemantic(SemanticSingleType type) noexcept {
+	return singleSemantics[type];
+}
+
+const Semantic *Semantic::getSemantic(SemanticSingleType type) const noexcept {
+	return singleSemantics.at(type);
+}
+
+bool Semantic::addSemantics(SemanticMultipleType type, Semantic *semantic) noexcept {
+	std::list<Semantic*> semantics = multipleSemantics[type];
+	if (std::find_if(semantics.begin(), semantics.end(),
+				[semantic](Semantic *const toCheck) { return toCheck == semantic; }) != semantics.end())
+		return false;
+
+	multipleSemantics[type].push_back(semantic);
+	return true;
+}
+
+void Semantic::forEachSemantics(SemanticMultipleType type,
+				const std::function<void(Semantic *semantic)> &fn) const noexcept {
+	const std::list<Semantic *> semantics = multipleSemantics.at(type);
+	std::for_each(semantics.begin(), semantics.end(), fn);
+}
+
 // SafeSemantic
+
+SafeSemantic::SafeSemantic(uint32_t type, Expr *expr, Semantic *parent,
+    std::unordered_map<SemanticInfoStringType, std::string> &&infoStrings,
+		std::unordered_map<SemanticSingleType, Semantic*> &&singleSemantics,
+		std::unordered_map<SemanticMultipleType, std::list<Semantic*>> &&multipleSemantics) noexcept
+		: Semantic(type, expr, parent, std::move(infoStrings),
+			std::move(singleSemantics), std::move(multipleSemantics)),
+			mtxChildren(), mtxSingle(), mtxMultiple() {
+}
 
 SafeSemantic::~SafeSemantic() {
 }
@@ -111,4 +160,45 @@ bool SafeSemantic::setChild(const std::string &name, Semantic *semantic) noexcep
 Semantic *SafeSemantic::getChild(const std::string &name) noexcept {
   std::lock_guard<std::mutex> lck(mtxChildren);
   return Semantic::getChild(name);
+}
+
+void SafeSemantic::setSemantic(SemanticSingleType type, Semantic *semantic) noexcept {
+	std::lock_guard<std::mutex> lck(mtxSingle);
+	Semantic::setSemantic(type, semantic);
+}
+
+bool SafeSemantic::addSemantics(SemanticMultipleType type, Semantic *semantic) noexcept {
+	std::lock_guard<std::mutex> lck(mtxMultiple);
+	return Semantic::addSemantics(type, semantic);
+}
+
+void SafeSemantic::forEachSemantics(SemanticMultipleType type,
+				const std::function<void(Semantic *semantic)> &fn) const noexcept {
+	std::lock_guard<std::mutex> lck(mtxMultiple);
+	Semantic::forEachSemantics(type, fn);
+}
+
+// TypeAnalyzer
+TypeAnalyzer::TypeAnalyzer(const size_t maxthreads) noexcept
+		: maxthreads{maxthreads},
+			mtxSemantics(), semantics() {
+}
+
+TypeAnalyzer::~TypeAnalyzer() {
+}
+
+bool TypeAnalyzer::addSemantic(const std::string &mangle, std::unique_ptr<Semantic> &&semantic) noexcept {
+	std::lock_guard<std::mutex> lck(mtxSemantics);
+	auto pair = semantics.insert(std::pair<std::string, std::unique_ptr<Semantic>>(
+				mangle, std::move(semantic)));
+	return pair.second;
+}
+
+Semantic *TypeAnalyzer::getSemantic(const std::string &mangle) noexcept {
+	std::lock_guard<std::mutex> lck(mtxSemantics);
+	auto it = semantics.find(mangle);
+	if (it == semantics.end())
+		return nullptr;
+
+	return it->second.get();
 }
