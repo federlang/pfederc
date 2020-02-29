@@ -87,7 +87,7 @@ namespace pfederc {
     virtual ~LogMessage();
 
     Level getLogLevel() const noexcept;
-    const std::string &getMessage() const noexcept;;
+    const std::string &getMessage() const noexcept;
 
     /*!\return Returns attached messages
      */
