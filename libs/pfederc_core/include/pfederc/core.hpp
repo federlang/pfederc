@@ -7,6 +7,7 @@
 #include <cstring>
 #include <functional>
 #include <iostream>
+#include <iterator>
 #include <istream>
 #include <list>
 #include <map>

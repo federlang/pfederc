@@ -6,7 +6,7 @@ enable_testing()
 
 find_program(VALGRIND "valgrind")
 if (VALGRIND)
-	set(VALGRIND "${VALGRIND}" --tool=memcheck --leak-check=yes)
+	set(VALGRIND "${VALGRIND}" --tool=memcheck --leak-check=yes -q)
 endif()
 
 macro(build_test name)

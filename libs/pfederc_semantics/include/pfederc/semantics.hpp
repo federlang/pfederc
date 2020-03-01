@@ -173,6 +173,32 @@ namespace pfederc {
     virtual Semantic *getChild(const std::string &name) noexcept;
   };
 
+  /*!\return Returns mangled name of module called name with parent
+   * \param parent Can be null or valid pointer to expression.
+   * \param name Name of the module
+   */
+  std::string mangleModule(Expr *parent, const std::string &name) noexcept;
+
+  /*!\return Returns mangled name of function called name with parent
+   * \param parent Mustn't be nullptr
+   * \param name Name of the function
+   * \param beginParam beginning of paremeter list (magled names)
+   * \param endParam end of paremeter list (mangled names)
+   * \param returnType Empty if none, otherwise mangled name of type
+   */
+  std::string mangleFunction(Expr *parent, const std::string &name,
+      std::iterator<std::input_iterator_tag, std::string> beginParam,
+      std::iterator<std::input_iterator_tag, std::string> endParam,
+      const std::string &returnType) noexcept;
+
+  /*!\return Returns mangled name of class called name with parent
+   */
+  std::string mangleClass(Expr *parent, const std::string &name) noexcept;
+
+  /*!\return Returns mangled trait
+   */
+  std::string mangleTrait(Expr *parent, const std::string &name) noexcept;
+
   /*!\brief Semantic with thread safety
    */
   class SafeSemantic : public Semantic {
