@@ -191,6 +191,13 @@ std::unique_ptr<Expr> Parser::parseFunction(std::unique_ptr<Capabilities> &&caps
       err = true;
     }
 
+    if (!!caps) {
+      generateError(std::make_unique<SyntaxError>(LVL_ERROR,
+            SyntaxErrorCode::STX_ERR_FUNC_VAR_NO_CAPS,
+            lexer.getCurrentToken()->getPosition()));
+      err = true;
+    }
+
     auto result = parseFuncType();
     if (err)
       return nullptr;

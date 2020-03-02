@@ -73,7 +73,10 @@ inline static LogMessage _logParserError(const Parser &parser, const SyntaxError
       "Expected ';'"));
   case SyntaxErrorCode::STX_ERR_FUNC_VAR_NO_TEMPL:
     return LogMessage(lvl, logCreateErrorMessage(lexer, pos,
-      "Function variable mustn't have be a template."));
+      "Function type mustn't have a template."));
+  case SyntaxErrorCode::STX_ERR_FUNC_VAR_NO_CAPS:
+    return LogMessage(lvl, logCreateErrorMessage(lexer, pos,
+      "Function type mustn't have capabilities."));
   case SyntaxErrorCode::STX_ERR_EXPECTED_EOL:
     return LogMessage(lvl, logCreateErrorMessage(lexer, pos,
       "Expected end-of-line"));
