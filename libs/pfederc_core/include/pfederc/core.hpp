@@ -2,6 +2,7 @@
 #define PFEDERC_CORE_CORE_HPP
 
 #include <algorithm>
+#include <cassert>
 #include <cctype>
 #include <cstdint>
 #include <cstring>

@@ -9,6 +9,8 @@ std::unique_ptr<Expr> Parser::parseIf(bool isensure) noexcept {
   IfCase startifcase = parseIfStart(isensure);
   if (std::get<0>(startifcase) && std::get<1>(startifcase))
     cases.push_back(std::move(startifcase));
+  else
+    err = true;
 
   std::unique_ptr<BodyExpr> elseBody;
   while (expect(TokenType::TOK_KW_ELSE)) {
