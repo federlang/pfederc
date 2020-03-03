@@ -13,6 +13,7 @@ macro(build_test name)
 	add_executable("${name}"
 		"${pfederc_test_SOURCE_DIR}/${name}.cpp")
 	target_link_libraries("${name}" ${PFEDERC_LIBRARIES})
+	add_lto_support("${name}")
 endmacro()
 
 macro(status_test name)

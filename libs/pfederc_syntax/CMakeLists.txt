@@ -25,3 +25,4 @@ target_include_directories(pfederc_syntax PUBLIC
 	"${pfederc_syntax_SOURCE_DIR}/include")
 target_link_libraries(pfederc_syntax PUBLIC pfederc_core pfederc_errors
   pfederc_lexer)
+add_lto_support(pfederc_syntax)

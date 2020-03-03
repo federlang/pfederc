@@ -30,7 +30,8 @@ namespace pfederc {
     ST_MODULE =   0x00008000,
     ST_TUPLE =    0x00010000,
     ST_TEMPLVAR = 0x00020000, //!< Template variable
-    ST_INTERNAL = 0x00040000, // !< Internal types
+    ST_INTERNAL = 0x00040000, //!< Internal types
+    ST_PROGRAM =  0x00080000, //!< Program Module
   };
 
   inline constexpr bool hasAllSemanticType(uint32_t org, uint32_t shouldhave) {
@@ -117,10 +118,10 @@ namespace pfederc {
 
     /*!\return Return associated expression.
      */
-    inline Expr &getExpression() noexcept { return *expr; }
+    inline Expr *getExpression() noexcept { return expr; }
     /*!\return Return associated expression (const).
      */
-    inline const Expr &getExpression() const noexcept { return *expr; }
+    inline const Expr *getExpression() const noexcept { return expr; }
 
     /*!\return Returns optional parent.
      */
@@ -129,6 +130,11 @@ namespace pfederc {
      */
     inline const Semantic *getParent() const noexcept { return parent; }
 
+    /*!\brief Set type to semantic. Type must exist before (initialized
+     * by constructor).
+     * \param type
+     * \param semantic Not nullptr
+     */
 		virtual void setSemantic(SemanticSingleType type, Semantic *semantic) noexcept;
 
     virtual Semantic *getSemantic(SemanticSingleType type) noexcept;
@@ -186,18 +192,24 @@ namespace pfederc {
    * \param endParam end of paremeter list (mangled names)
    * \param returnType Empty if none, otherwise mangled name of type
    */
-  std::string mangleFunction(Expr *parent, const std::string &name,
+  std::string mangleFunction(const Expr *parent, const std::string &name,
       std::iterator<std::input_iterator_tag, std::string> beginParam,
       std::iterator<std::input_iterator_tag, std::string> endParam,
       const std::string &returnType) noexcept;
 
   /*!\return Returns mangled name of class called name with parent
    */
-  std::string mangleClass(Expr *parent, const std::string &name) noexcept;
+  std::string mangleClass(const Expr *parent, const std::string &name) noexcept;
 
-  /*!\return Returns mangled trait
+  /*!\return Returns mangled trait name
    */
-  std::string mangleTrait(Expr *parent, const std::string &name) noexcept;
+  std::string mangleTrait(const Expr *parent, const std::string &name) noexcept;
+
+  /*!\return Returns mangled global variable name
+   */
+  std::string mangleGlobalVariable(const Expr *parent, const std::string &name) noexcept;
+
+  std::string mangleProgram(const std::string &name) noexcept;
 
   /*!\brief Semantic with thread safety
    */
@@ -237,7 +249,16 @@ namespace pfederc {
      */
     virtual Semantic *getChild(const std::string &name) noexcept;
 
+    /*!\brief Set type to semantic. Type must exist before (initialized
+     * by constructor).
+     * \param type
+     * \param semantic Not nullptr
+     */
 		virtual void setSemantic(SemanticSingleType type, Semantic *semantic) noexcept;
+
+    virtual Semantic *getSemantic(SemanticSingleType type) noexcept;
+
+    virtual const Semantic *getSemantic(SemanticSingleType type) const noexcept;
 		
 		/*!\brief Adds semantic to semantics of 'type'
 		 * \param type To which list the semantic should be added. List must
@@ -253,13 +274,32 @@ namespace pfederc {
 				const std::function<void(Semantic *semantic)> &fn) const noexcept;
   };
 
+  struct BuildSemanticParam {
+    std::string filepath;
+    bool build;
+    ProgramExpr *expr;
+  };
+
 	class TypeAnalyzer final {
 		const size_t maxthreads;
 
 		std::mutex mtxSemantics;
 		std::unordered_map<std::string /* mangle */, std::unique_ptr<Semantic>> semantics;
 
-		Semantic* buildSemantic(Expr *parent, Expr *program) noexcept;
+    std::mutex mtxBuildSemantics;
+    //!\brief Which semantics the target has to build
+    std::unordered_map<std::string, std::list<Semantic*>> targetBuildSemantics;
+
+    std::unordered_map<std::string, Semantic*> programs;
+
+    std::unordered_map<Expr*,Semantic*> exprToSemantic;
+
+    void addSemanticToBuilder(const std::string &name, Semantic *semantic) noexcept;
+
+    void helperBuildProgramSemantic(const BuildSemanticParam &param) noexcept;
+    void helperBuildProgramSemantics(const std::list<BuildSemanticParam> &list) noexcept;
+    void helperBuildModuleSemantic(Expr* parent, ModExpr *expr) noexcept;
+    void helperBuildModuleSemantics(const std::list<BuildSemanticParam> &list) noexcept;
 	public:
 		/*!\brief Initializes TypeAnalyzer
 		 * \param maxthreads How many simultanous threads should be opened.
@@ -273,11 +313,23 @@ namespace pfederc {
 		/*!\brief Adds mangle+semantic to semantics
 		 * \param mangle
 		 * \param semantics
-		 * \return Returns true on success, otherwise false
+		 * \return Returns pointer of added semantic if added to map,
+     * otherwise a pointer to already added object is returned.
 		 *
 		 * Thread-safe
-		 */
-		bool addSemantic(const std::string &mangle, std::unique_ptr<Semantic> &&semantic) noexcept;
+     *
+     * Only binds semantic to expression if binding between mangle and semantic
+     * wasn't established before.
+     */
+		Semantic *addSemantic(const std::string &mangle,
+        std::unique_ptr<Semantic> &&semantic) noexcept;
+
+    /*!\brief Nearly the same as addSemantic() but adds semantic to expression
+     * binding regardless wether or not the semantic was already bound to the
+     * mangle
+     */
+    Semantic *addSemanticAlways(const std::string &mangle,
+        std::unique_ptr<Semantic> &&semantic) noexcept;
 
 		/*!\return Returns nullptr on failure (mangle not found),
 		 * otherwise not nullptr/valid semantic
@@ -287,11 +339,18 @@ namespace pfederc {
 		 */
 		Semantic *getSemantic(const std::string &mangle) noexcept;
 
-		/*!\brief
-		 * \param expressions Top-level expressions. Every expression must
-		 * be either a module. The string is the module name, Expr is the program.
-		 */
-		Semantic* buildSemantics(std::list<std::tuple<std::string, Expr*>> &expressions) noexcept;
+    /*!\brief Build single semantic
+     * \param fileIdx 0 = Input for interpreter. Everything else are files.
+     * \return Returns nullptr if failed to build semantic
+     *
+     * Note: Only use for interpreter purposes externally
+     */
+		Semantic* buildSemantic(size_t fileIdx, bool build,
+                           Semantic *parent, Expr *program) noexcept;
+
+    /*!\brief Build semantics
+     */
+		void buildSemantics(const std::list<BuildSemanticParam> &list) noexcept;
 	};
 }
 

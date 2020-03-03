@@ -100,10 +100,7 @@ bool Semantic::isTypeInternalObject() const noexcept {
 }
 
 void Semantic::setSemantic(SemanticSingleType type, Semantic *semantic) noexcept {
-	if (singleSemantics.find(type) != singleSemantics.end())
-		singleSemantics[type] = semantic;
-	else
-		singleSemantics.insert(std::pair<SemanticSingleType, Semantic*>(type, semantic));
+  singleSemantics[type] = semantic;
 }
 
 Semantic *Semantic::getSemantic(SemanticSingleType type) noexcept {
@@ -130,8 +127,16 @@ void Semantic::forEachSemantics(SemanticMultipleType type,
 	std::for_each(semantics.begin(), semantics.end(), fn);
 }
 
-// SafeSemantic
+Semantic *SafeSemantic::getSemantic(SemanticSingleType type) noexcept {
+  std::lock_guard<std::mutex> lck(mtxSingle);
+  return Semantic::getSemantic(type);
+}
 
+const Semantic *SafeSemantic::getSemantic(SemanticSingleType type) const noexcept {
+  std::lock_guard<std::mutex> lck(mtxSingle);
+  return Semantic::getSemantic(type);
+}
+                                                                     
 SafeSemantic::SafeSemantic(uint32_t type, Expr *expr, Semantic *parent,
     std::unordered_map<SemanticInfoStringType, std::string> &&infoStrings,
 		std::unordered_map<SemanticSingleType, Semantic*> &&singleSemantics,
@@ -189,11 +194,50 @@ TypeAnalyzer::TypeAnalyzer(const size_t maxthreads) noexcept
 TypeAnalyzer::~TypeAnalyzer() {
 }
 
-bool TypeAnalyzer::addSemantic(const std::string &mangle, std::unique_ptr<Semantic> &&semantic) noexcept {
+void TypeAnalyzer::addSemanticToBuilder(const std::string &name, Semantic *semantic) noexcept {
+  std::lock_guard<std::mutex> lck(mtxBuildSemantics);
+  if (targetBuildSemantics.find(name) != targetBuildSemantics.end()) {
+    targetBuildSemantics[name].push_back(semantic);
+    return;
+  }
+
+  targetBuildSemantics.insert(std::pair<std::string, std::list<Semantic*>>(
+        name, std::list<Semantic*>{semantic}));
+}
+
+Semantic* TypeAnalyzer::addSemantic(const std::string &mangle,
+    std::unique_ptr<Semantic> &&semantic) noexcept {
+  Expr *expr = semantic->getExpression();
 	std::lock_guard<std::mutex> lck(mtxSemantics);
 	auto pair = semantics.insert(std::pair<std::string, std::unique_ptr<Semantic>>(
 				mangle, std::move(semantic)));
-	return pair.second;
+  Semantic *result = pair.first->second.get();
+  if (pair.second) {
+#ifndef NDEBUG
+    assert(exprToSemantic.insert(std::pair<Expr*,Semantic*>(expr, result)).second);
+#else
+    exprToSemantic.insert(std::pair<Expr*,Semantic*>(expr, result));
+#endif
+  }
+  return result;
+}
+
+Semantic *TypeAnalyzer::addSemanticAlways(const std::string &mangle,
+    std::unique_ptr<Semantic> &&semantic) noexcept {
+  Expr *expr = semantic->getExpression();
+  Semantic *pSemantic = semantic.get();
+  Semantic *result = addSemantic(mangle, std::move(semantic));
+  if (result != pSemantic) {
+    // addSemantic doesn't bind expr to semantic if insertion wasn't
+    // successfull, in that case still insert it
+#ifndef NDEBUG
+    assert(exprToSemantic.insert(std::pair<Expr*,Semantic*>(expr, result)).second);
+#else
+    exprToSemantic.insert(std::pair<Expr*,Semantic*>(expr, result));
+#endif
+  }
+
+  return result;
 }
 
 Semantic *TypeAnalyzer::getSemantic(const std::string &mangle) noexcept {
