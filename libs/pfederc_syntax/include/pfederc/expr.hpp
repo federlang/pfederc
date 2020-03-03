@@ -78,6 +78,7 @@ namespace pfederc {
   };
 
   class Expr {
+    Expr *parent;
     const Lexer &lexer;
     ExprType type;
     Position pos;
@@ -94,6 +95,9 @@ namespace pfederc {
     inline const Lexer &getLexer() const noexcept { return lexer; }
     inline ExprType getType() const noexcept { return type; }
     inline const Position &getPosition() const noexcept { return pos; }
+
+    inline Expr *getParent() const noexcept { return parent; }
+    inline void setParent(Expr *parent) noexcept { this->parent = parent; };
 
     virtual std::string toString() const noexcept = 0;
   };

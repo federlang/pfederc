@@ -1,6 +1,43 @@
 #include "pfederc/expr.hpp"
 using namespace pfederc;
 
+template<class T>
+static void _setParent(std::unique_ptr<T> &expr, Expr *parent) noexcept {
+  if (!!expr)
+    expr->setParent(parent);
+}
+
+template<class T>
+static void _setParents(std::list<std::unique_ptr<T>> &exprs, Expr *parent) noexcept {
+  for (std::unique_ptr<T> &expr : exprs) {
+    expr->setParent(parent);
+  }
+}
+
+template<class T>
+static void _setParents(std::vector<std::unique_ptr<T>> &exprs, Expr *parent) noexcept {
+  for (std::unique_ptr<T> &expr : exprs) {
+    expr->setParent(parent);
+  }
+}
+
+static void _setParameterParents(std::vector<std::unique_ptr<FuncParameter>> &params, Expr *parent) noexcept {
+  for (auto &param : params) {
+    std::get<2>(*param)->setParent(parent);
+    _setParent(std::get<3>(*param), parent);
+    _setParent(std::get<4>(*param), parent);
+  }
+}
+
+static void _setTemplateParents(std::unique_ptr<TemplateDecls> &templs, Expr *parent) noexcept {
+  if (!templs)
+    return;
+
+  for (auto &templ : *(templs)) {
+    _setParent(std::get<1>(templ), parent);
+  }
+}
+
 static std::string _templateToString(const TemplateDecls &tmpls) {
   std::string result;
   result += '{';
@@ -48,7 +85,7 @@ static std::string _capsToString(const Capabilities &caps) noexcept {
 
 // Expr
 Expr::Expr(const Lexer &lexer, ExprType type, const Position &pos) noexcept
-    : lexer{lexer}, type{type}, pos(pos) {
+    : parent{nullptr}, lexer{lexer}, type{type}, pos(pos) {
 
 }
 
@@ -73,6 +110,9 @@ ProgramExpr::ProgramExpr(const Lexer &lexer, const Position &pos,
     : Expr(lexer, ExprType::EXPR_PROG, pos),
       imports(std::move(imports)),
       defs(std::move(defs)) {
+  
+  _setParents(imports, this);
+  _setParents(defs, this);
 }
 
 ProgramExpr::~ProgramExpr() {
@@ -111,6 +151,8 @@ UseExpr::UseExpr(const Lexer &lexer, const Position &pos,
     Exprs &&exprs) noexcept
     : Expr(lexer, ExprType::EXPR_USE, pos), exprs(std::move(exprs)) {
   assert(!this->exprs.empty());
+
+  _setParents(this->exprs, this);
 }
 
 UseExpr::~UseExpr() {
@@ -156,6 +198,11 @@ FuncExpr::FuncExpr(const Lexer &lexer, const Position &pos,
       autoDetectReturnType{autoDetectReturnType} {
   assert(this->tokId);
   assert((this->autoDetectReturnType && !this->returnExpr) || !this->autoDetectReturnType);
+
+  _setTemplateParents(this->templs, this);
+  _setParameterParents(this->params, this);
+  _setParent(this->returnExpr, this);
+  _setParent(this->body, this);
 }
 
 FuncExpr::~FuncExpr() {
@@ -224,6 +271,9 @@ FuncTypeExpr::FuncTypeExpr(const Lexer &lexer, const Position &pos,
     std::unique_ptr<Expr> &&returnExpr) noexcept
     : Expr(lexer, ExprType::EXPR_FUNCTYPE, pos),
       params(std::move(params)), returnExpr(std::move(returnExpr)) {
+
+  _setParameterParents(this->params, this);
+  _setParent(returnExpr, this);
 }
 
 FuncTypeExpr::~FuncTypeExpr() {
@@ -241,6 +291,9 @@ LambdaExpr::LambdaExpr(const Lexer &lexer, const Position &pos,
     : Expr(lexer, ExprType::EXPR_LAMBDA, pos),
       params(std::move(params)), body(std::move(body)) {
   assert(!!this->body);
+
+  _setParents(this->params, this);
+  _setParent(this->body, this);
 }
 
 LambdaExpr::~LambdaExpr() {
@@ -276,6 +329,10 @@ TraitExpr::TraitExpr(const Lexer &lexer, const Position &pos,
       templs(std::move(templs)),
       impltraits(std::move(impltraits)), functions(std::move(functions)) {
   assert(this->tokId);
+
+  _setTemplateParents(this->templs, this);
+  _setParents(this->impltraits, this);
+  _setParents(this->functions, this);
 }
 
 TraitExpr::~TraitExpr() {
@@ -332,6 +389,11 @@ ClassExpr::ClassExpr(const Lexer &lexer, const Position &pos,
       attributes(std::move(attributes)),
       functions(std::move(functions)) {
   assert(this->tokId);
+
+  _setTemplateParents(this->templs, this);
+  _setParents(this->constructAttributes, this);
+  _setParents(this->attributes, this);
+  _setParents(this->functions, this);
 }
 
 ClassExpr::~ClassExpr() {
@@ -390,6 +452,11 @@ TraitImplExpr::TraitImplExpr(const Lexer &lexer, const Position &pos,
       templs(std::move(templs)),
       implTrait(std::move(implTrait)), functions(std::move(functions)) {
   assert(this->classTokId);
+  assert(!!this->implTrait);
+
+  _setTemplateParents(this->templs, this);
+  this->implTrait->setParent(this);
+  _setParents(this->functions, this);
 }
 
 TraitImplExpr::~TraitImplExpr() {
@@ -429,6 +496,12 @@ EnumExpr::EnumExpr(const Lexer &lexer, const Position &pos,
     : Expr(lexer, ExprType::EXPR_ENUM, pos), tokId{tokId},
       templs(std::move(templs)), constructors(std::move(constructors)) {
   assert(this->tokId);
+
+  _setTemplateParents(this->templs, this);
+
+  for (auto &construct : this->constructors) {
+    _setParents(std::get<1>(construct), this);
+  }
 }
 
 EnumExpr::~EnumExpr() {
@@ -477,6 +550,8 @@ TypeExpr::TypeExpr(const Lexer &lexer, const Position &pos,
     tokId{tokId}, expr(std::move(expr)) {
   assert(this->tokId);
   assert(!!this->expr);
+
+  this->expr->setParent(this);
 }
 
 TypeExpr::~TypeExpr() {
@@ -495,6 +570,8 @@ ModExpr::ModExpr(const Lexer &lexer, const Position &pos,
     const Token *tokId, Exprs &&exprs) noexcept
     : Expr(lexer, ExprType::EXPR_MOD, pos), tokId{tokId}, exprs(std::move(exprs)) {
   assert(this->tokId);
+
+  _setParents(this->exprs, this);
 }
 
 ModExpr::~ModExpr() {
@@ -515,6 +592,8 @@ SafeExpr::SafeExpr(const Lexer &lexer, const Position &pos,
     std::unique_ptr<Expr> &&expr) noexcept
     : Expr(lexer, ExprType::EXPR_SAFE, pos), expr(std::move(expr)) {
   assert(!!this->expr);
+
+  this->expr->setParent(this);
 }
 
 SafeExpr::~SafeExpr() {
@@ -531,6 +610,13 @@ IfExpr::IfExpr(const Lexer &lexer, const Position &pos,
     : Expr(lexer, ExprType::EXPR_IF, pos), ifCases(std::move(ifCases)),
       elseExpr(std::move(elseExpr)), isensure{isensure} {
   assert(!this->ifCases.empty());
+
+  for (auto &ifcase : this->ifCases) {
+    std::get<0>(ifcase)->setParent(this);
+    std::get<1>(ifcase)->setParent(this);
+  }
+
+  _setParent(this->elseExpr, this);
 }
 
 IfExpr::~IfExpr() {
@@ -580,6 +666,12 @@ LoopExpr::LoopExpr(const Lexer &lexer, ExprType type, const Position &pos,
   assert(this->condExpr);
   assert((!!this->initExpr && !!this->itExpr) || !this->initExpr);
   assert(!!this->bodyExpr);
+
+  _setParent(this->initExpr, this);
+  this->condExpr->setParent(this);
+  _setParent(this->itExpr, this);
+
+  _setParent(this->bodyExpr, this);
 }
 
 LoopExpr::~LoopExpr() {
@@ -631,6 +723,13 @@ MatchExpr::MatchExpr(const Lexer &lexer, const Position &pos,
       cases(std::move(cases)),
       anyCase(std::move(anyCase)) {
   assert(!!this->expr);
+
+  this->expr->setParent(this);
+  for (auto &matchp : this->cases) {
+    std::get<2>(matchp)->setParent(this);
+  }
+
+  _setParent(this->anyCase, this);
 }
 
 MatchExpr::~MatchExpr() {
@@ -685,6 +784,9 @@ BiOpExpr::BiOpExpr(const Lexer &lexer, const Position &pos,
   assert(isTokenTypeOperator(this->opType));
   assert(!!this->lhs);
   assert(!!this->rhs);
+
+  this->lhs->setParent(this);
+  this->rhs->setParent(this);
 }
 
 BiOpExpr::~BiOpExpr() {
@@ -754,6 +856,8 @@ UnOpExpr::UnOpExpr(const Lexer &lexer, const Position &pos,
   assert(this->tokOp);
   assert(isTokenTypeOperator(this->tokOp->getType()));
   assert(!!this->expr);
+
+  this->expr->setParent(this);
 }
 
 UnOpExpr::~UnOpExpr() {
@@ -774,6 +878,9 @@ BodyExpr::BodyExpr(const Lexer &lex, const Position &pos,
      ReturnControlType rct) noexcept
      : Expr(lex, ExprType::EXPR_BODY, pos), exprs(std::move(exprs)),
        retExpr(std::move(retExpr)), rct{rct} {
+  
+  _setParents(this->exprs, this);
+  _setParent(this->retExpr, this);
 }
 
 BodyExpr::~BodyExpr() {
@@ -819,6 +926,9 @@ ArrayCpyExpr::ArrayCpyExpr(const Lexer &lexer, const Position &pos,
        lengthExpr(std::move(lengthExpr)) {
   assert(!!this->valueExpr);
   assert(!!this->lengthExpr);
+
+  this->valueExpr->setParent(this);
+  this->lengthExpr->setParent(this);
 }
 
 ArrayCpyExpr::~ArrayCpyExpr() {
@@ -834,6 +944,8 @@ ArrayLitExpr::ArrayLitExpr(const Lexer &lexer, const Position &pos,
      : Expr(lexer, ExprType::EXPR_ARRLIT, pos),
        exprs(std::move(exprs)) {
   assert(!this->exprs.empty());
+
+  _setParents(this->exprs, this);
 }
 
 ArrayLitExpr::~ArrayLitExpr() {
@@ -858,6 +970,8 @@ ArrayEmptyExpr::ArrayEmptyExpr(const Lexer &lexer, const Position &pos,
      std::unique_ptr<Expr> &&typeExpr) noexcept
      : Expr(lexer, ExprType::EXPR_ARREMPTY, pos), typeExpr(std::move(typeExpr)) {
   assert(!!this->typeExpr);
+
+  this->typeExpr->setParent(this);
 }
 
 ArrayEmptyExpr::~ArrayEmptyExpr() {
