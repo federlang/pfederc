@@ -2,7 +2,7 @@
 using namespace pfederc;
 
 template<class T>
-static void _setParent(std::unique_ptr<T> &expr, Expr *parent) noexcept {
+inline static void _setParent(std::unique_ptr<T> &expr, Expr *parent) noexcept {
   if (!!expr)
     expr->setParent(parent);
 }
@@ -108,6 +108,7 @@ ProgramExpr::ProgramExpr(const Lexer &lexer, const Position &pos,
     Exprs &&imports,
     Exprs &&defs) noexcept
     : Expr(lexer, ExprType::EXPR_PROG, pos),
+      progName{progName},
       imports(std::move(imports)),
       defs(std::move(defs)) {
   

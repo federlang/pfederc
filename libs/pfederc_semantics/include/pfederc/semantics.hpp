@@ -283,10 +283,10 @@ namespace pfederc {
 	class TypeAnalyzer final {
 		const size_t maxthreads;
 
-		std::mutex mtxSemantics;
+		mutable std::mutex mtxSemantics;
 		std::unordered_map<std::string /* mangle */, std::unique_ptr<Semantic>> semantics;
 
-    std::mutex mtxBuildSemantics;
+    mutable std::mutex mtxBuildSemantics;
     //!\brief Which semantics the target has to build
     std::unordered_map<std::string, std::list<Semantic*>> targetBuildSemantics;
 
@@ -337,7 +337,9 @@ namespace pfederc {
 		 *
 		 * Thread-safe
 		 */
-		Semantic *getSemantic(const std::string &mangle) noexcept;
+		Semantic *getSemantic(const std::string &mangle) const noexcept;
+
+    void forEachSemantic(const std::function<void(const std::string&,Semantic*)> &fn) const noexcept;
 
     /*!\brief Build single semantic
      * \param fileIdx 0 = Input for interpreter. Everything else are files.

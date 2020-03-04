@@ -18,9 +18,10 @@ add_library(pfederc_syntax
   "${pfederc_syntax_SOURCE_DIR}/src/syntax_loop.cpp"
   "${pfederc_syntax_SOURCE_DIR}/src/syntax_match.cpp"
 	"${pfederc_syntax_SOURCE_DIR}/src/syntax_module.cpp"
+	"${pfederc_syntax_SOURCE_DIR}/src/syntax_program.cpp"
 	"${pfederc_syntax_SOURCE_DIR}/src/syntax_template.cpp"
   "${pfederc_syntax_SOURCE_DIR}/src/syntax_trait.cpp"
-   "${pfederc_syntax_SOURCE_DIR}/src/syntax_type.cpp")
+  "${pfederc_syntax_SOURCE_DIR}/src/syntax_type.cpp")
 target_include_directories(pfederc_syntax PUBLIC
 	"${pfederc_syntax_SOURCE_DIR}/include")
 target_link_libraries(pfederc_syntax PUBLIC pfederc_core pfederc_errors

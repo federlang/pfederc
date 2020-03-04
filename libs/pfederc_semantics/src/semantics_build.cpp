@@ -32,7 +32,6 @@ void TypeAnalyzer::helperBuildProgramSemantics(const std::list<BuildSemanticPara
     helperBuildProgramSemantic(param);
 }
 
-
 void TypeAnalyzer::helperBuildModuleSemantic(Expr* parent, ModExpr *expr) noexcept {
   Semantic *parentSemantic = nullptr;
   auto it = exprToSemantic.find(parent);

@@ -47,7 +47,7 @@ static const std::vector<ExprType> _ALLOWED_EXPR_PROG = {
 };
 
 ModBody Parser::parseModBody(bool isprog) noexcept {
-  const Token *progName;
+  const Token *progName{nullptr};
   Exprs imports;
   Exprs defs;
 
@@ -68,8 +68,9 @@ ModBody Parser::parseModBody(bool isprog) noexcept {
       break;
 
     std::unique_ptr<Expr> expr(parseExpression());
-    if ((isprog && *lexer.getCurrentToken() != TokenType::TOK_EOF)
-        || *lexer.getCurrentToken() != TokenType::TOK_EOL) {
+    if (((isprog && *lexer.getCurrentToken() != TokenType::TOK_EOF)
+        || !isprog)
+        && *lexer.getCurrentToken() != TokenType::TOK_EOL) {
       if (isprog)
         generateError(std::make_unique<SyntaxError>(LVL_ERROR,
           SyntaxErrorCode::STX_ERR_EXPECTED_EOF_EOL, lexer.getCurrentToken()->getPosition()));
@@ -108,7 +109,7 @@ ModBody Parser::parseModBody(bool isprog) noexcept {
             SyntaxErrorCode::STX_ERR_PROGNAME, expr->getPosition()));
           err = true;
         } else
-          progName = &dynamic_cast<ProgNameExpr&>(*expr).getToken();
+          progName = dynamic_cast<ProgNameExpr&>(*expr).getTokenPtr();
 
         break;
       case ExprType::EXPR_USE:

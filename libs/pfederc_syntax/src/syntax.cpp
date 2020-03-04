@@ -145,14 +145,12 @@ std::unique_ptr<Expr> Parser::parseBrackets() noexcept {
 std::unique_ptr<Expr> Parser::parseUse() noexcept {
   sanityExpect(TokenType::TOK_KW_USE);
   if (expect(TokenType::TOK_KW_MOD)) {
+    const Token *tok = lexer.getCurrentToken();
     if (!expect(TokenType::TOK_ID)) {
       generateError(std::make_unique<SyntaxError>(LVL_ERROR,
         SyntaxErrorCode::STX_ERR_EXPECTED_ID, lexer.getCurrentToken()->getPosition()));
       return nullptr;
     }
-
-    const Token *tok = lexer.getCurrentToken();
-    lexer.next(); // eat id
 
     return std::make_unique<ProgNameExpr>(lexer, tok);
   }

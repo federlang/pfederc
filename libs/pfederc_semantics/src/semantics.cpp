@@ -189,6 +189,7 @@ void SafeSemantic::forEachSemantics(SemanticMultipleType type,
 TypeAnalyzer::TypeAnalyzer(const size_t maxthreads) noexcept
 		: maxthreads{maxthreads},
 			mtxSemantics(), semantics() {
+  assert(maxthreads > 0);
 }
 
 TypeAnalyzer::~TypeAnalyzer() {
@@ -240,11 +241,18 @@ Semantic *TypeAnalyzer::addSemanticAlways(const std::string &mangle,
   return result;
 }
 
-Semantic *TypeAnalyzer::getSemantic(const std::string &mangle) noexcept {
+Semantic *TypeAnalyzer::getSemantic(const std::string &mangle) const noexcept {
 	std::lock_guard<std::mutex> lck(mtxSemantics);
 	auto it = semantics.find(mangle);
 	if (it == semantics.end())
 		return nullptr;
 
 	return it->second.get();
+}
+
+void TypeAnalyzer::forEachSemantic(const std::function<void(
+      const std::string&,Semantic*)> &fn) const noexcept {
+  std::lock_guard<std::mutex> lck(mtxSemantics);
+  for (auto &pair : semantics)
+    fn(pair.first, pair.second.get());
 }

@@ -99,6 +99,9 @@ namespace pfederc {
     inline Expr *getParent() const noexcept { return parent; }
     inline void setParent(Expr *parent) noexcept { this->parent = parent; };
 
+    inline bool operator ==(ExprType type) const noexcept
+    { return this->type == type; }
+
     virtual std::string toString() const noexcept = 0;
   };
   
@@ -230,6 +233,7 @@ namespace pfederc {
     virtual ~ProgNameExpr();
 
     inline const Token &getToken() const noexcept { return *tok; }
+    inline const Token *getTokenPtr() const noexcept { return tok; }
 
     virtual std::string toString() const noexcept;
   };
