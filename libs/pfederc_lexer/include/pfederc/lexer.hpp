@@ -7,7 +7,6 @@
 
 namespace pfederc {
   class Lexer;
-  class LexerError;
 
   enum class LexerErrorCode {
     LEX_ERR_GENERAL_INVALID_CHARACTER,
@@ -22,6 +21,33 @@ namespace pfederc {
     LEX_ERR_NUM_UNEXPECTED_CHAR,
     LEX_ERR_REGION_COMMENT_END,
   };
+
+  template<class ErrorCode>
+  class Error final {
+    Level logLevel;
+    ErrorCode err;
+    Position pos;
+    std::vector<Position> extraPos;
+  public:
+    inline Error(Level logLevel, ErrorCode err, Position pos,
+      std::vector<Position> &&extraPos = {})
+      : logLevel{logLevel}, err{err}, pos(pos),
+        extraPos(std::move(extraPos)) {
+    }
+
+    Error(const Error &) = delete;
+    ~Error() {}
+
+    inline Level getLogLevel() const noexcept { return logLevel; }
+    inline ErrorCode getErrorCode() const noexcept { return err; }
+    inline const Position &getPosition() const noexcept { return pos; }
+
+    inline const std::vector<Position> &getExtraPositions() const noexcept
+    { return extraPos; }
+  };
+
+  typedef Error<LexerErrorCode> LexerError;
+
 
   class Lexer {
     LanguageConfiguration cfg;
@@ -137,37 +163,6 @@ namespace pfederc {
      */
     inline Token *getCurrentToken() noexcept {
       return currentToken;
-    }
-  };
-
-  class LexerError final {
-    Level logLevel;
-    LexerErrorCode err;
-    Position pos;
-  public:
-    /*!\brief Initializes LexerError
-     * \param logLevel
-     * \param err
-     * \param pos Error position
-     */
-    constexpr LexerError(Level logLevel, LexerErrorCode err,
-        const Position &pos) noexcept
-        : logLevel{logLevel}, err{err}, pos(pos) {
-    }
-    inline ~LexerError() {}
-
-    inline Level getLogLevel() const noexcept {
-      return logLevel;
-    }
-    
-    inline LexerErrorCode getErrorCode() const noexcept {
-      return err;
-    }
-
-    /*!\return Returns where the error occured
-     */
-    inline const Position &getPosition() const noexcept {
-      return pos;
     }
   };
 

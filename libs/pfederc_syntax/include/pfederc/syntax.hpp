@@ -8,7 +8,6 @@
 
 namespace pfederc {
   class Parser;
-  class SyntaxError;
 
   enum class SyntaxErrorCode {
     STX_ERR_EXPECTED_PRIMARY_EXPR,
@@ -57,6 +56,8 @@ namespace pfederc {
     STX_ERR_INVALID_CAPS_DIRECTIVE,
     STX_ERR_INVALID_CAPS_FOLLOWUP,
   };
+
+  typedef Error<SyntaxErrorCode> SyntaxError;
 
   typedef std::tuple<const Token * /*progName*/,
                Exprs /*&&imports*/,
@@ -177,26 +178,6 @@ namespace pfederc {
 
   extern const std::map<TokenType /* opening bracket */,
     SyntaxErrorCode> STX_ERR_BRACKETS;
-
-  class SyntaxError final {
-    Level logLevel;
-    SyntaxErrorCode err;
-    Position pos;
-    std::vector<Position> extraPos;
-  public:
-    inline SyntaxError(Level logLevel, SyntaxErrorCode err, Position pos,
-      std::vector<Position> &&extraPos = {})
-      : logLevel{logLevel}, err{err}, pos(pos),
-        extraPos(std::move(extraPos)) {
-    }
-
-    SyntaxError(const SyntaxError &) = delete;
-    ~SyntaxError();
-
-    inline Level getLogLevel() const noexcept { return logLevel; }
-    inline SyntaxErrorCode getErrorCode() const noexcept { return err; }
-    inline const Position &getPosition() const noexcept { return pos; }
-  };
 
   /*!\return Returns true if an error occured while parsing
    * otherwise false.

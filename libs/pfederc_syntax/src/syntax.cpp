@@ -219,6 +219,3 @@ std::unique_ptr<Expr> Parser::parseExpression(Precedence prec) noexcept {
   return parseBinary(std::move(primary), prec);
 }
 
-// SyntaxError
-SyntaxError::~SyntaxError() {
-}
