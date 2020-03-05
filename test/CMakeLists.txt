@@ -700,7 +700,7 @@ fail_test(ast_ensure57 ast "ensure True\nelse False\n\;")
 # good
 match_test(ast_match00 ast "match True\nTrue => \;\n\;"
   "^match True\nTrue => \;\n\;\n$")
-match_test(ast_match01 ast "match True\nTrue => hello()\;\n\;"
+match_test(ast_match01 ast "match True\nTrue => hello()\n\;\n\;"
   "^match True\nTrue => \\\\(hello\\\\)\n\;\n\;\n$")
 match_test(ast_match02 ast "match True\nTrue => \;\nFalse => \;\n\;"
   "^match True\nTrue => \;\nFalse => \;\n\;\n$")
@@ -723,6 +723,12 @@ fail_test(ast_match54 ast "match myvar\nTrue => \n\;")
 fail_test(ast_match55 ast "match myvar\nTrue => hello()\n")
 fail_test(ast_match56 ast "match myvar\nTrue => hello()")
 fail_test(ast_match57 ast "match myvar\nCase0(x) => \;\nCase1(x, y) => \;\n_(x) => \;\n\;")
+
+# return with direct ';'
+match_test(ast_return00 ast "func hello:\n100\;"
+  "^func hello:\nreturn 100\n\;\n$")
+match_test(ast_return01 ast "func hello:\nx := 100 + 1\nx\;"
+  "^func hello:\n\\\\(:= x \\\\(\\\\+ 100 1\\\\)\\\\)\nreturn x\n\;\n$")
 
 # memory tests
 valgrind_test(ast_mem00 $<TARGET_FILE:astmem> "a + b")

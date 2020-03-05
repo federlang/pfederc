@@ -318,12 +318,21 @@ std::unique_ptr<BodyExpr> Parser::parseFunctionBody() noexcept {
     }
 
     std::unique_ptr<Expr> expr(parseExpression());
-    if (*lexer.getCurrentToken() != TokenType::TOK_STMT && !expect(TokenType::TOK_EOL)) {
+    if (*lexer.getCurrentToken() != TokenType::TOK_STMT
+        && *lexer.getCurrentToken() != TokenType::TOK_EOL) {
       generateError(std::make_unique<SyntaxError>(LVL_ERROR,
         SyntaxErrorCode::STX_ERR_EXPECTED_EOL, lexer.getCurrentToken()->getPosition()));
       skipToStmtEol();
       err = true;
+    } else if (*lexer.getCurrentToken() == TokenType::TOK_STMT && expr) {
+      pos = pos + expr->getPosition();
+      // return expression without mentioning return ('expr' ';')
+      return std::make_unique<BodyExpr>(lexer, pos,
+          std::move(exprs), std::move(expr),
+          ReturnControlType::RETURN);
     }
+
+    expect(TokenType::TOK_EOL);
 
     if (!expr)
       err = true;
