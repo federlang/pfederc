@@ -205,15 +205,15 @@ namespace pfederc {
 
   /*!\brief String of TokenType (exactly the same as TokenType)
    */
-  extern const std::map<TokenType, std::string> TOKEN_TYPE_STRINGS;
+  extern const std::unordered_map<TokenType, std::string> TOKEN_TYPE_STRINGS;
 
   /*!\brief Contains all binary operator to unary operator convertions
    * (operators which can double has binary- and unary operators)
    */
-  extern const std::map<TokenType /* biop */,
+  extern const std::unordered_map<TokenType /* biop */,
       TokenType /* unop */> TOKEN_BIOP_TO_UNOP;
 
-  extern const std::map<TokenType /* open bracket */,
+  extern const std::unordered_map<TokenType /* open bracket */,
     TokenType /* closing bracket */> TOKEN_BRACKETS;
 
   /*!\brief Operator associativity
@@ -235,7 +235,7 @@ namespace pfederc {
   typedef std::tuple<Precedence, OperatorType, Associativity> OperatorInfoTuple;
   /*!\brief Information about operators
    */
-  extern const std::map<TokenType, const OperatorInfoTuple> OPERATORS_INFO;
+  extern const std::unordered_map<TokenType, const OperatorInfoTuple> OPERATORS_INFO;
 
   class Token {
     Token *last;

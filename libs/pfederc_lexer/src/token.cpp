@@ -87,7 +87,7 @@ namespace pfederc {
      OperatorTuple(TokenType::TOK_OP_ASG_RSH, ">>=")},
   };
 
-  const std::map<TokenType, std::string> TOKEN_TYPE_STRINGS {
+  const std::unordered_map<TokenType, std::string> TOKEN_TYPE_STRINGS {
     { TokenType::TOK_ERR, "TOK_ERR" },
     { TokenType::TOK_EOL, "TOK_EOL" },
     { TokenType::TOK_EOF, "TOK_EOF" },
@@ -189,7 +189,7 @@ namespace pfederc {
     { TokenType::TOK_ANY, "TOK_ANY" },
   };
 
-  const std::map<TokenType, const OperatorInfoTuple> OPERATORS_INFO {
+  const std::unordered_map<TokenType, const OperatorInfoTuple> OPERATORS_INFO {
     { TokenType::TOK_OP_COMMA,   OperatorInfoTuple( 1, OperatorType::BINARY, Associativity::LEFT) },
     { TokenType::TOK_OP_ASG_DCL, OperatorInfoTuple( 2, OperatorType::BINARY, Associativity::RIGHT) },
     { TokenType::TOK_OP_ASG_AND, OperatorInfoTuple( 3, OperatorType::BINARY, Associativity::RIGHT) },
@@ -240,7 +240,7 @@ namespace pfederc {
     { TokenType::TOK_OP_DMEM,    OperatorInfoTuple(18, OperatorType::BINARY, Associativity::LEFT) },
   };
 
-  const std::map<TokenType, TokenType> TOKEN_BIOP_TO_UNOP {
+  const std::unordered_map<TokenType, TokenType> TOKEN_BIOP_TO_UNOP {
     { TokenType::TOK_OP_ADD, TokenType::TOK_OP_POS },
     { TokenType::TOK_OP_SUB, TokenType::TOK_OP_NEG },
     { TokenType::TOK_OP_MUL, TokenType::TOK_OP_DEREF },
@@ -248,7 +248,7 @@ namespace pfederc {
   };
 
 
-  const std::map<TokenType /* open bracket */,
+  const std::unordered_map<TokenType /* open bracket */,
     TokenType /* closing bracket */> TOKEN_BRACKETS = {
       { TokenType::TOK_OP_BRACKET_OPEN, TokenType::TOK_BRACKET_CLOSE },
       { TokenType::TOK_OP_ARR_BRACKET_OPEN, TokenType::TOK_ARR_BRACKET_CLOSE },
