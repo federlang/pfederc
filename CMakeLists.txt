@@ -1,6 +1,8 @@
 cmake_minimum_required(VERSION 3.10)
 project(pfederc)
 
+find_package(Threads REQUIRED)
+
 include(CheckIPOSupported)
 check_ipo_supported(RESULT lto_supported OUTPUT error)
 
@@ -15,7 +17,8 @@ endmacro()
 add_subdirectory("${pfederc_SOURCE_DIR}/libs")
 
 set(PFEDERC_LIBRARIES pfederc_core pfederc_errors pfederc_lexer
-  pfederc_syntax pfederc_semantics)
+  pfederc_syntax pfederc_semantics
+  ${CMAKE_THREAD_LIBS_INIT})
 
 add_executable(pfederc "${pfederc_SOURCE_DIR}/src/main.cpp")
 add_lto_support(pfederc)

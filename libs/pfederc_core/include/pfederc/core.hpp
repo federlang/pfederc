@@ -7,6 +7,7 @@
 #include <cstdint>
 #include <cstring>
 #include <functional>
+#include <future>
 #include <iostream>
 #include <iterator>
 #include <istream>
