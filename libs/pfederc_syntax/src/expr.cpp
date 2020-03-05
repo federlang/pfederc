@@ -34,7 +34,7 @@ static void _setTemplateParents(std::unique_ptr<TemplateDecls> &templs, Expr *pa
     return;
 
   for (auto &templ : *(templs)) {
-    _setParent(std::get<1>(templ), parent);
+    _setParent(templ.expr, parent);
   }
 }
 
@@ -49,10 +49,10 @@ static std::string _templateToString(const TemplateDecls &tmpls) {
     else
       first = false;
 
-    const auto &snd = std::get<1>(tmpl);
-    result += std::get<0>(tmpl)->toString(snd->getLexer());
+    const auto &snd = *tmpl.expr;
+    result += tmpl.id->toString(snd.getLexer());
     result += ": ";
-    result += snd->toString();
+    result += snd.toString();
   }
 
   result += '}';

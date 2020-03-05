@@ -9,7 +9,7 @@ std::unique_ptr<TemplateDecl> Parser::fromDeclExprToTemplateDecl(BiOpExpr &biopr
   }
   
   return std::make_unique<TemplateDecl>(
-    &(dynamic_cast<const TokenExpr&>(bioprhs.getLeft()).getToken()),
+    dynamic_cast<const TokenExpr&>(bioprhs.getLeft()).getTokenPtr(),
     bioprhs.getRightPtr());
 }
 
@@ -19,7 +19,7 @@ std::unique_ptr<TemplateDecls> Parser::parseTemplateDecl() noexcept {
   bool err = false;
 
   std::unique_ptr<Expr> expr(parseExpression());
-  std::unique_ptr<TemplateDecls> result(new TemplateDecls());
+  std::unique_ptr<TemplateDecls> result(std::make_unique<TemplateDecls>());
 
   while (expr && isBiOpExpr(*expr, TokenType::TOK_OP_COMMA)) {
     BiOpExpr &biopexpr = dynamic_cast<BiOpExpr&>(*expr);
@@ -39,8 +39,8 @@ std::unique_ptr<TemplateDecls> Parser::parseTemplateDecl() noexcept {
     if (!templdecl)
       err = true;
     else
-    // success, push on result
-      result->push_back(TemplateDecl(std::get<0>(*templdecl), std::get<1>(*templdecl).release()));
+      // success, push on result
+      result->push_back(TemplateDecl{templdecl->id, std::move(templdecl->expr)});
     // next iterator step
     expr = biopexpr.getLeftPtr();
   }
@@ -58,7 +58,7 @@ std::unique_ptr<TemplateDecls> Parser::parseTemplateDecl() noexcept {
       err = true;
     // success, push on result
     else
-      result->push_back(TemplateDecl(std::get<0>(*templdecl), std::get<1>(*templdecl).release()));
+      result->push_back(TemplateDecl{templdecl->id, std::move(templdecl->expr)});
   }
 
   if (!expect(TokenType::TOK_TEMPL_BRACKET_CLOSE)) {

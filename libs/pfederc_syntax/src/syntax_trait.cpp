@@ -83,8 +83,8 @@ void Parser::parseTraitBody(bool &err,
       if (funcExpr->getTemplates()) {
         generateError(std::make_unique<SyntaxError>(LVL_ERROR,
               SyntaxErrorCode::STX_ERR_TRAIT_SCOPE_FUNC_TEMPL,
-              std::get<0>(funcExpr->getTemplates()->front())->getPosition()
-              + std::get<1>(funcExpr->getTemplates()->back())->getPosition()));
+              funcExpr->getTemplates()->front().id->getPosition()
+              + funcExpr->getTemplates()->back().expr->getPosition()));
       }
 
       if (funcExpr->getBody()) {

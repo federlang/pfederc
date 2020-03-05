@@ -187,7 +187,7 @@ std::unique_ptr<Expr> Parser::parseFunction(std::unique_ptr<Capabilities> &&caps
   if (*lexer.getCurrentToken() == TokenType::TOK_KW_TYPE) {
     if (!templ->empty()) {
       generateError(std::make_unique<SyntaxError>(LVL_ERROR,
-        SyntaxErrorCode::STX_ERR_FUNC_VAR_NO_TEMPL, std::get<1>(templ->at(0))->getPosition()));
+        SyntaxErrorCode::STX_ERR_FUNC_VAR_NO_TEMPL, templ->at(0).expr->getPosition()));
       err = true;
     }
 

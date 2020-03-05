@@ -129,8 +129,21 @@ namespace pfederc {
     inline const auto &getEnsures() const noexcept { return ensures; }
   };
 
-  typedef std::tuple<const Token * /* id */,
-    std::unique_ptr<Expr>> TemplateDecl;
+  struct TemplateDecl final {
+    const Token *id;
+    std::unique_ptr<Expr> expr;
+
+    inline TemplateDecl(const Token *id, std::unique_ptr<Expr> &&expr) noexcept
+      : id{id}, expr(std::move(expr)) {
+    }
+
+    TemplateDecl(const TemplateDecl &) = delete;
+
+    inline TemplateDecl(TemplateDecl &&templ) noexcept
+      : id{templ.id}, expr(std::move(templ.expr)) {}
+
+    inline ~TemplateDecl() {}
+  };
   typedef std::vector<TemplateDecl> TemplateDecls;
 
   typedef std::vector<std::unique_ptr<Expr>> Exprs;
