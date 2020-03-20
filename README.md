@@ -15,8 +15,8 @@ git clone https://github.com/federlang/pfederc
 cd pfederc
 mkdir build
 cd build
-cmake ..
-cmake --build . -j $(nproc)
+cmake -G Ninja ..
+ninja -j$(nproc)
 ```
 
 Testing (user is in build directory):
