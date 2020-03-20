@@ -379,7 +379,7 @@ std::unique_ptr<Token> Lexer::nextTokenNum() noexcept {
 std::unique_ptr<Token> Lexer::nextTokenBinNum() noexcept {
   nextChar(); // eat b
 
-  std::size_t num = 0;
+  size_t num = 0;
   while (currentChar == '0' || currentChar == '1') {
     num *= 2;
     num += currentChar - '0';
@@ -392,7 +392,7 @@ std::unique_ptr<Token> Lexer::nextTokenBinNum() noexcept {
 std::unique_ptr<Token> Lexer::nextTokenOctNum() noexcept {
   nextChar(); // eat o
 
-  std::size_t num = 0;
+  size_t num = 0;
   while (currentChar >= '0' && currentChar <= '7') {
     num *= 8;
     num += currentChar - '0';
@@ -405,7 +405,7 @@ std::unique_ptr<Token> Lexer::nextTokenOctNum() noexcept {
 std::unique_ptr<Token> Lexer::nextTokenHexNum() noexcept {
   nextChar(); // eat x
 
-  std::size_t num = 0;
+  size_t num = 0;
   while (std::isxdigit(currentChar)) {
     num *= 16;
     if (std::isdigit(currentChar))
@@ -419,7 +419,7 @@ std::unique_ptr<Token> Lexer::nextTokenHexNum() noexcept {
 }
 
 std::unique_ptr<Token> Lexer::nextTokenDecNum() noexcept {
-  std::size_t num = 0;
+  size_t num = 0;
   while (std::isdigit(currentChar)) {
     num *= 10;
     num += currentChar - '0';
@@ -432,7 +432,7 @@ std::unique_ptr<Token> Lexer::nextTokenDecNum() noexcept {
   return nextTokenNumType(num);
 }
 
-std::unique_ptr<Token> Lexer::nextTokenNumType(std::size_t num) noexcept {
+std::unique_ptr<Token> Lexer::nextTokenNumType(size_t num) noexcept {
   if (isdigit(currentChar))
     return generateError(std::make_unique<LexerError>(LVL_ERROR,
       LexerErrorCode::LEX_ERR_NUM_UNEXPECTED_CHAR_DIGIT, Position{getCurrentCursor().line,

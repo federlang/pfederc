@@ -285,8 +285,6 @@ namespace pfederc {
     NumberToken(Token *last, TokenType type, const Position &pos, int64_t num) noexcept;
     NumberToken(Token *last, TokenType type, const Position &pos, float num) noexcept;
     NumberToken(Token *last, TokenType type, const Position &pos, double num) noexcept;
-    inline NumberToken(Token *last, TokenType type, const Position &pos, std::size_t num) noexcept
-	    : NumberToken(last, type, pos, static_cast<uint64_t>(num)) {}
     virtual ~NumberToken();
 
     int8_t  i8() const noexcept;
