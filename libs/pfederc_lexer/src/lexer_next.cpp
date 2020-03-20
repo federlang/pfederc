@@ -432,7 +432,7 @@ std::unique_ptr<Token> Lexer::nextTokenDecNum() noexcept {
   return nextTokenNumType(num);
 }
 
-std::unique_ptr<Token> Lexer::nextTokenNumType(size_t num) noexcept {
+std::unique_ptr<Token> Lexer::nextTokenNumType(std::uint64_t num) noexcept {
   if (isdigit(currentChar))
     return generateError(std::make_unique<LexerError>(LVL_ERROR,
       LexerErrorCode::LEX_ERR_NUM_UNEXPECTED_CHAR_DIGIT, Position{getCurrentCursor().line,

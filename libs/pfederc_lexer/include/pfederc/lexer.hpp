@@ -79,7 +79,7 @@ namespace pfederc {
     std::unique_ptr<Token> nextTokenHexNum() noexcept;
     std::unique_ptr<Token> nextTokenDecNum() noexcept;
     //! Reads number type (non, or s,S,l,L with optional u). *num* is number.
-    std::unique_ptr<Token> nextTokenNumType(size_t num) noexcept;
+    std::unique_ptr<Token> nextTokenNumType(std::uint64_t num) noexcept;
     //! Next floating point number. *num* is left to '.'
     std::unique_ptr<Token> nextTokenFltNum(size_t num) noexcept;
     std::unique_ptr<Token> nextTokenChar() noexcept;
