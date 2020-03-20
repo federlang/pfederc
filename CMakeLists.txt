@@ -4,7 +4,7 @@ project(pfederc)
 find_package(Threads REQUIRED)
 
 include(CheckIPOSupported)
-check_ipo_supported(RESULT lto_supported OUTPUT error)
+check_ipo_supported(RESULT lto_supported OUTPUT output)
 
 macro(add_lto_support name)
 	if (lto_supported)
