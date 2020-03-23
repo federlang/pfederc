@@ -51,10 +51,10 @@ build_test(ast)
 build_test(astmem)
 build_test(astopt)
 build_test(astoptmem)
-build_test(print_mangles)
+#build_test(print_mangles)
 
-status_test(semantic_children)
-status_test(semantic_safe_children)
+#status_test(semantic_children)
+#status_test(semantic_safe_children)
 
 # Identifiers
 # good
