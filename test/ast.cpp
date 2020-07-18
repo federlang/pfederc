@@ -6,8 +6,10 @@
 using namespace pfederc;
 
 int main(int argc, char * argsv[]) {
-  if (argc != 2 || strlen(argsv[1]) == 0)
+  if (argc != 2 || strlen(argsv[1]) == 0) {
+    std::cerr << "Expected expression (Single argument)" << std::endl;
     return 1;
+  }
 
   std::istringstream input(argsv[1]);
   LanguageConfiguration cfg = createDefaultLanguageConfiguration();
