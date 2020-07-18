@@ -90,6 +90,7 @@ inline static std::string _logLexerErrorMark(const Lexer &lexer, const Position 
   std::string result = lexer.getLineAt(pos.line) + '\n';
   const size_t lineStartIdx = lexer.getLineIndices()[lexer.getLineNumber(pos.startIndex)];
   const size_t lineEndIdx = lexer.getLineIndices()[lexer.getLineNumber(pos.endIndex)];
+  const size_t end = std::max(pos.startIndex, pos.endIndex);
   // if end position not in same line
   const size_t lastLine = lexer.getLineNumber(pos.endIndex);
   if (lastLine > pos.line) {
@@ -100,23 +101,18 @@ inline static std::string _logLexerErrorMark(const Lexer &lexer, const Position 
   // print space till start
   for (size_t i = lineStartIdx; i < pos.startIndex && i < lexer.getFileContent().size(); ++i)  {
     const uint8_t c = lexer.getFileContent()[i];
-    const uint8_t d = c & 0xF0;
     if (c == '\t')
       result += "  ";
-    else if ((~c & 0x80) == 0x80 // ascii
-        || d == 0xC0 || d == 0xE0 || d == 0xF0) // utf-8 compatible
+    else if (charset::isCharEnd<charset::UTF8>(c)) // utf-8 compatible
       result += ' ';
   }
-  const size_t startenddiff = (pos.endIndex - lineEndIdx) - (pos.startIndex - lineStartIdx);
   // print marks till end
-  for (size_t i = pos.endIndex - startenddiff;
-       i <= pos.endIndex && i < lexer.getFileContent().size(); ++i)  {
-    const uint8_t c = lexer.getFileContent()[i];
-    const uint8_t d = c & 0xF0;
+  for (size_t i = pos.startIndex;
+       i <= end && i <= lexer.getFileContent().size(); ++i)  {
+    const uint8_t c = (i == lexer.getFileContent().size()) ? ' ' : lexer.getFileContent()[i];
     if (c == '\t')
       result += "^^";
-    else if ((~c & 0x80) == 0x80 // ascii
-        || d == 0xC0 || d == 0xE0 || d == 0xF0) // utf-8 compatible
+    else if (charset::isCharEnd<charset::UTF8>(c)) // utf-8 compatible
       result += '^';
   }
   return result;

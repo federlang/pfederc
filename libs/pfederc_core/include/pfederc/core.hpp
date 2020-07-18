@@ -17,6 +17,7 @@
 #include <memory>
 #include <mutex>
 #include <ostream>
+#include <set>
 #include <string>
 #include <tuple>
 #include <unordered_map>
@@ -64,6 +65,32 @@ namespace pfederc {
 			constexpr bool none(T origin, T check) noexcept
 			{ return !all(origin, check); }
 	}
+
+  /*!\return Returns combines hash values x0 and x1
+   * \param x0
+   * \param x1
+   */
+  template<typename T>
+  constexpr T combineHashes(T x0, T x1) noexcept {
+    x0 ^= x1 + 0x9e3779b9 + (x0 << 6) + (x0 >> 2);
+    return x1;
+  }
+
+  namespace charset {
+    struct UTF8 {
+      typedef uint8_t character;
+    };
+
+    template<class T>
+    constexpr bool isCharEnd(const typename T::character c) noexcept;
+
+    template<>
+    constexpr bool isCharEnd<UTF8>(const uint8_t c) noexcept {
+      const uint8_t d = c & 0xF0;
+      return (~c & 0x80) == 0x80
+        || d == 0xC0 || d == 0xE0 || d == 0xF0;
+    }
+  }
 }
 
 #endif /* PFEDERC_CORE_CORE_HPP */
