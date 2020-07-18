@@ -171,23 +171,17 @@ std::unique_ptr<Expr> Parser::parseFunction(std::unique_ptr<Capabilities> &&caps
 
   bool err = false;
 
-  std::unique_ptr<TemplateDecls> templ;
+  TemplateDecls templ;
   if (*lexer.getCurrentToken() == TokenType::TOK_OP_TEMPL_BRACKET_OPEN) {
     templ = parseTemplateDecl();
-    if (!templ)
+    if (templ.empty())
       err = true;
-    else if (!expect(TokenType::TOK_TEMPL_BRACKET_CLOSE) && !err) {
-      err = true;
-      generateError(std::make_unique<SyntaxError>(LVL_ERROR,
-        SyntaxErrorCode::STX_ERR_EXPECTED_TEMPL_CLOSING_BRACKET,
-        lexer.getCurrentToken()->getPosition()));
-    }
   }
 
   if (*lexer.getCurrentToken() == TokenType::TOK_KW_TYPE) {
-    if (!templ->empty()) {
+    if (!templ.empty()) {
       generateError(std::make_unique<SyntaxError>(LVL_ERROR,
-        SyntaxErrorCode::STX_ERR_FUNC_VAR_NO_TEMPL, templ->at(0).expr->getPosition()));
+        SyntaxErrorCode::STX_ERR_FUNC_VAR_NO_TEMPL, templ.at(0)->expr->getPosition()));
       err = true;
     }
 

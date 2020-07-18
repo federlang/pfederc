@@ -29,12 +29,12 @@ static void _setParameterParents(std::vector<std::unique_ptr<FuncParameter>> &pa
   }
 }
 
-static void _setTemplateParents(std::unique_ptr<TemplateDecls> &templs, Expr *parent) noexcept {
-  if (!templs)
+static void _setTemplateParents(TemplateDecls &templs, Expr *parent) noexcept {
+  if (templs.empty())
     return;
 
-  for (auto &templ : *(templs)) {
-    _setParent(templ.expr, parent);
+  for (auto &templ : templs) {
+    _setParent(templ->expr, parent);
   }
 }
 
@@ -43,16 +43,19 @@ static std::string _templateToString(const TemplateDecls &tmpls) {
   result += '{';
 
   bool first = true;
-  for (const TemplateDecl &tmpl : tmpls) {
+  for (const auto &tmpl : tmpls) {
     if (!first)
       result += ", ";
     else
       first = false;
 
-    const auto &snd = *tmpl.expr;
-    result += tmpl.id->toString(snd.getLexer());
-    result += ": ";
-    result += snd.toString();
+    if (!tmpl->expr) {
+      result += tmpl->id->toString();
+    } else {
+      result += tmpl->id->toString();
+      result += ": ";
+      result += tmpl->expr->toString();
+    }
   }
 
   result += '}';
@@ -188,7 +191,7 @@ std::string ProgNameExpr::toString() const noexcept {
 FuncExpr::FuncExpr(const Lexer &lexer, const Position &pos,
     std::unique_ptr<Capabilities> &&caps,
     const Token *tokId,
-    std::unique_ptr<TemplateDecls> &&templs,
+    TemplateDecls &&templs,
     std::vector<std::unique_ptr<FuncParameter>> &&params,
     std::unique_ptr<Expr> &&returnExpr,
     std::unique_ptr<BodyExpr> &&body,
@@ -215,8 +218,8 @@ std::string FuncExpr::toString() const noexcept {
     result += _capsToString(*caps);
 
   result += "func";
-  if (templs)
-    result += _templateToString(*templs);
+  if (!templs.empty())
+    result += _templateToString(templs);
 
   result += ' ';
   result += getIdentifier().toString(getLexer());
@@ -323,7 +326,7 @@ std::string LambdaExpr::toString() const noexcept {
 TraitExpr::TraitExpr(const Lexer &lexer, const Position &pos,
     std::unique_ptr<Capabilities> &&caps,
     const Token *tokId,
-    std::unique_ptr<TemplateDecls> &&templs,
+    TemplateDecls &&templs,
     std::vector<std::unique_ptr<Expr>> &&impltraits,
     std::list<std::unique_ptr<FuncExpr>> &&functions) noexcept
     : Expr(lexer, ExprType::EXPR_TRAIT, pos), Capable(std::move(caps)), tokId{tokId},
@@ -345,8 +348,8 @@ std::string TraitExpr::toString() const noexcept {
     result += _capsToString(*caps);
 
   result += "trait";
-  if (templs) {
-    result += _templateToString(*templs);
+  if (!templs.empty()) {
+    result += _templateToString(templs);
   }
 
   result += ' ';
@@ -380,7 +383,7 @@ std::string TraitExpr::toString() const noexcept {
 ClassExpr::ClassExpr(const Lexer &lexer, const Position &pos,
     std::unique_ptr<Capabilities> &&caps,
     const Token *tokId,
-    std::unique_ptr<TemplateDecls> &&templs,
+    TemplateDecls &&templs,
     std::list<std::unique_ptr<BiOpExpr>> &&constructAttributes,
     std::list<std::unique_ptr<BiOpExpr>> &&attributes,
     std::list<std::unique_ptr<FuncExpr>> &&functions) noexcept
@@ -406,8 +409,8 @@ std::string ClassExpr::toString() const noexcept {
     result += _capsToString(*caps);
 
   result += "class";
-  if (templs) {
-    result += _templateToString(*templs);
+  if (!templs.empty()) {
+    result += _templateToString(templs);
   }
 
   result += ' ';
@@ -446,7 +449,7 @@ std::string ClassExpr::toString() const noexcept {
 TraitImplExpr::TraitImplExpr(const Lexer &lexer, const Position &pos,
     std::unique_ptr<Capabilities> &&caps,
     const Token *classTokId,
-    std::unique_ptr<TemplateDecls> &&templs,
+    TemplateDecls &&templs,
     std::unique_ptr<Expr> &&implTrait,
     std::list<std::unique_ptr<FuncExpr>> &&functions) noexcept
     : Expr(lexer, ExprType::EXPR_TRAITIMPL, pos), Capable(std::move(caps)), classTokId{classTokId},
@@ -469,8 +472,8 @@ std::string TraitImplExpr::toString() const noexcept {
     result += _capsToString(*caps);
 
   result += "class trait";
-  if (templs)
-    result += _templateToString(*templs);
+  if (!templs.empty())
+    result += _templateToString(templs);
 
   result += ' ';
 
@@ -492,7 +495,7 @@ std::string TraitImplExpr::toString() const noexcept {
 // EnumExpr
 EnumExpr::EnumExpr(const Lexer &lexer, const Position &pos,
     const Token *tokId,
-    std::unique_ptr<TemplateDecls> &&templs,
+    TemplateDecls &&templs,
     std::vector<EnumConstructor> &&constructors) noexcept
     : Expr(lexer, ExprType::EXPR_ENUM, pos), tokId{tokId},
       templs(std::move(templs)), constructors(std::move(constructors)) {
@@ -510,8 +513,8 @@ EnumExpr::~EnumExpr() {
 
 std::string EnumExpr::toString() const noexcept {
   std::string result = "enum";
-  if (templs)
-    result += _templateToString(*templs);
+  if (!templs.empty())
+    result += _templateToString(templs);
 
   result += ' ';
   result += tokId->toString(getLexer());

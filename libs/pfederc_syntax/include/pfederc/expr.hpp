@@ -130,21 +130,24 @@ namespace pfederc {
   };
 
   struct TemplateDecl final {
-    const Token *id;
+    std::unique_ptr<TokenExpr> id;
     std::unique_ptr<Expr> expr;
 
-    inline TemplateDecl(const Token *id, std::unique_ptr<Expr> &&expr) noexcept
-      : id{id}, expr(std::move(expr)) {
+    inline TemplateDecl(std::unique_ptr<TokenExpr> &&id) noexcept
+      : id(std::move(id)), expr(nullptr) {}
+
+    inline TemplateDecl(std::unique_ptr<TokenExpr> &&id, std::unique_ptr<Expr> &&expr) noexcept
+      : id(std::move(id)), expr(std::move(expr)) {
     }
 
     TemplateDecl(const TemplateDecl &) = delete;
 
     inline TemplateDecl(TemplateDecl &&templ) noexcept
-      : id{templ.id}, expr(std::move(templ.expr)) {}
+      : id(std::move(templ.id)), expr(std::move(templ.expr)) {}
 
     inline ~TemplateDecl() {}
   };
-  typedef std::vector<TemplateDecl> TemplateDecls;
+  typedef std::vector<std::unique_ptr<TemplateDecl>> TemplateDecls;
 
   typedef std::vector<std::unique_ptr<Expr>> Exprs;
 
@@ -259,7 +262,7 @@ namespace pfederc {
 
   class FuncExpr final : public Expr, public Capable {
     const Token *tokId; //!< function identifier
-    std::unique_ptr<TemplateDecls> templs;
+    TemplateDecls templs;
     std::vector<std::unique_ptr<FuncParameter>> params;
     std::unique_ptr<Expr> returnExpr; // optional
     std::unique_ptr<BodyExpr> body; // optional
@@ -278,7 +281,7 @@ namespace pfederc {
     FuncExpr(const Lexer &lexer, const Position &pos,
       std::unique_ptr<Capabilities> &&caps,
       const Token *tokId,
-      std::unique_ptr<TemplateDecls> &&templs,
+      TemplateDecls &&templs,
       std::vector<std::unique_ptr<FuncParameter>> &&params,
       std::unique_ptr<Expr> &&returnExpr,
       std::unique_ptr<BodyExpr> &&body,
@@ -360,7 +363,7 @@ namespace pfederc {
 
   class TraitExpr final : public Expr, public Capable {
     const Token *tokId; //!< trait identifier
-    std::unique_ptr<TemplateDecls> templs;
+    TemplateDecls templs;
     std::vector<std::unique_ptr<Expr>> impltraits;
     std::list<std::unique_ptr<FuncExpr>> functions;
   public:
@@ -375,7 +378,7 @@ namespace pfederc {
     TraitExpr(const Lexer &lexer, const Position &pos,
       std::unique_ptr<Capabilities> &&caps,
       const Token *tokId,
-      std::unique_ptr<TemplateDecls> &&templs,
+      TemplateDecls &&templs,
       std::vector<std::unique_ptr<Expr>> &&impltraits,
       std::list<std::unique_ptr<FuncExpr>> &&functions) noexcept;
     TraitExpr(const TraitExpr &) = delete;
@@ -393,7 +396,7 @@ namespace pfederc {
 
   class ClassExpr final : public Expr, public Capable {
     const Token *tokId;
-    std::unique_ptr<TemplateDecls> templs;
+    TemplateDecls templs;
     std::list<std::unique_ptr<BiOpExpr>> constructAttributes;
     std::list<std::unique_ptr<BiOpExpr>> attributes;
     std::list<std::unique_ptr<FuncExpr>> functions;
@@ -410,7 +413,7 @@ namespace pfederc {
     ClassExpr(const Lexer &lexer, const Position &pos,
       std::unique_ptr<Capabilities> &&caps,
       const Token *tokId,
-      std::unique_ptr<TemplateDecls> &&templs,
+      TemplateDecls &&templs,
       std::list<std::unique_ptr<BiOpExpr>> &&constructAttributes,
       std::list<std::unique_ptr<BiOpExpr>> &&attributes,
       std::list<std::unique_ptr<FuncExpr>> &&functions) noexcept;
@@ -434,7 +437,7 @@ namespace pfederc {
 
   class TraitImplExpr final : public Expr, public Capable {
     const Token *classTokId;
-    std::unique_ptr<TemplateDecls> templs;
+    TemplateDecls templs;
     std::unique_ptr<Expr> implTrait;
     std::list<std::unique_ptr<FuncExpr>> functions;
   public:
@@ -448,7 +451,7 @@ namespace pfederc {
      */
     TraitImplExpr(const Lexer &lexer, const Position &pos,
         std::unique_ptr<Capabilities> &&caps,
-        const Token *classTokId, std::unique_ptr<TemplateDecls> &&templs,
+        const Token *classTokId, TemplateDecls &&templs,
         std::unique_ptr<Expr> &&implTrait,
         std::list<std::unique_ptr<FuncExpr>> &&functions) noexcept;
     TraitImplExpr(const TraitImplExpr &) = delete;
@@ -469,7 +472,7 @@ namespace pfederc {
 
   class EnumExpr final : public Expr {
     const Token *tokId;
-    std::unique_ptr<TemplateDecls> templs;
+    TemplateDecls templs;
     std::vector<EnumConstructor> constructors;
   public:
     /*!\brief Initializes EnumExpr
@@ -481,7 +484,7 @@ namespace pfederc {
      */
     EnumExpr(const Lexer &lexer, const Position &pos,
         const Token *tokId,
-        std::unique_ptr<TemplateDecls> &&templs,
+        TemplateDecls &&templs,
         std::vector<EnumConstructor> &&constructors) noexcept;
     EnumExpr(const EnumExpr &) = delete;
     virtual ~EnumExpr();

@@ -10,7 +10,7 @@ std::unique_ptr<Expr> Parser::parseClass(std::unique_ptr<Capabilities> &&caps) n
   bool err = false;
 
   // class templ?
-  std::unique_ptr<TemplateDecls> templ;
+  TemplateDecls templ;
   if (*lexer.getCurrentToken() == TokenType::TOK_OP_TEMPL_BRACKET_OPEN) {
     templ = parseTemplateDecl();
     err = true;

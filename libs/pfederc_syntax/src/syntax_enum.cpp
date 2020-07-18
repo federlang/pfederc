@@ -7,7 +7,7 @@ std::unique_ptr<Expr> Parser::parseEnum() noexcept {
 
   bool err = false; // hard errors
 
-  std::unique_ptr<TemplateDecls> templ;
+  TemplateDecls templ;
   if (*lexer.getCurrentToken() == TokenType::TOK_OP_TEMPL_BRACKET_OPEN) {
     templ = parseTemplateDecl();
     // maybe soft error

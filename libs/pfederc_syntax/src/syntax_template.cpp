@@ -1,65 +1,63 @@
 #include "pfederc/syntax.hpp"
 using namespace pfederc;
 
-std::unique_ptr<TemplateDecl> Parser::fromDeclExprToTemplateDecl(BiOpExpr &bioprhs) noexcept {
-  if (!isTokenExpr(bioprhs.getLeft(), TokenType::TOK_ID)) {
+std::unique_ptr<TemplateDecl> Parser::fromExprToTemplateDecl(std::unique_ptr<Expr> &&rhs) noexcept {
+  if (!rhs) {
+    return nullptr;
+  }
+
+  if (isTokenExpr(*rhs, TokenType::TOK_ID)) {
+    return std::make_unique<TemplateDecl>(std::unique_ptr<TokenExpr>(
+          dynamic_cast<TokenExpr*>(rhs.release())));
+  }
+
+  if (!isBiOpExpr(*rhs, TokenType::TOK_OP_DCL)) {
     generateError(std::make_unique<SyntaxError>(LVL_ERROR,
-      SyntaxErrorCode::STX_ERR_INVALID_VARDECL_ID, bioprhs.getPosition()));
+      SyntaxErrorCode::STX_ERR_EXPECTED_VARDECL, rhs->getPosition()));
+    return nullptr;
+  }
+
+  BiOpExpr& bioprhs = dynamic_cast<BiOpExpr&>(*rhs);
+
+  if (!isTokenExpr(bioprhs.getLeft(), TokenType::TOK_ID)) {
+    generateError(std::make_unique<SyntaxError>(LVL_ERROR, SyntaxErrorCode::STX_ERR_INVALID_VARDECL_ID, bioprhs.getPosition()));
     return nullptr;
   }
   
   return std::make_unique<TemplateDecl>(
-    dynamic_cast<const TokenExpr&>(bioprhs.getLeft()).getTokenPtr(),
+    std::unique_ptr<TokenExpr>(dynamic_cast<TokenExpr*>(bioprhs.getLeftPtr().release())),
     bioprhs.getRightPtr());
 }
 
-std::unique_ptr<TemplateDecls> Parser::parseTemplateDecl() noexcept {
+TemplateDecls Parser::parseTemplateDecl() noexcept {
   sanityExpect(TokenType::TOK_OP_TEMPL_BRACKET_OPEN);
 
   bool err = false;
 
   std::unique_ptr<Expr> expr(parseExpression());
-  std::unique_ptr<TemplateDecls> result(std::make_unique<TemplateDecls>());
+  TemplateDecls result;
 
   while (expr && isBiOpExpr(*expr, TokenType::TOK_OP_COMMA)) {
     BiOpExpr &biopexpr = dynamic_cast<BiOpExpr&>(*expr);
     std::unique_ptr<Expr> rhs(biopexpr.getRightPtr());
-    if (!isBiOpExpr(*rhs, TokenType::TOK_OP_DCL)) {
-      generateError(std::make_unique<SyntaxError>(LVL_ERROR,
-        SyntaxErrorCode::STX_ERR_EXPECTED_VARDECL, rhs->getPosition()));
 
-      // next iterator step
-      expr = biopexpr.getLeftPtr();
-
-      continue;
-    }
-
-    BiOpExpr &bioprhs = dynamic_cast<BiOpExpr&>(*rhs);
-    std::unique_ptr<TemplateDecl> templdecl(fromDeclExprToTemplateDecl(bioprhs));
+    std::unique_ptr<TemplateDecl> templdecl(fromExprToTemplateDecl(std::move(rhs)));
     if (!templdecl)
       err = true;
     else
       // success, push on result
-      result->push_back(TemplateDecl{templdecl->id, std::move(templdecl->expr)});
+      result.insert(result.begin(), std::move(templdecl));
+
     // next iterator step
     expr = biopexpr.getLeftPtr();
   }
-
-  if (expr && !isBiOpExpr(*expr, TokenType::TOK_OP_DCL)) {
-    generateError(std::make_unique<SyntaxError>(LVL_ERROR,
-      SyntaxErrorCode::STX_ERR_EXPECTED_VARDECL, expr->getPosition()));
-    return nullptr;
-  }
   
-  if (expr) {
-    BiOpExpr &bioprhs = dynamic_cast<BiOpExpr&>(*expr);
-    std::unique_ptr<TemplateDecl> templdecl(fromDeclExprToTemplateDecl(bioprhs));
-    if (!templdecl)
-      err = true;
-    // success, push on result
-    else
-      result->push_back(TemplateDecl{templdecl->id, std::move(templdecl->expr)});
-  }
+  std::unique_ptr<TemplateDecl> templdecl(fromExprToTemplateDecl(std::move(expr)));
+  if (!templdecl)
+    err = true;
+  // success, push on result
+  else
+    result.insert(result.begin(), std::move(templdecl));
 
   if (!expect(TokenType::TOK_TEMPL_BRACKET_CLOSE)) {
     generateError(std::make_unique<SyntaxError>(LVL_ERROR,
@@ -69,7 +67,7 @@ std::unique_ptr<TemplateDecls> Parser::parseTemplateDecl() noexcept {
   }
 
   if (err)
-    return nullptr;
+    return TemplateDecls();
 
   return result;
 }

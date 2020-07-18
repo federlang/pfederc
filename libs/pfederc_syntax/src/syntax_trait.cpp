@@ -6,7 +6,7 @@ std::unique_ptr<Expr> Parser::parseTrait(std::unique_ptr<Capabilities> &&caps) n
 
   bool err = false; // hard errors
 
-  std::unique_ptr<TemplateDecls> templ;
+  TemplateDecls templ;
   if (*lexer.getCurrentToken() == TokenType::TOK_OP_TEMPL_BRACKET_OPEN) {
     templ = parseTemplateDecl();
     // maybe soft error
@@ -80,11 +80,11 @@ void Parser::parseTraitBody(bool &err,
       std::unique_ptr<FuncExpr> funcExpr(
             dynamic_cast<FuncExpr*>(expr.release()));
 
-      if (funcExpr->getTemplates()) {
+      if (!funcExpr->getTemplates().empty()) {
         generateError(std::make_unique<SyntaxError>(LVL_ERROR,
               SyntaxErrorCode::STX_ERR_TRAIT_SCOPE_FUNC_TEMPL,
-              funcExpr->getTemplates()->front().id->getPosition()
-              + funcExpr->getTemplates()->back().expr->getPosition()));
+              funcExpr->getTemplates().front()->id->getPosition()
+              + funcExpr->getTemplates().back()->expr->getPosition()));
       }
 
       if (funcExpr->getBody()) {

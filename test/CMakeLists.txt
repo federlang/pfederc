@@ -730,6 +730,25 @@ match_test(ast_return00 ast "func hello:\n100\;"
 match_test(ast_return01 ast "func hello:\nx := 100 + 1\nx\;"
   "^func hello:\n\\\\(:= x \\\\(\\\\+ 100 1\\\\)\\\\)\nreturn x\n\;\n$")
 
+# templates
+# good
+match_test(ast_templ00 ast "class{T} MyClass\n\;"
+  "^class{T} MyClass\n\;\n$")
+match_test(ast_templ01 ast "class{T, S} MyClass\n\;"
+  "^class{T, S} MyClass\n\;\n$")
+match_test(ast_templ02 ast "enum{T} Option\nNone\nJust(x: T)\n\;"
+  "^enum{T} Option\nNone\nJust\\\\(\\\\(: x T\\\\)\\\\)\n\;\n$")
+match_test(ast_templ03 ast "trait{T} MyTrait\n\;"
+  "^trait{T} MyTrait\n\;\n$")
+match_test(ast_templ04 ast "func{T} myfunc\n\;"
+  "^func{T} myfunc\n\;\n$")
+# bad
+fail_test(ast_templ50 ast "func{} myfunc\n\;")
+fail_test(ast_templ51 ast "class{} Class\n\;")
+fail_test(ast_templ52 ast "enum{} Class\n\;")
+fail_test(ast_templ53 ast "trait{} Class\n\;")
+fail_test(ast_templ54 ast "trait{T:} Class\n\;")
+
 # memory tests
 valgrind_test(ast_mem00 $<TARGET_FILE:astmem> "a + b")
 valgrind_test(ast_mem01 $<TARGET_FILE:astmem> "a + b + c * d * e / hello")
@@ -744,6 +763,8 @@ valgrind_test(ast_mem09 $<TARGET_FILE:astmem> "func helloworld(x: i32):\nreturn 
 valgrind_test(ast_mem10 $<TARGET_FILE:astmem> "class MyClass(x: i32)\n\;")
 valgrind_test(ast_mem11 $<TARGET_FILE:astmem> "class MyClass(x: i32, y: i32)\n\;")
 valgrind_test(ast_mem12 $<TARGET_FILE:astmem> "class enum func trait class trait type")
+valgrind_test(ast_mem13 $<TARGET_FILE:astmem> "class{T} MyClass\n\;")
+valgrind_test(ast_mem14 $<TARGET_FILE:astmem> "class{T, S} MyClass\n\;")
 
 # ---------------------------- syntax optimizer ------------------------------
 

@@ -8,7 +8,7 @@ std::unique_ptr<Expr> Parser::parseClassTrait(std::unique_ptr<Capabilities> &&ca
   // hard errors
   bool err = false;
 
-  std::unique_ptr<TemplateDecls> templ;
+  TemplateDecls templ;
   if (*lexer.getCurrentToken() == TokenType::TOK_OP_TEMPL_BRACKET_OPEN) {
     templ = parseTemplateDecl();
   }

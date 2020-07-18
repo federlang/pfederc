@@ -158,8 +158,8 @@ namespace pfederc {
     std::unique_ptr<Expr> parseTemplate() noexcept;
     std::unique_ptr<BodyExpr> parseFunctionBody() noexcept;
     ModBody parseModBody(bool isprog = false) noexcept;
-    std::unique_ptr<TemplateDecl> fromDeclExprToTemplateDecl(BiOpExpr &expr) noexcept;
-    std::unique_ptr<TemplateDecls> parseTemplateDecl() noexcept;
+    std::unique_ptr<TemplateDecl> fromExprToTemplateDecl(std::unique_ptr<Expr> &&expr) noexcept;
+    TemplateDecls parseTemplateDecl() noexcept;
   public:
     inline Parser(Lexer &lexer) noexcept
       : lexer{lexer}, errors(), descriptions() {}
