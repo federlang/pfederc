@@ -47,7 +47,7 @@ std::unique_ptr<Expr> Parser::parseBinary(std::unique_ptr<Expr> lhs,
     if (optype != TokenType::TOK_OP_NONE)
       lexer.next(); // advance to next unprocessed token
     
-    // ignore newline tekons
+    // ignore newline tokens
     while (*lexer.getCurrentToken() == TokenType::TOK_EOL)
       lexer.next();
 
@@ -55,8 +55,8 @@ std::unique_ptr<Expr> Parser::parseBinary(std::unique_ptr<Expr> lhs,
     if (TOKEN_BRACKETS.find(optype) != TOKEN_BRACKETS.end()) {
       if (optype == TokenType::TOK_OP_BRACKET_OPEN
           && *lexer.getCurrentToken() == TokenType::TOK_BRACKET_CLOSE) {
+        // empty function call, because ()
         const Token *const closingBracket = lexer.getCurrentToken();
-        // empty function call
         lexer.next(); // eat )
         lhs = std::make_unique<UnOpExpr>(lexer,
           lhs->getPosition() + op->getPosition() + closingBracket->getPosition(),
